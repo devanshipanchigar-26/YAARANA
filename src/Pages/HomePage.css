@@ -1,0 +1,73 @@
+@import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Poppins:wght@400;600;700;800&display=swap');
+
+:root {
+  --bg-color: #F4EEE8;
+  --text-dark: #3D271D;
+  --accent-blue: #1B92FF;
+  --accent-yellow: #FFD000;
+  --accent-orange: #E05A2B;
+  --accent-green: #3A8A59;
+  --font-display: 'Luckiest Guy', cursive;
+  --font-body: 'Poppins', sans-serif;
+  --navbar-height: 80px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--bg-color);
+  font-family: var(--font-body);
+}
+
+.homepage-container {
+  width: 100%;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+}
+
+.navbar-wrapper {
+  height: var(--navbar-height);
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  background-color: var(--bg-color);
+}
+
+.scroll-container {
+  height: 100vh;
+  width: 100%;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  scroll-padding-top: var(--navbar-height);
+  scroll-behavior: smooth;
+}
+
+.scroll-section {
+  width: 100%;
+  min-height: 100vh;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 20px 40px;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: 5rem;
+  color: var(--text-dark);
+  letter-spacing: 1.5px;
+}
