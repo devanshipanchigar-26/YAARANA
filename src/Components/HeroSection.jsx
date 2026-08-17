@@ -6,13 +6,15 @@ export default function HeroSection() {
   return (
     <section className="scroll-section hero-section" id="home">
       <div className="hero-card">
-        <div className="hero-content">
+        
+        {/* 1. Text Content Block */}
+        <div className="hero-text-block">
           <h1 className="hero-main-heading">
-            <span className="line-with-badge">
-              BRING YOUR YAAR <span className="pill-badge badge-green">COZY</span>
+            <span className="heading-line">BRING YOUR YAAR</span>
+            <span className="pill-badge badge-green">COZY</span>
+            <span className="heading-line">
+              AT <span className="highlight-blue">YAARANA</span>
             </span>
-            <br />
-            AT <span className="highlight-blue">YAARANA</span>
           </h1>
 
           <div className="hero-subblock">
@@ -27,14 +29,9 @@ export default function HeroSection() {
           <p className="hero-tagline">
             We're literally obsessed with giving your Yaar a reason to come back.
           </p>
-
-          <div className="hero-buttons">
-            <button className="btn-order">ORDER NOW</button>
-            <button className="btn-book">BOOK TABLE &gt;</button>
-          </div>
         </div>
 
-        {/* Coffee Illustration Container */}
+        {/* 2. Coffee Cups Illustration */}
         <div className="hero-image-wrapper">
           <img 
             src={coffeeImg} 
@@ -42,6 +39,13 @@ export default function HeroSection() {
             className="hero-coffee-image"
           />
         </div>
+
+        {/* 3. Action Buttons */}
+        <div className="hero-buttons">
+          <button className="btn-order">ORDER NOW</button>
+          <button className="btn-book">BOOK TABLE &gt;</button>
+        </div>
+
       </div>
     </section>
   );
