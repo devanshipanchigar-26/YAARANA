@@ -35,13 +35,15 @@ const specialsData = [
   }
 ];
 
-// Tripled list to allow smooth, continuous infinite looping in both directions
 const extendedItems = [...specialsData, ...specialsData, ...specialsData];
 
 export default function OurSpecials() {
-  const [currentIndex, setCurrentIndex] = useState(specialsData.length); // Starts at middle set
+  const [currentIndex, setCurrentIndex] = useState(specialsData.length);
   const [isTransitioning, setIsTransitioning] = useState(true);
   const isMoving = useRef(false);
+
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
 
   const handleNext = () => {
     if (isMoving.current) return;
@@ -57,7 +59,6 @@ export default function OurSpecials() {
     setCurrentIndex((prev) => prev - 1);
   };
 
-  // Seamless jump when reaching buffer boundaries without rewind animation
   const handleTransitionEnd = () => {
     isMoving.current = false;
     if (currentIndex >= specialsData.length * 2) {
@@ -69,12 +70,35 @@ export default function OurSpecials() {
     }
   };
 
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchMove = (e) => {
+    touchEndX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStartX.current || !touchEndX.current) return;
+    const distance = touchStartX.current - touchEndX.current;
+    const minSwipeDistance = 50;
+
+    if (distance > minSwipeDistance) {
+      handleNext();
+    } else if (distance < -minSwipeDistance) {
+      handlePrev();
+    }
+
+    touchStartX.current = 0;
+    touchEndX.current = 0;
+  };
+
   return (
     <section className="scroll-section specials-section" id="specials">
       <div className="specials-container">
         
-        {/* Section Header */}
-        <div className="specials-header">
+        {/* Desktop Section Header */}
+        <div className="specials-header desktop-header">
           <div className="circular-badge">
             <svg viewBox="0 0 100 100">
               <path id="circlePath" d="M 50, 50 m -36, 0 a 36,36 0 1,1 72,0 a 36,36 0 1,1 -72,0" fill="none" />
@@ -86,26 +110,50 @@ export default function OurSpecials() {
               <img src={badgeCupImg} alt="Yaarana Cup Icon" className="badge-cup-img" />
             </div>
           </div>
-          <h2 className="section-title">OUR SPECIALS</h2>
+          <h2 className="section-title">
+            OUR<br />SPECIALS
+          </h2>
+        </div>
+
+        {/* Mobile Section Header (Aligned perfectly along the red vertical line) */}
+        <div className="specials-header mobile-header">
+          <div className="mobile-top-row">
+            <div className="circular-badge mobile-badge">
+              <svg viewBox="0 0 100 100">
+                <path id="circlePathMobile" d="M 50, 50 m -36, 0 a 36,36 0 1,1 72,0 a 36,36 0 1,1 -72,0" fill="none" />
+                <text fontSize="11" fontWeight="800" fill="#3D271D" letterSpacing="1">
+                  <textPath href="#circlePathMobile">TASTY TREATS FOR EVERY YAAR • </textPath>
+                </text>
+              </svg>
+              <div className="badge-center-icon">
+                <img src={badgeCupImg} alt="Yaarana Cup Icon" className="badge-cup-img" />
+              </div>
+            </div>
+            <h2 className="mobile-title-our">OUR</h2>
+          </div>
+          <h2 className="mobile-title-specials">SPECIALS</h2>
         </div>
 
         {/* Carousel */}
         <div className="carousel-wrapper">
           
-          {/* Big Rounded Left Arrow */}
           <button className="arrow-btn left-arrow" onClick={handlePrev} aria-label="Previous Special">
             <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="m15 18-6-6 6-6" />
             </svg>
           </button>
 
-          {/* Masked Viewport */}
-          <div className="specials-viewport">
+          <div 
+            className="specials-viewport"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
             <div 
               className="specials-track"
               onTransitionEnd={handleTransitionEnd}
               style={{
-                transform: `translateX(calc(-${currentIndex} * ((100% + 40px) / 3)))`,
+                transform: `translateX(calc(-${currentIndex} * ((100% + var(--specials-gap)) / var(--visible-items))))`,
                 transition: isTransitioning ? 'transform 0.45s cubic-bezier(0.25, 1, 0.5, 1)' : 'none'
               }}
             >
@@ -120,7 +168,6 @@ export default function OurSpecials() {
             </div>
           </div>
 
-          {/* Big Rounded Right Arrow */}
           <button className="arrow-btn right-arrow" onClick={handleNext} aria-label="Next Special">
             <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="m9 18 6-6-6-6" />
