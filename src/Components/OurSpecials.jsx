@@ -97,8 +97,8 @@ export default function OurSpecials() {
     <section className="scroll-section specials-section" id="specials">
       <div className="specials-container">
         
-        {/* Desktop Section Header */}
-        <div className="specials-header desktop-header">
+        {/* Section Header (Shared JSX structure, dynamically styled via CSS for Desktop vs Mobile) */}
+        <div className="specials-header">
           <div className="circular-badge">
             <svg viewBox="0 0 100 100">
               <path id="circlePath" d="M 50, 50 m -36, 0 a 36,36 0 1,1 72,0 a 36,36 0 1,1 -72,0" fill="none" />
@@ -110,33 +110,14 @@ export default function OurSpecials() {
               <img src={badgeCupImg} alt="Yaarana Cup Icon" className="badge-cup-img" />
             </div>
           </div>
-          <h2 className="section-title">
-            OUR<br />SPECIALS
-          </h2>
-        </div>
-
-        {/* Mobile Section Header (Aligned perfectly along the red vertical line) */}
-        <div className="specials-header mobile-header">
-          <div className="mobile-top-row">
-            <div className="circular-badge mobile-badge">
-              <svg viewBox="0 0 100 100">
-                <path id="circlePathMobile" d="M 50, 50 m -36, 0 a 36,36 0 1,1 72,0 a 36,36 0 1,1 -72,0" fill="none" />
-                <text fontSize="11" fontWeight="800" fill="#3D271D" letterSpacing="1">
-                  <textPath href="#circlePathMobile">TASTY TREATS FOR EVERY YAAR • </textPath>
-                </text>
-              </svg>
-              <div className="badge-center-icon">
-                <img src={badgeCupImg} alt="Yaarana Cup Icon" className="badge-cup-img" />
-              </div>
-            </div>
-            <h2 className="mobile-title-our">OUR</h2>
+          <div className="header-text-group">
+            <h2 className="title-our">OUR</h2>
+            <h2 className="title-specials">SPECIALS</h2>
           </div>
-          <h2 className="mobile-title-specials">SPECIALS</h2>
         </div>
 
         {/* Carousel */}
         <div className="carousel-wrapper">
-          
           <button className="arrow-btn left-arrow" onClick={handlePrev} aria-label="Previous Special">
             <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="m15 18-6-6 6-6" />
@@ -173,7 +154,6 @@ export default function OurSpecials() {
               <path d="m9 18 6-6-6-6" />
             </svg>
           </button>
-
         </div>
 
         {/* View Full Menu CTA Button */}

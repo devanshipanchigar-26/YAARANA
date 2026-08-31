@@ -1,6 +1,8 @@
 .story-section {
   padding-top: 10px;
   justify-content: center;
+  display: flex;
+  width: 100%;
 }
 
 /* Dark Brown Outer Container Card */
@@ -11,14 +13,15 @@
   width: 100%;
   max-width: 1480px;
   height: 100%;
-  max-height: calc(100vh - var(--navbar-height) - 24px);
-  padding: 28px 44px; /* Reduced padding to maximize photo size */
+  max-height: calc(100vh - var(--navbar-height, 75px) - 24px);
+  padding: 28px 44px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 44px;
   box-shadow: 0 20px 48px rgba(49, 30, 24, 0.28);
   overflow: hidden;
+  box-sizing: border-box;
 }
 
 /* Extra-Large Left Photo Wrapper */
@@ -72,7 +75,7 @@
 }
 
 .story-heading .highlight-text {
-  color: var(--accent-yellow);
+  color: var(--accent-yellow, #FFD000);
 }
 
 /* Typography */
@@ -86,7 +89,7 @@
 }
 
 .story-paragraph-primary strong {
-  color: var(--accent-yellow);
+  color: var(--accent-yellow, #FFD000);
   font-weight: 700;
 }
 
@@ -106,7 +109,7 @@
 }
 
 .btn-story-cta {
-  background-color: var(--accent-yellow);
+  background-color: var(--accent-yellow, #FFD000);
   color: #311E18;
   font-family: var(--font-display);
   font-size: 1.45rem;
@@ -124,7 +127,7 @@
   box-shadow: 0 12px 26px rgba(255, 208, 0, 0.48);
 }
 
-/* Bottom-Right Coffee Beans Line Art (Fitted within card) */
+/* Bottom-Right Coffee Beans Line Art */
 .story-beans-wrapper {
   position: absolute;
   right: 20px;
@@ -145,4 +148,98 @@
   object-position: right bottom;
   filter: brightness(0) invert(1);
   opacity: 0.32;
+}
+
+/* =========================================================
+   RESPONSIVE MEDIA QUERIES FOR MOBILE VIEW
+   ========================================================= */
+
+@media (max-width: 900px) {
+  .story-section {
+    padding-top: 4px;
+  }
+
+  /* Restored original proportional card height (no full-screen stretching) */
+  .story-dark-card {
+    flex-direction: column;
+    height: auto;
+    max-height: none;
+    padding: 20px 16px;
+    border-radius: 32px;
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  /* Enlarged image size for mobile */
+  .story-image-wrapper {
+    flex: none;
+    width: 100%;
+    height: 250px;
+    max-height: 250px;
+  }
+
+  .story-image-box {
+    min-height: 250px;
+    height: 250px;
+    border-radius: 24px;
+  }
+
+  .story-content {
+    flex: none;
+    width: 100%;
+    text-align: left;
+  }
+
+  .story-heading {
+    font-size: 2.3rem;
+    line-height: 1.1;
+    margin-bottom: 10px;
+  }
+
+  .story-paragraph-primary {
+    font-size: 0.95rem;
+    line-height: 1.4;
+    margin-bottom: 8px;
+    max-width: 100%;
+  }
+
+  .story-paragraph-secondary {
+    font-size: 0.88rem;
+    line-height: 1.35;
+    margin-bottom: 16px;
+    max-width: 100%;
+  }
+
+  .story-action-row {
+    width: 100%;
+    justify-content: flex-start; /* Aligned to the left */
+    margin-bottom: 8px;
+  }
+
+  /* Made button smaller (not full width) */
+  .btn-story-cta {
+    width: auto;
+    font-size: 1rem;
+    padding: 10px 28px;
+    border-radius: 24px;
+    text-align: center;
+  }
+
+  .story-beans-wrapper {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    width: 100%;
+    height: 80px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: -10px;
+  }
+
+  .story-beans-img {
+    width: 260px;
+    height: 130px;
+    opacity: 10;
+  }
 }
