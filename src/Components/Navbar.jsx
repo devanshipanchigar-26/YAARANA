@@ -1,8 +1,9 @@
 import React from 'react';
 import { Heart, ShoppingCart } from 'lucide-react';
+import Cart from '../Cart/Cart'; // Correct relative path to the Cart folder
 import './Navbar.css';
 
-export default function Navbar() {
+export default function Navbar({ cartItemCount = 0, onCartClick }) {
   return (
     <nav className="navbar">
       {/* Logo */}
@@ -29,8 +30,14 @@ export default function Navbar() {
         <button className="icon-button" type="button" aria-label="Wishlist">
           <Heart size={22} />
         </button>
-        <button className="icon-button" type="button" aria-label="Shopping cart">
+        <button 
+          className="icon-button cart-icon-btn" 
+          type="button" 
+          aria-label="Shopping cart"
+          onClick={onCartClick}
+        >
           <ShoppingCart size={22} />
+          {cartItemCount > 0 && <span className="cart-badge">{cartItemCount}</span>}
         </button>
       </div>
     </nav>
