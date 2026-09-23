@@ -1,56 +1,76 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../supabaseClient';
 import './OrderHistoryPage.css';
 
-const historicalOrdersData = [
-  {
-    id: '#ORD-099',
-    tableNo: 'Table 1',
-    date: '2026-09-21', // Today
-    items: '1x Veg Loaded Burger, 1x Cold Cocoa',
-    totalAmount: '₹349',
-    paymentMode: 'ONLINE',
-    status: 'Completed'
-  },
-  {
-    id: '#ORD-098',
-    tableNo: 'Table 3',
-    date: '2026-09-20', // This week
-    items: '2x White Sauce Pasta, 1x Garlic Bread',
-    totalAmount: '₹580',
-    paymentMode: 'CASH',
-    status: 'Completed'
-  },
-  {
-    id: '#ORD-095',
-    tableNo: 'Table 5',
-    date: '2026-09-15', // This week / month
-    items: '1x Paneer Tikka Sandwich',
-    totalAmount: '₹210',
-    paymentMode: 'ONLINE',
-    status: 'Cancelled'
-  },
-  {
-    id: '#ORD-090',
-    tableNo: 'Table 2',
-    date: '2026-09-01', // This month
-    items: '3x Chocolate Waffle, 2x KitKat Shake',
-    totalAmount: '₹890',
-    paymentMode: 'ONLINE',
-    status: 'Completed'
-  }
-];
-
 export default function OrderHistoryPage() {
-  const [filter, setFilter] = useState('today');
+  const [filter, setFilter] = useState('all');
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Simple date filter logic for demonstration
-  const filteredOrders = historicalOrdersData.filter(order => {
+  useEffect(() => {
+    fetchHistoryOrders();
+  }, []);
+
+  const fetchHistoryOrders = async () => {
+    setLoading(true);
+    try {
+      // Fetch orders along with their related order items and menu item details
+      const { data, error } = await supabase
+        .from('orders')
+        .select(`
+          *,
+          order_items (
+            quantity,
+            menu_items (
+              name
+            )
+          )
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const formatted = (data || []).map(order => {
+        const orderDateObj = new Date(order.created_at);
+
+        // Build items string from joined tables
+        let itemsDescription = 'Café Order Items';
+        if (order.order_items && order.order_items.length > 0) {
+          itemsDescription = order.order_items.map(item => {
+            const dishName = item.menu_items?.name || 'Item';
+            return `${item.quantity}x ${dishName}`;
+          }).join(', ');
+        }
+
+        return {
+          id: `#${order.id}`,
+          tableNo: order.table_no || 'Table 1',
+          date: orderDateObj.toISOString().split('T')[0], // YYYY-MM-DD
+          rawDate: orderDateObj,
+          items: itemsDescription,
+          totalAmount: `₹${order.total_amount || 0}`,
+          paymentMode: order.payment_mode ? order.payment_mode.toUpperCase() : 'ONLINE',
+          status: order.order_status || 'Completed'
+        };
+      });
+
+      setOrders(formatted);
+    } catch (error) {
+      console.error('Error fetching order history:', error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredOrders = orders.filter(order => {
+    const todayStr = '2026-09-23';
     if (filter === 'today') {
-      return order.date === '2026-09-21';
+      return order.date === todayStr;
     }
     if (filter === 'week') {
-      // Mocking week filter range
-      return order.date >= '2026-09-14';
+      const orderTime = order.rawDate.getTime();
+      const oneWeekAgo = new Date('2026-09-16').getTime();
+      return orderTime >= oneWeekAgo;
     }
     if (filter === 'month') {
       return order.date.startsWith('2026-09');
@@ -94,7 +114,11 @@ export default function OrderHistoryPage() {
 
       {/* Orders Table Container */}
       <div className="history-table-container">
-        {filteredOrders.length === 0 ? (
+        {loading ? (
+          <div className="no-history-box">
+            <p>🔄 Loading order history from database...</p>
+          </div>
+        ) : filteredOrders.length === 0 ? (
           <div className="no-history-box">
             <p>📭 No orders found for this time period.</p>
           </div>
@@ -113,7 +137,8 @@ export default function OrderHistoryPage() {
             </thead>
             <tbody>
               {filteredOrders.map((order) => {
-                const isCompleted = order.status === 'Completed';
+                const statusLower = order.status.toLowerCase();
+                const isCompleted = statusLower === 'completed' || statusLower === 'delivered';
                 return (
                   <tr key={order.id}>
                     <td><span className="history-id-badge">{order.id}</span></td>

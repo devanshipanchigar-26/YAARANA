@@ -6,6 +6,9 @@ import AdminLayout from './admin/AdminLayout';
 import LiveOrdersPage from './admin/LiveOrdersPage';
 import OrderHistoryPage from './admin/OrderHistoryPage';
 import MenuManagementPage from './admin/MenuManagementPage';
+import CustomersPage from './admin/CustomersPage';
+import SalesStatisticsPage from './admin/SalesStatisticsPage';
+import ReviewsPage from './admin/ReviewsPage';
 import './App.css';
 
 export default function App() {
@@ -28,11 +31,19 @@ export default function App() {
           {activeAdminTab === 'live-orders' && <LiveOrdersPage />}
           {activeAdminTab === 'order-history' && <OrderHistoryPage />}
           {activeAdminTab === 'menu-management' && <MenuManagementPage />}
+          {activeAdminTab === 'customers' && <CustomersPage />}
+          {activeAdminTab === 'reviews' && <ReviewsPage />}
+          {/* Replace your sales tab condition with this to handle any tab key variation */}
+          {(activeAdminTab === 'sales-statistics' || activeAdminTab === 'sales' || activeAdminTab === 'sales-stats') && <SalesStatisticsPage />}
 
-          {/* Fallback for other tabs under development */}
           {activeAdminTab !== 'live-orders' && 
-           activeAdminTab !== 'order-history' && 
-           activeAdminTab !== 'menu-management' && (
+          activeAdminTab !== 'order-history' && 
+          activeAdminTab !== 'menu-management' && 
+          activeAdminTab !== 'customers' && 
+          activeAdminTab !== 'sales-statistics' && 
+          activeAdminTab !== 'sales' && 
+          activeAdminTab !== 'sales-stats' &&
+          activeAdminTab !== 'reviews' && (
             <div>
               <h2 style={{ fontFamily: "'Luckiest Guy', cursive", color: '#3D271D', fontSize: '2.2rem' }}>
                 {activeAdminTab.replace('-', ' ').toUpperCase()}

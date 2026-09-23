@@ -7,6 +7,10 @@ export default function MenuManagementPage() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Search and Filter states
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('');
+
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -23,7 +27,6 @@ export default function MenuManagementPage() {
   const fetchMenuData = async () => {
     setLoading(true);
     try {
-      // 1. Fetch categories
       const { data: catData, error: catError } = await supabase
         .from('categories')
         .select('*')
@@ -32,14 +35,12 @@ export default function MenuManagementPage() {
       if (catError) throw catError;
       setCategories(catData || []);
 
-      // 2. Fetch menu items cleanly without forced joins
       const { data: menuData, error: menuError } = await supabase
         .from('menu_items')
         .select('*')
         .order('id', { ascending: true });
 
       if (menuError) throw menuError;
-      console.log('Successfully fetched menu items:', menuData);
       setMenuItems(menuData || []);
     } catch (error) {
       console.error('Error fetching menu data:', error.message);
@@ -49,7 +50,6 @@ export default function MenuManagementPage() {
     }
   };
 
-  // Helper to get category name by ID
   const getCategoryName = (catId) => {
     const found = categories.find(c => c.id === catId);
     return found ? found.name : 'Unassigned';
@@ -135,12 +135,21 @@ export default function MenuManagementPage() {
     }
   };
 
+  // Filtered menu items based on search query and category dropdown selection
+  const filteredItems = menuItems.filter(item => {
+    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          (item.description && item.description.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesCategory = selectedCategoryFilter === '' || item.category_id.toString() === selectedCategoryFilter;
+    return matchesSearch && matchesCategory;
+  });
+
   return (
     <div className="menu-management-page">
       <div className="page-header-row">
         <h2 className="admin-page-title">Menu Management</h2>
       </div>
 
+      {/* Add / Edit Form Card */}
       <div className="add-item-card">
         <h3>{editingId ? '✏️ Edit Menu Item' : '✨ Add New Menu Item'}</h3>
         <form onSubmit={handleSubmit} className="add-item-form">
@@ -167,7 +176,7 @@ export default function MenuManagementPage() {
           />
           <input 
             type="text" 
-            placeholder="Emoji (e.g. ☕)" 
+            placeholder="Emoji" 
             value={formData.emoji}
             onChange={(e) => setFormData({ ...formData, emoji: e.target.value })}
           />
@@ -190,12 +199,34 @@ export default function MenuManagementPage() {
         </form>
       </div>
 
+      {/* Search & Filter Controls Bar */}
+      <div style={{ display: 'flex', gap: '12px', alignItems: 'center', background: '#FDFBFA', padding: '14px 20px', borderRadius: '16px', border: '1px solid #EFE9E1' }}>
+        <input 
+          type="text"
+          placeholder="🔍 Search items by name or description..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{ flex: 1, padding: '10px 14px', borderRadius: '10px', border: '1px solid #EFE9E1', background: '#F9F6F0', fontSize: '0.9rem', color: '#3D271D', outline: 'none' }}
+        />
+        <select 
+          value={selectedCategoryFilter}
+          onChange={(e) => setSelectedCategoryFilter(e.target.value)}
+          style={{ padding: '10px 14px', borderRadius: '10px', border: '1px solid #EFE9E1', background: '#F9F6F0', fontSize: '0.9rem', color: '#3D271D', outline: 'none', minWidth: '180px' }}
+        >
+          <option value="">All Categories</option>
+          {categories.map(cat => (
+            <option key={cat.id} value={cat.id}>{cat.name}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* Menu Items Table */}
       <div className="history-table-container">
         {loading ? (
           <div className="no-history-box"><p>Loading menu items from Supabase...</p></div>
-        ) : menuItems.length === 0 ? (
+        ) : filteredItems.length === 0 ? (
           <div className="no-history-box">
-            <p>No menu items found in Supabase database.</p>
+            <p>No matching menu items found.</p>
           </div>
         ) : (
           <table className="history-table">
@@ -211,7 +242,7 @@ export default function MenuManagementPage() {
               </tr>
             </thead>
             <tbody>
-              {menuItems.map((item) => (
+              {filteredItems.map((item) => (
                 <tr key={item.id}>
                   <td style={{ fontSize: '1.2rem' }}>{item.emoji || '🍽️'}</td>
                   <td><strong>{item.name}</strong></td>
