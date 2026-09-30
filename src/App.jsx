@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from './Components/Navbar';
 import HomePage from './Pages/HomePage';
 import MenuPage from './Pages/MenuPage';
@@ -11,18 +11,55 @@ import MenuManagementPage from './admin/MenuManagementPage';
 import CustomersPage from './admin/CustomersPage';
 import SalesStatisticsPage from './admin/SalesStatisticsPage';
 import ReviewsPage from './admin/ReviewsPage';
+import Login from './Pages/Login';
+import Signup from './Pages/Signup';
+import ForgotPassword from './Pages/ForgotPassword';
 import './App.css';
+
+const CART_KEY = 'yaarana_cart';
+
+// Read the saved cart from the browser (empty if nothing saved)
+const loadCart = () => {
+  try {
+    const raw = localStorage.getItem(CART_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
 
 export default function App() {
   // Toggle between 'website' and 'admin' views
   const [currentView, setCurrentView] = useState('website');
   const [activeAdminTab, setActiveAdminTab] = useState('menu-management');
 
+  // Track if user is authenticated (can also check Supabase session here)
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  
+  // Track if the Auth Modal/Page is open when trying to checkout
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authMode, setAuthMode] = useState('login'); // 'login' or 'signup'
+
   // Which customer page is showing: 'home' | 'menu' | 'book-table'
   const [customerPage, setCustomerPage] = useState('home');
 
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [cartItems, setCartItems] = useState([]);
+  const [cartItems, setCartItems] = useState(loadCart);
+
+  // Table number from the QR code link, e.g. yoursite.com/?table=5
+  const [qrTable] = useState(
+    () => new URLSearchParams(window.location.search).get('table') || ''
+  );
+
+  // Keep the cart saved, so a refresh doesn't empty it
+  useEffect(() => {
+    try {
+      localStorage.setItem(CART_KEY, JSON.stringify(cartItems));
+    } catch {
+      /* storage unavailable - cart just won't persist */
+    }
+  }, [cartItems]);
 
   // Cart count is calculated from the items, so it can never get out of sync
   const cartItemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
@@ -43,11 +80,28 @@ export default function App() {
           name: item.name,
           price: item.price,
           quantity: 1,
-          emoji: item.emoji || '🍽️',
+          emoji: item.emoji || '',
         },
       ];
     });
   };
+
+  const increaseQuantity = (id) =>
+    setCartItems((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, quantity: c.quantity + 1 } : c))
+    );
+
+  const decreaseQuantity = (id) =>
+    setCartItems((prev) =>
+      prev
+        .map((c) => (c.id === id ? { ...c, quantity: c.quantity - 1 } : c))
+        .filter((c) => c.quantity > 0)
+    );
+
+  const removeItem = (id) =>
+    setCartItems((prev) => prev.filter((c) => c.id !== id));
+
+  const clearCart = () => setCartItems([]);
 
   // Switch customer page and start at the top of the new page
   const navigateTo = (page) => {
@@ -144,7 +198,15 @@ export default function App() {
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
         items={cartItems}
-        totalItems={cartItemCount}
+        increaseQuantity={increaseQuantity}
+        decreaseQuantity={decreaseQuantity}
+        removeItem={removeItem}
+        clearCart={clearCart}
+        defaultTable={qrTable}
+        onExplore={() => {
+          setIsCartOpen(false);
+          navigateTo('menu');
+        }}
       />
     </div>
   );

@@ -1,0 +1,198 @@
+@import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Carter+One&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.signup-page {
+  width: 100%;
+  min-height: 100vh;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background: url('/background.svg') center center/cover no-repeat;
+}
+
+.signup-card {
+  width: 450px;
+
+  background: rgba(255, 255, 255, 0.75);
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  border-radius: 35px;
+
+  padding: 45px;
+
+  border: 2px solid rgba(0, 134, 255, 0.15);
+
+  box-shadow: 0 20px 60px rgba(74, 48, 44, 0.12);
+}
+
+.logo {
+  width: 230px;
+
+  margin: auto;
+
+  background: #0086ff;
+
+  color: white;
+
+  padding: 10px;
+
+  border-radius: 12px;
+
+  text-align: center;
+
+  font-family: 'Luckiest Guy';
+
+  font-size: 28px;
+
+  letter-spacing: 2px;
+}
+
+h1 {
+  margin-top: 35px;
+
+  text-align: center;
+
+  font-family: 'Luckiest Guy';
+
+  color: #4a302c;
+
+  font-size: 42px;
+
+  letter-spacing: 2px;
+}
+
+.subtitle {
+  margin-top: 12px;
+
+  margin-bottom: 35px;
+
+  text-align: center;
+
+  font-family: 'Carter One';
+
+  color: #6d5d58;
+
+  font-size: 14px;
+}
+
+.input-group {
+  display: flex;
+
+  flex-direction: column;
+
+  margin-bottom: 20px;
+}
+
+.input-group label {
+  margin-bottom: 8px;
+
+  font-family: 'Carter One';
+
+  color: #4a302c;
+
+  font-size: 14px;
+}
+
+.input-group input {
+  width: 100%;
+
+  height: 55px;
+
+  padding: 0 18px;
+
+  border: none;
+
+  outline: none;
+
+  border-radius: 15px;
+
+  background: white;
+
+  border: 2px solid transparent;
+
+  font-family: 'Carter One';
+
+  transition: 0.3s;
+}
+
+.input-group input:focus {
+  border-color: #0086ff;
+}
+
+button {
+  width: 100%;
+
+  height: 58px;
+
+  margin-top: 10px;
+
+  border: none;
+
+  border-radius: 18px;
+
+  background: #0086ff;
+
+  color: white;
+
+  font-family: 'Luckiest Guy';
+
+  font-size: 18px;
+
+  letter-spacing: 2px;
+
+  cursor: pointer;
+
+  transition: 0.3s;
+}
+
+button:hover {
+  background: #006fe6;
+
+  transform: translateY(-2px);
+}
+
+.bottom-text {
+  margin-top: 28px;
+
+  text-align: center;
+
+  font-family: 'Carter One';
+
+  color: #555;
+
+  font-size: 14px;
+}
+
+.bottom-text span {
+  color: #e8622a;
+
+  cursor: pointer;
+
+  font-weight: 600;
+
+  transition: 0.3s;
+}
+
+.bottom-text span:hover {
+  color: #0086ff;
+}
+
+.bottom-text a {
+  color: #e8622a;
+  text-decoration: none;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.bottom-text a:hover {
+  color: #0086ff;
+}
