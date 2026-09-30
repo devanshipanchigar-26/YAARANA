@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import Navbar from './Components/Navbar';
 import HomePage from './Pages/HomePage';
+import MenuPage from './Pages/MenuPage';
+import BookTablePage from './Pages/BookTablePage';
 import Cart from './Cart/Cart';
 import AdminLayout from './admin/AdminLayout';
 import LiveOrdersPage from './admin/LiveOrdersPage';
@@ -13,15 +15,45 @@ import './App.css';
 
 export default function App() {
   // Toggle between 'website' and 'admin' views
-  const [currentView, setCurrentView] = useState('admin'); 
+  const [currentView, setCurrentView] = useState('website');
   const [activeAdminTab, setActiveAdminTab] = useState('menu-management');
 
+  // Which customer page is showing: 'home' | 'menu' | 'book-table'
+  const [customerPage, setCustomerPage] = useState('home');
+
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [cartItemCount, setCartItemCount] = useState(2);
-  const [cartItems, setCartItems] = useState([
-    { id: 1, name: 'Hazelnut Cold Coffee', price: 199, quantity: 1, emoji: '☕' },
-    { id: 2, name: 'Loaded Cheese Fries', price: 229, quantity: 1, emoji: '🍟' }
-  ]);
+  const [cartItems, setCartItems] = useState([]);
+
+  // Cart count is calculated from the items, so it can never get out of sync
+  const cartItemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+
+  // Add an item, or increase its quantity if it's already in the cart
+  const addToCart = (item) => {
+    setCartItems((prev) => {
+      const existing = prev.find((c) => c.id === item.id);
+      if (existing) {
+        return prev.map((c) =>
+          c.id === item.id ? { ...c, quantity: c.quantity + 1 } : c
+        );
+      }
+      return [
+        ...prev,
+        {
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: 1,
+          emoji: item.emoji || '🍽️',
+        },
+      ];
+    });
+  };
+
+  // Switch customer page and start at the top of the new page
+  const navigateTo = (page) => {
+    setCustomerPage(page);
+    window.scrollTo(0, 0);
+  };
 
   // If view mode is admin, render the admin dashboard layout
   if (currentView === 'admin') {
@@ -33,15 +65,14 @@ export default function App() {
           {activeAdminTab === 'menu-management' && <MenuManagementPage />}
           {activeAdminTab === 'customers' && <CustomersPage />}
           {activeAdminTab === 'reviews' && <ReviewsPage />}
-          {/* Replace your sales tab condition with this to handle any tab key variation */}
           {(activeAdminTab === 'sales-statistics' || activeAdminTab === 'sales' || activeAdminTab === 'sales-stats') && <SalesStatisticsPage />}
 
-          {activeAdminTab !== 'live-orders' && 
-          activeAdminTab !== 'order-history' && 
-          activeAdminTab !== 'menu-management' && 
-          activeAdminTab !== 'customers' && 
-          activeAdminTab !== 'sales-statistics' && 
-          activeAdminTab !== 'sales' && 
+          {activeAdminTab !== 'live-orders' &&
+          activeAdminTab !== 'order-history' &&
+          activeAdminTab !== 'menu-management' &&
+          activeAdminTab !== 'customers' &&
+          activeAdminTab !== 'sales-statistics' &&
+          activeAdminTab !== 'sales' &&
           activeAdminTab !== 'sales-stats' &&
           activeAdminTab !== 'reviews' && (
             <div>
@@ -54,7 +85,7 @@ export default function App() {
 
           {/* Button to go back to customer website */}
           <div style={{ marginTop: '40px', borderTop: '1px solid #EFE9E1', paddingTop: '20px' }}>
-            <button 
+            <button
               onClick={() => setCurrentView('website')}
               style={{
                 backgroundColor: '#311E18',
@@ -78,16 +109,20 @@ export default function App() {
   // Otherwise, render the main customer-facing website
   return (
     <div className="app">
-      <Navbar 
-        onCartClick={() => setIsCartOpen(true)} 
-        cartItemCount={cartItemCount} 
+      <Navbar
+        onCartClick={() => setIsCartOpen(true)}
+        cartItemCount={cartItemCount}
+        onNavigate={navigateTo}
+        currentPage={customerPage}
       />
-      
-      <HomePage />
+
+      {customerPage === 'home' && <HomePage onNavigate={navigateTo} />}
+      {customerPage === 'menu' && <MenuPage addToCart={addToCart} />}
+      {customerPage === 'book-table' && <BookTablePage />}
 
       {/* Floating Button to open Admin Panel for testing */}
       <div style={{ position: 'fixed', bottom: '20px', right: '20px', zIndex: 997 }}>
-        <button 
+        <button
           onClick={() => setCurrentView('admin')}
           style={{
             backgroundColor: '#FFD000',
@@ -105,7 +140,7 @@ export default function App() {
         </button>
       </div>
 
-      <Cart 
+      <Cart
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
         items={cartItems}

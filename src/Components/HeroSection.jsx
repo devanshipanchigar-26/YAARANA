@@ -2,11 +2,11 @@ import React from 'react';
 import coffeeImg from '../assets/hero.png';
 import './HeroSection.css';
 
-export default function HeroSection() {
+export default function HeroSection({ onNavigate }) {
   return (
     <section className="scroll-section hero-section" id="home">
       <div className="hero-card">
-        
+
         {/* 1. Text Content Block */}
         <div className="hero-text-block">
           <h1 className="hero-main-heading">
@@ -33,17 +33,21 @@ export default function HeroSection() {
 
         {/* 2. Coffee Cups Illustration */}
         <div className="hero-image-wrapper">
-          <img 
-            src={coffeeImg} 
-            alt="Yaarana Coffee Cups" 
+          <img
+            src={coffeeImg}
+            alt="Yaarana Coffee Cups"
             className="hero-coffee-image"
           />
         </div>
 
         {/* 3. Action Buttons */}
         <div className="hero-buttons">
-          <button className="btn-order">ORDER NOW</button>
-          <button className="btn-book">BOOK TABLE &gt;</button>
+          <button type="button" className="btn-order" onClick={() => onNavigate('menu')}>
+            ORDER NOW
+          </button>
+          <button type="button" className="btn-book" onClick={() => onNavigate('book-table')}>
+            BOOK TABLE &gt;
+          </button>
         </div>
 
       </div>
