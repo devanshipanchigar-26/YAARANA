@@ -1,6 +1,5 @@
 /* Base Section */
 .hero-section {
-  padding-top: 10px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -14,18 +13,16 @@
   border-radius: 36px;
   width: 100%;
   max-width: 1520px;
-  height: 100%;
-  max-height: calc(100vh - var(--navbar-height, 75px) - 30px);
-  padding: 40px 64px;
+  min-height: auto;
+  padding: clamp(28px, 4vh, 48px) clamp(28px, 4.5vw, 64px);
   display: grid;
-  grid-template-columns: 1.35fr 1fr;
+  grid-template-columns: 1.3fr 1fr;
   grid-template-rows: auto auto;
   grid-template-areas:
     "text image"
     "buttons image";
   align-items: center;
   box-shadow: 0 16px 40px rgba(61, 39, 29, 0.06);
-  overflow: hidden;
   box-sizing: border-box;
 }
 
@@ -42,10 +39,10 @@
 
 .hero-main-heading {
   font-family: var(--font-display);
-  font-size: 5.6rem;
+  font-size: clamp(2.8rem, 4.4vw, 5.2rem);
   color: var(--text-dark, #3D271D);
   line-height: 1.05;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   letter-spacing: 0.5px;
   display: flex;
   flex-direction: column;
@@ -62,7 +59,7 @@
 }
 
 .hero-subblock {
-  margin: 10px 0 14px;
+  margin: 6px 0 10px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -71,10 +68,10 @@
 
 .hero-secondary-heading {
   font-family: var(--font-display);
-  font-size: 3.4rem;
+  font-size: clamp(1.8rem, 2.6vw, 3.2rem);
   color: var(--text-dark, #3D271D);
   line-height: 1.15;
-  margin-top: 8px;
+  margin-top: 6px;
   text-align: left;
 }
 
@@ -82,8 +79,8 @@
 .pill-badge {
   display: inline-block;
   font-family: var(--font-display);
-  font-size: 1.6rem;
-  padding: 6px 22px;
+  font-size: clamp(1.1rem, 1.4vw, 1.5rem);
+  padding: 5px 18px;
   border-radius: 28px;
   color: #ffffff;
   vertical-align: middle;
@@ -91,7 +88,7 @@
 
 .badge-green { 
   background-color: var(--accent-green, #2E7D32); 
-  margin: 8px 0;
+  margin: 6px 0;
 }
 
 .badge-orange { 
@@ -105,11 +102,11 @@
 }
 
 .hero-tagline {
-  font-size: 1.45rem;
+  font-size: clamp(1.05rem, 1.25vw, 1.35rem);
   font-weight: 600;
   color: #6B554B;
   max-width: 680px;
-  margin: 8px 0 24px;
+  margin: 6px 0 18px;
   line-height: 1.38;
   text-align: left;
 }
@@ -119,10 +116,10 @@
   grid-area: buttons;
   display: flex;
   align-items: center;
-  gap: 28px;
+  gap: 24px;
   position: relative;
   z-index: 5;
-  margin-top: 8px;
+  margin-top: 6px;
 }
 
 .btn-order {
@@ -130,9 +127,9 @@
   color: var(--text-dark, #3D271D);
   font-family: var(--font-display);
   border: none;
-  padding: 18px 48px;
+  padding: clamp(12px, 1.8vh, 18px) clamp(28px, 3vw, 44px);
   border-radius: 40px;
-  font-size: 1.8rem;
+  font-size: clamp(1.2rem, 1.5vw, 1.7rem);
   cursor: pointer;
   box-shadow: 0 8px 22px rgba(255, 208, 0, 0.45);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -148,7 +145,7 @@
   border: none;
   color: var(--text-dark, #3D271D);
   font-family: var(--font-display);
-  font-size: 1.8rem;
+  font-size: clamp(1.2rem, 1.5vw, 1.7rem);
   cursor: pointer;
   transition: color 0.2s ease, transform 0.2s ease;
 }
@@ -164,8 +161,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: -150px;
-  margin-top: 150px;
+  margin-left: clamp(-80px, -6vw, 0px);
   position: relative;
   z-index: 2;
   pointer-events: none;
@@ -173,12 +169,12 @@
 
 .hero-coffee-image {
   width: 100%;
-  max-width: 720px;
+  max-width: 680px;
   height: auto;
-  max-height: 540px;
+  max-height: clamp(260px, 46vh, 500px);
   object-fit: contain;
   filter: drop-shadow(0 18px 36px rgba(61, 39, 29, 0.12));
-  transform: scale(1.18);
+  transform: scale(1.08);
   pointer-events: auto;
   transition: transform 0.4s ease;
   transform-origin: center bottom;

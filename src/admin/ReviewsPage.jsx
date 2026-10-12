@@ -104,18 +104,18 @@ export default function ReviewsPage() {
       </div>
 
       {/* Summary Stat Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', margin: '20px 0' }}>
-        <div style={{ background: '#FDFBFA', border: '1px solid #EFE9E1', borderRadius: '16px', padding: '18px', boxShadow: '0 4px 12px rgba(61, 39, 29, 0.03)' }}>
-          <p style={{ margin: '0 0 6px 0', fontSize: '0.85rem', color: '#6B554B', fontWeight: 'bold' }}>AVERAGE RATING</p>
-          <h3 style={{ margin: 0, fontSize: '1.8rem', color: '#f39c12', fontFamily: "'Luckiest Guy', cursive" }}>{averageRating} / 5.0</h3>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px', margin: '20px 0' }}>
+        <div style={{ background: '#FDFBFA', border: '1px solid #EFE9E1', borderRadius: '16px', padding: '16px', boxShadow: '0 4px 12px rgba(61, 39, 29, 0.03)' }}>
+          <p style={{ margin: '0 0 6px 0', fontSize: '0.8rem', color: '#6B554B', fontWeight: 'bold' }}>AVERAGE RATING</p>
+          <h3 style={{ margin: 0, fontSize: '1.6rem', color: '#f39c12', fontFamily: "'Luckiest Guy', cursive" }}>{averageRating} / 5.0</h3>
         </div>
-        <div style={{ background: '#FDFBFA', border: '1px solid #EFE9E1', borderRadius: '16px', padding: '18px', boxShadow: '0 4px 12px rgba(61, 39, 29, 0.03)' }}>
-          <p style={{ margin: '0 0 6px 0', fontSize: '0.85rem', color: '#6B554B', fontWeight: 'bold' }}>TOTAL REVIEWS</p>
-          <h3 style={{ margin: 0, fontSize: '1.8rem', color: '#3D271D', fontFamily: "'Luckiest Guy', cursive" }}>{totalReviews}</h3>
+        <div style={{ background: '#FDFBFA', border: '1px solid #EFE9E1', borderRadius: '16px', padding: '16px', boxShadow: '0 4px 12px rgba(61, 39, 29, 0.03)' }}>
+          <p style={{ margin: '0 0 6px 0', fontSize: '0.8rem', color: '#6B554B', fontWeight: 'bold' }}>TOTAL REVIEWS</p>
+          <h3 style={{ margin: 0, fontSize: '1.6rem', color: '#3D271D', fontFamily: "'Luckiest Guy', cursive" }}>{totalReviews}</h3>
         </div>
-        <div style={{ background: '#FDFBFA', border: '1px solid #EFE9E1', borderRadius: '16px', padding: '18px', boxShadow: '0 4px 12px rgba(61, 39, 29, 0.03)' }}>
-          <p style={{ margin: '0 0 6px 0', fontSize: '0.85rem', color: '#6B554B', fontWeight: 'bold' }}>5-STAR FEEDBACK</p>
-          <h3 style={{ margin: 0, fontSize: '1.8rem', color: '#27ae60', fontFamily: "'Luckiest Guy', cursive" }}>{fiveStarCount}</h3>
+        <div style={{ background: '#FDFBFA', border: '1px solid #EFE9E1', borderRadius: '16px', padding: '16px', boxShadow: '0 4px 12px rgba(61, 39, 29, 0.03)' }}>
+          <p style={{ margin: '0 0 6px 0', fontSize: '0.8rem', color: '#6B554B', fontWeight: 'bold' }}>5-STAR FEEDBACK</p>
+          <h3 style={{ margin: 0, fontSize: '1.6rem', color: '#27ae60', fontFamily: "'Luckiest Guy', cursive" }}>{fiveStarCount}</h3>
         </div>
       </div>
 
@@ -148,9 +148,9 @@ export default function ReviewsPage() {
             return (
               <div 
                 key={review.id} 
-                style={{ background: '#FDFBFA', border: '1px solid #EFE9E1', borderRadius: '16px', padding: '20px', boxShadow: '0 4px 12px rgba(61, 39, 29, 0.03)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}
+                style={{ background: '#FDFBFA', border: '1px solid #EFE9E1', borderRadius: '16px', padding: 'clamp(14px, 3vw, 20px)', boxShadow: '0 4px 12px rgba(61, 39, 29, 0.03)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '14px', flexWrap: 'wrap' }}
               >
-                <div>
+                <div style={{ flex: '1 1 240px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px', flexWrap: 'wrap' }}>
                     <strong style={{ fontSize: '1.05rem', color: '#3D271D' }}>{customerName}</strong>
                     <span style={{ fontSize: '0.9rem' }}>{stars}</span>
@@ -161,7 +161,7 @@ export default function ReviewsPage() {
                   </p>
                 </div>
 
-                <div style={{ display: 'flex', gap: '8px' }}>
+                <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
                   <button 
                     onClick={() => alert('Reply feature coming soon!')}
                     style={{ backgroundColor: '#FFD000', color: '#311E18', border: 'none', padding: '6px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 'bold', whiteSpace: 'nowrap' }}

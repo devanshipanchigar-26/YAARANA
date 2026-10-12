@@ -27,8 +27,8 @@
 
 .circular-badge {
   position: relative;
-  width: 130px;
-  height: 130px;
+  width: clamp(95px, 9vw, 130px);
+  height: clamp(95px, 9vw, 130px);
   flex-shrink: 0;
 }
 
@@ -44,8 +44,8 @@
   left: 50%;
   transform: translate(-50%, -50%);
   background-color: var(--accent-yellow, #FFD000);
-  width: 65px;
-  height: 65px;
+  width: clamp(48px, 4.5vw, 65px);
+  height: clamp(48px, 4.5vw, 65px);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -69,7 +69,7 @@
 
 .title-our {
   font-family: var(--font-display);
-  font-size: 4.5rem;
+  font-size: clamp(2.8rem, 4.2vw, 4.5rem);
   color: var(--text-dark, #3D271D);
   line-height: 1;
   margin: 0;
@@ -77,7 +77,7 @@
 
 .title-specials {
   font-family: var(--font-display);
-  font-size: 4.5rem;
+  font-size: clamp(2.8rem, 4.2vw, 4.5rem);
   color: var(--text-dark, #3D271D);
   line-height: 0.95;
   margin: 0;
@@ -97,19 +97,26 @@
   border: none;
   color: var(--accent-orange, #E05A2B);
   cursor: pointer;
-  padding: 8px;
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  min-width: 60px;
+  min-height: 60px;
+  max-width: 60px;
+  max-height: 60px;
+  box-sizing: border-box;
   transition: transform 0.25s ease, color 0.2s ease, background-color 0.25s ease;
   user-select: none;
   flex-shrink: 0;
 }
 
 .arrow-btn:hover {
-  transform: scale(1.22);
-  background-color: rgba(224, 90, 43, 0.08);
+  transform: scale(1.18);
+  background-color: rgba(224, 90, 43, 0.12);
 }
 
 .arrow-btn:active {
@@ -142,8 +149,8 @@
 }
 
 .image-frame {
-  width: 250px;
-  height: 250px;
+  width: clamp(190px, 18vw, 250px);
+  height: clamp(190px, 18vw, 250px);
   border-radius: 50%;
   overflow: hidden;
   margin: 0 auto 16px;
@@ -161,7 +168,7 @@
 
 .item-card h3 {
   font-family: var(--font-display);
-  font-size: 2.6rem;
+  font-size: clamp(1.9rem, 2.2vw, 2.6rem);
   color: var(--text-dark, #3D271D);
 }
 
@@ -204,8 +211,8 @@
     --specials-gap: 20px;
     padding: 0 16px;
     justify-content: space-between;
-    height: 100%;
-    min-height: calc(100vh - var(--navbar-height, 75px) - 20px);
+    height: auto;
+    min-height: auto;
   }
 
   /* Reverts desktop header to the exact mobile red-box grid structure */
@@ -217,8 +224,8 @@
       "badge specials";
     column-gap: 16px;
     row-gap: 0px;
-    margin-top: 40px;
-    margin-bottom: 4px;
+    margin-top: 8px;
+    margin-bottom: 12px;
     align-items: center;
   }
 

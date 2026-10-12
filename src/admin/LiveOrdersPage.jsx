@@ -314,8 +314,8 @@ export default function LiveOrdersPage() {
           backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000
         }}>
           <div style={{
-            background: '#FDFBFA', padding: '24px', borderRadius: '16px', width: '460px',
-            boxShadow: '0 8px 24px rgba(61,39,29,0.2)', border: '1px solid #EFE9E1', maxHeight: '90vh', overflowY: 'auto'
+            background: '#FDFBFA', padding: 'clamp(16px, 4vw, 24px)', borderRadius: '16px', width: 'min(460px, 92vw)',
+            boxShadow: '0 8px 24px rgba(61,39,29,0.2)', border: '1px solid #EFE9E1', maxHeight: '90vh', overflowY: 'auto', boxSizing: 'border-box'
           }}>
             <h3 style={{ fontFamily: "'Luckiest Guy', cursive", color: '#3D271D', marginTop: 0, marginBottom: '16px' }}>
               Edit Order {editingOrder.id}

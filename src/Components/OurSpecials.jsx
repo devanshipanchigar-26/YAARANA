@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import badgeCupImg from '../assets/badge-cup.png';
 import './OurSpecials.css';
 
@@ -37,13 +37,35 @@ const specialsData = [
 
 const extendedItems = [...specialsData, ...specialsData, ...specialsData];
 
-export default function OurSpecials() {
+export default function OurSpecials({ onNavigate }) {
   const [currentIndex, setCurrentIndex] = useState(specialsData.length);
   const [isTransitioning, setIsTransitioning] = useState(true);
+  const [stepDistance, setStepDistance] = useState(0);
   const isMoving = useRef(false);
+  const viewportRef = useRef(null);
 
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
+
+  useEffect(() => {
+    const updateDistance = () => {
+      if (viewportRef.current) {
+        const card = viewportRef.current.querySelector('.item-card');
+        if (card) {
+          const gap = window.innerWidth <= 900 ? 20 : 40;
+          setStepDistance(card.offsetWidth + gap);
+        }
+      }
+    };
+
+    updateDistance();
+    const timer = setTimeout(updateDistance, 150);
+    window.addEventListener('resize', updateDistance);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', updateDistance);
+    };
+  }, []);
 
   const handleNext = () => {
     if (isMoving.current) return;
@@ -97,7 +119,7 @@ export default function OurSpecials() {
     <section className="scroll-section specials-section" id="specials">
       <div className="specials-container">
         
-        {/* Section Header (Shared JSX structure, dynamically styled via CSS for Desktop vs Mobile) */}
+        {/* Section Header */}
         <div className="specials-header">
           <div className="circular-badge">
             <svg viewBox="0 0 100 100">
@@ -119,12 +141,13 @@ export default function OurSpecials() {
         {/* Carousel */}
         <div className="carousel-wrapper">
           <button className="arrow-btn left-arrow" onClick={handlePrev} aria-label="Previous Special">
-            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="m15 18-6-6 6-6" />
             </svg>
           </button>
 
           <div 
+            ref={viewportRef}
             className="specials-viewport"
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
@@ -134,7 +157,7 @@ export default function OurSpecials() {
               className="specials-track"
               onTransitionEnd={handleTransitionEnd}
               style={{
-                transform: `translateX(calc(-${currentIndex} * ((100% + var(--specials-gap)) / var(--visible-items))))`,
+                transform: stepDistance ? `translateX(-${currentIndex * stepDistance}px)` : 'none',
                 transition: isTransitioning ? 'transform 0.45s cubic-bezier(0.25, 1, 0.5, 1)' : 'none'
               }}
             >
@@ -150,7 +173,7 @@ export default function OurSpecials() {
           </div>
 
           <button className="arrow-btn right-arrow" onClick={handleNext} aria-label="Next Special">
-            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="m9 18 6-6-6-6" />
             </svg>
           </button>
@@ -158,7 +181,9 @@ export default function OurSpecials() {
 
         {/* View Full Menu CTA Button */}
         <div className="specials-bottom-action">
-          <button className="btn-view-menu">VIEW FULL MENU &gt;</button>
+          <button className="btn-view-menu" onClick={() => onNavigate && onNavigate('menu')}>
+            VIEW FULL MENU &gt;
+          </button>
         </div>
 
       </div>

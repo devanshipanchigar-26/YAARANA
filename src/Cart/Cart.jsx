@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Trash2, ShoppingCart, ArrowLeft, CheckCircle2, Lock } from 'lucide-react';
 import { supabase } from '../supabaseClient';
+import { useAuth } from '../context/AuthContext';
 import './Cart.css';
 
 const PICKUP_OPTIONS = ['ASAP', 'In 15 minutes', 'In 30 minutes', 'In 45 minutes', 'In 1 hour'];
@@ -25,9 +26,12 @@ export default function Cart({
   clearCart,
   onExplore,
   defaultTable = '',
+  initialStep = 'cart',
+  onRequireLogin,
 }) {
+  const { user, profile } = useAuth();
   // 'cart' -> 'checkout' -> 'success'
-  const [step, setStep] = useState('cart');
+  const [step, setStep] = useState(initialStep);
 
   const [customerName, setCustomerName] = useState(() => loadSavedCustomer().name || '');
   const [customerPhone, setCustomerPhone] = useState(() => loadSavedCustomer().phone || '');
@@ -43,6 +47,21 @@ export default function Cart({
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const total = subtotal;
+
+  // Sync step if initialStep changes externally
+  useEffect(() => {
+    if (initialStep) {
+      setStep(initialStep);
+    }
+  }, [initialStep]);
+
+  // Auto-fill user profile details when logged in
+  useEffect(() => {
+    if (user) {
+      if (profile?.name && !customerName) setCustomerName(profile.name);
+      if (profile?.phone && !customerPhone) setCustomerPhone(profile.phone);
+    }
+  }, [user, profile]);
 
   // Table number from the QR link
   useEffect(() => {
@@ -107,6 +126,16 @@ export default function Cart({
     clearCart();
     setStep('success');
     setPlacing(false);
+  };
+
+  const handleProceedToCheckout = () => {
+    if (!user) {
+      if (onRequireLogin) {
+        onRequireLogin();
+      }
+      return;
+    }
+    setStep('checkout');
   };
 
   const headerTitle =
@@ -210,7 +239,7 @@ export default function Cart({
                 <button
                   type="button"
                   className="checkout-button"
-                  onClick={() => setStep('checkout')}
+                  onClick={handleProceedToCheckout}
                 >
                   Proceed to Checkout
                   <span>→</span>

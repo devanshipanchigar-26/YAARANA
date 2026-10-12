@@ -84,34 +84,34 @@ export default function CustomersPage() {
       </div>
 
       {/* Summary Stat Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '10px' }}>
-        <div style={{ background: '#FDFBFA', border: '1px solid #EFE9E1', borderRadius: '16px', padding: '18px', boxShadow: '0 4px 12px rgba(61, 39, 29, 0.03)' }}>
-          <p style={{ margin: '0 0 6px 0', fontSize: '0.85rem', color: '#6B554B', fontWeight: 'bold' }}>TOTAL CUSTOMERS</p>
-          <h3 style={{ margin: 0, fontSize: '1.8rem', color: '#3D271D', fontFamily: "'Luckiest Guy', cursive" }}>{totalRegistered}</h3>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px', marginBottom: '10px' }}>
+        <div style={{ background: '#FDFBFA', border: '1px solid #EFE9E1', borderRadius: '16px', padding: '16px', boxShadow: '0 4px 12px rgba(61, 39, 29, 0.03)' }}>
+          <p style={{ margin: '0 0 6px 0', fontSize: '0.8rem', color: '#6B554B', fontWeight: 'bold' }}>TOTAL CUSTOMERS</p>
+          <h3 style={{ margin: 0, fontSize: '1.6rem', color: '#3D271D', fontFamily: "'Luckiest Guy', cursive" }}>{totalRegistered}</h3>
         </div>
-        <div style={{ background: '#FDFBFA', border: '1px solid #EFE9E1', borderRadius: '16px', padding: '18px', boxShadow: '0 4px 12px rgba(61, 39, 29, 0.03)' }}>
-          <p style={{ margin: '0 0 6px 0', fontSize: '0.85rem', color: '#6B554B', fontWeight: 'bold' }}>VIP & ACTIVE USERS</p>
-          <h3 style={{ margin: 0, fontSize: '1.8rem', color: '#3D271D', fontFamily: "'Luckiest Guy', cursive" }}>{activeVIPs}</h3>
+        <div style={{ background: '#FDFBFA', border: '1px solid #EFE9E1', borderRadius: '16px', padding: '16px', boxShadow: '0 4px 12px rgba(61, 39, 29, 0.03)' }}>
+          <p style={{ margin: '0 0 6px 0', fontSize: '0.8rem', color: '#6B554B', fontWeight: 'bold' }}>VIP & ACTIVE USERS</p>
+          <h3 style={{ margin: 0, fontSize: '1.6rem', color: '#3D271D', fontFamily: "'Luckiest Guy', cursive" }}>{activeVIPs}</h3>
         </div>
-        <div style={{ background: '#FDFBFA', border: '1px solid #EFE9E1', borderRadius: '16px', padding: '18px', boxShadow: '0 4px 12px rgba(61, 39, 29, 0.03)' }}>
-          <p style={{ margin: '0 0 6px 0', fontSize: '0.85rem', color: '#6B554B', fontWeight: 'bold' }}>TOTAL CAFÉ REVENUE</p>
-          <h3 style={{ margin: 0, fontSize: '1.8rem', color: '#3D271D', fontFamily: "'Luckiest Guy', cursive" }}>₹{totalRevenue.toFixed(2)}</h3>
+        <div style={{ background: '#FDFBFA', border: '1px solid #EFE9E1', borderRadius: '16px', padding: '16px', boxShadow: '0 4px 12px rgba(61, 39, 29, 0.03)' }}>
+          <p style={{ margin: '0 0 6px 0', fontSize: '0.8rem', color: '#6B554B', fontWeight: 'bold' }}>TOTAL CAFÉ REVENUE</p>
+          <h3 style={{ margin: 0, fontSize: '1.6rem', color: '#3D271D', fontFamily: "'Luckiest Guy', cursive" }}>₹{totalRevenue.toFixed(2)}</h3>
         </div>
       </div>
 
       {/* Search & Filter Bar */}
-      <div style={{ display: 'flex', gap: '12px', alignItems: 'center', background: '#FDFBFA', padding: '14px 20px', borderRadius: '16px', border: '1px solid #EFE9E1' }}>
+      <div style={{ display: 'flex', gap: '12px', alignItems: 'center', background: '#FDFBFA', padding: '14px 20px', borderRadius: '16px', border: '1px solid #EFE9E1', flexWrap: 'wrap' }}>
         <input 
           type="text"
           placeholder="🔍 Search by name, phone, or email..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          style={{ flex: 1, padding: '10px 14px', borderRadius: '10px', border: '1px solid #EFE9E1', background: '#F9F6F0', fontSize: '0.9rem', color: '#3D271D', outline: 'none' }}
+          style={{ flex: 1, minWidth: '200px', padding: '10px 14px', borderRadius: '10px', border: '1px solid #EFE9E1', background: '#F9F6F0', fontSize: '0.9rem', color: '#3D271D', outline: 'none' }}
         />
         <select 
           value={roleFilter}
           onChange={(e) => setRoleFilter(e.target.value)}
-          style={{ padding: '10px 14px', borderRadius: '10px', border: '1px solid #EFE9E1', background: '#F9F6F0', fontSize: '0.9rem', color: '#3D271D', outline: 'none', minWidth: '160px' }}
+          style={{ padding: '10px 14px', borderRadius: '10px', border: '1px solid #EFE9E1', background: '#F9F6F0', fontSize: '0.9rem', color: '#3D271D', outline: 'none', minWidth: '140px' }}
         >
           <option value="">All Roles</option>
           <option value="customer">Customer</option>
@@ -174,7 +174,7 @@ export default function CustomersPage() {
       {/* Customer Details Modal */}
       {selectedCustomer && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
-          <div style={{ background: '#FFF', padding: '30px', borderRadius: '20px', width: '90%', maxWidth: '550px', boxShadow: '0 10px 30px rgba(0,0,0,0.2)', maxHeight: '80vh', overflowY: 'auto' }}>
+          <div style={{ background: '#FFF', padding: 'clamp(16px, 4vw, 28px)', borderRadius: '20px', width: 'min(550px, 94vw)', boxShadow: '0 10px 30px rgba(0,0,0,0.2)', maxHeight: '85vh', overflowY: 'auto', boxSizing: 'border-box' }}>
             <h3 style={{ fontFamily: "'Luckiest Guy', cursive", color: '#3D271D', fontSize: '1.5rem', margin: '0 0 10px 0' }}>
               👤 {selectedCustomer.name || 'Anonymous'}
             </h3>

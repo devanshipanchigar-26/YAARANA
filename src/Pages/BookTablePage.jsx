@@ -290,8 +290,11 @@ export default function BookTablePage() {
         .bt-success h3 { font-family: 'Luckiest Guy', cursive; font-weight: 400; color: ${COLORS.blue}; font-size: 1.8rem; margin: 0 0 10px; }
 
         @media (max-width: 520px) {
-          .bt-card { padding: 18px; }
+          .bt-page { padding: 85px 12px 40px; }
+          .bt-card { padding: 16px; }
           .bt-title { font-size: 1.9rem; }
+          .bt-floor { grid-template-columns: repeat(auto-fill, minmax(95px, 1fr)); gap: 10px; padding: 14px 10px; }
+          .bt-table { width: 95px; }
         }
       `}</style>
 

@@ -9,7 +9,7 @@ export default function HomePage({ onNavigate }) {
   return (
     <div className="homepage-container">
       <HeroSection onNavigate={onNavigate} />
-      <OurSpecials />
+      <OurSpecials onNavigate={onNavigate} />
       <OurStory />
       <GalleryFooter />
     </div>

@@ -1,7 +1,9 @@
 .gallery-footer-section {
-  padding: 30px 0 24px;
+  padding: 20px 0 36px;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
+  align-items: center;
+  width: 100%;
 }
 
 .gallery-container {
@@ -10,15 +12,16 @@
   padding: 0 40px;
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
 }
 
 .gallery-header {
-  margin-bottom: 22px;
+  margin-bottom: clamp(12px, 2vh, 20px);
 }
 
 .gallery-title {
   font-family: var(--font-display);
-  font-size: 4.2rem;
+  font-size: clamp(2.4rem, 4.2vw, 4rem);
   color: var(--text-dark);
   letter-spacing: 0.5px;
 }
@@ -27,7 +30,7 @@
 .gallery-carousels-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: clamp(12px, 1.8vh, 18px);
   width: 100%;
 }
 
@@ -37,14 +40,14 @@
   overflow: hidden;
   position: relative;
   border-radius: 32px;
-  padding: 6px 0;
+  padding: 4px 0;
   mask-image: linear-gradient(to right, transparent, black 4%, black 96%, transparent);
   -webkit-mask-image: linear-gradient(to right, transparent, black 4%, black 96%, transparent);
 }
 
 .gallery-scroll-track {
   display: flex;
-  gap: 28px;
+  gap: 24px;
   width: max-content;
 }
 
@@ -67,33 +70,33 @@
     transform: translateX(0);
   }
   100% {
-    transform: translateX(calc(-50% - 14px));
+    transform: translateX(calc(-50% - 12px));
   }
 }
 
 @keyframes autoScrollGalleryRight {
   0% {
-    transform: translateX(calc(-50% - 14px));
+    transform: translateX(calc(-50% - 12px));
   }
   100% {
     transform: translateX(0);
   }
 }
 
-/* Desktop Frame: Kept as original landscape rectangular ratio */
+/* Desktop Frame: Responsive height and width */
 .gallery-frame {
-  flex: 0 0 380px;
-  height: 240px;
-  border-radius: 28px;
+  flex: 0 0 clamp(240px, 24vw, 340px);
+  height: clamp(160px, 20vh, 210px);
+  border-radius: 24px;
   overflow: hidden;
   background-color: #EDE4DC;
-  box-shadow: 0 12px 28px rgba(61, 39, 29, 0.08);
+  box-shadow: 0 10px 24px rgba(61, 39, 29, 0.08);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .gallery-frame:hover {
-  transform: translateY(-6px) scale(1.02);
-  box-shadow: 0 16px 36px rgba(61, 39, 29, 0.14);
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 14px 30px rgba(61, 39, 29, 0.14);
 }
 
 .gallery-img {
@@ -107,8 +110,8 @@
 .footer-info-grid {
   display: grid;
   grid-template-columns: 1.2fr 1fr 1.2fr;
-  gap: 40px;
-  margin-top: 40px;
+  gap: 36px;
+  margin-top: clamp(20px, 3.5vh, 36px);
   padding-top: 10px;
 }
 

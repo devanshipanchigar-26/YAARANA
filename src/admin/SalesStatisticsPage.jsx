@@ -134,8 +134,8 @@ export default function SalesStatisticsPage() {
           📊 Sales Analytics
         </h2>
         
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <div style={{ display: 'flex', background: '#FDFBFA', padding: '4px', borderRadius: '12px', border: '1px solid #EFE9E1' }}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', background: '#FDFBFA', padding: '4px', borderRadius: '12px', border: '1px solid #EFE9E1', flexWrap: 'wrap' }}>
             {['today', 'week', 'month', 'all'].map((range) => (
               <button
                 key={range}
@@ -159,7 +159,7 @@ export default function SalesStatisticsPage() {
 
           <button 
             onClick={exportCSV}
-            style={{ backgroundColor: '#27ae60', color: '#FFF', border: 'none', padding: '8px 14px', borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.85rem' }}
+            style={{ backgroundColor: '#27ae60', color: '#FFF', border: 'none', padding: '8px 14px', borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.85rem', whiteSpace: 'nowrap' }}
           >
             📥 Export CSV
           </button>
@@ -167,26 +167,26 @@ export default function SalesStatisticsPage() {
       </div>
 
       {/* Summary Stat Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', margin: '20px 0' }}>
-        <div style={{ background: '#FDFBFA', border: '1px solid #EFE9E1', borderRadius: '16px', padding: '18px', boxShadow: '0 4px 12px rgba(61, 39, 29, 0.03)' }}>
-          <p style={{ margin: '0 0 6px 0', fontSize: '0.85rem', color: '#6B554B', fontWeight: 'bold' }}>TOTAL REVENUE</p>
-          <h3 style={{ margin: 0, fontSize: '1.8rem', color: '#27ae60', fontFamily: "'Luckiest Guy', cursive" }}>₹{totalRevenue.toFixed(2)}</h3>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px', margin: '20px 0' }}>
+        <div style={{ background: '#FDFBFA', border: '1px solid #EFE9E1', borderRadius: '16px', padding: '16px', boxShadow: '0 4px 12px rgba(61, 39, 29, 0.03)' }}>
+          <p style={{ margin: '0 0 6px 0', fontSize: '0.8rem', color: '#6B554B', fontWeight: 'bold' }}>TOTAL REVENUE</p>
+          <h3 style={{ margin: 0, fontSize: '1.6rem', color: '#27ae60', fontFamily: "'Luckiest Guy', cursive" }}>₹{totalRevenue.toFixed(2)}</h3>
         </div>
-        <div style={{ background: '#FDFBFA', border: '1px solid #EFE9E1', borderRadius: '16px', padding: '18px', boxShadow: '0 4px 12px rgba(61, 39, 29, 0.03)' }}>
-          <p style={{ margin: '0 0 6px 0', fontSize: '0.85rem', color: '#6B554B', fontWeight: 'bold' }}>TOTAL ORDERS</p>
-          <h3 style={{ margin: 0, fontSize: '1.8rem', color: '#3D271D', fontFamily: "'Luckiest Guy', cursive" }}>{totalOrdersCount}</h3>
+        <div style={{ background: '#FDFBFA', border: '1px solid #EFE9E1', borderRadius: '16px', padding: '16px', boxShadow: '0 4px 12px rgba(61, 39, 29, 0.03)' }}>
+          <p style={{ margin: '0 0 6px 0', fontSize: '0.8rem', color: '#6B554B', fontWeight: 'bold' }}>TOTAL ORDERS</p>
+          <h3 style={{ margin: 0, fontSize: '1.6rem', color: '#3D271D', fontFamily: "'Luckiest Guy', cursive" }}>{totalOrdersCount}</h3>
         </div>
-        <div style={{ background: '#FDFBFA', border: '1px solid #EFE9E1', borderRadius: '16px', padding: '18px', boxShadow: '0 4px 12px rgba(61, 39, 29, 0.03)' }}>
-          <p style={{ margin: '0 0 6px 0', fontSize: '0.85rem', color: '#6B554B', fontWeight: 'bold' }}>AVG. ORDER VALUE</p>
-          <h3 style={{ margin: 0, fontSize: '1.8rem', color: '#3D271D', fontFamily: "'Luckiest Guy', cursive" }}>₹{averageOrderValue.toFixed(2)}</h3>
+        <div style={{ background: '#FDFBFA', border: '1px solid #EFE9E1', borderRadius: '16px', padding: '16px', boxShadow: '0 4px 12px rgba(61, 39, 29, 0.03)' }}>
+          <p style={{ margin: '0 0 6px 0', fontSize: '0.8rem', color: '#6B554B', fontWeight: 'bold' }}>AVG. ORDER VALUE</p>
+          <h3 style={{ margin: 0, fontSize: '1.6rem', color: '#3D271D', fontFamily: "'Luckiest Guy', cursive" }}>₹{averageOrderValue.toFixed(2)}</h3>
         </div>
       </div>
 
       {/* GRAPHS SECTION */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '20px', marginBottom: '20px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', marginBottom: '20px' }}>
         
         {/* Bar Chart: Revenue Over Time */}
-        <div style={{ background: '#FDFBFA', border: '1px solid #EFE9E1', borderRadius: '16px', padding: '20px', boxShadow: '0 4px 12px rgba(61, 39, 29, 0.03)', height: '300px' }}>
+        <div style={{ background: '#FDFBFA', border: '1px solid #EFE9E1', borderRadius: '16px', padding: '18px', boxShadow: '0 4px 12px rgba(61, 39, 29, 0.03)', height: 'clamp(260px, 35vh, 320px)' }}>
           <h3 style={{ fontFamily: "'Luckiest Guy', cursive", color: '#3D271D', fontSize: '1.1rem', margin: '0 0 16px 0' }}>📈 Revenue Timeline</h3>
           {barChartData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
@@ -204,12 +204,12 @@ export default function SalesStatisticsPage() {
         </div>
 
         {/* Pie Chart: Payment Modes */}
-        <div style={{ background: '#FDFBFA', border: '1px solid #EFE9E1', borderRadius: '16px', padding: '20px', boxShadow: '0 4px 12px rgba(61, 39, 29, 0.03)', height: '300px' }}>
+        <div style={{ background: '#FDFBFA', border: '1px solid #EFE9E1', borderRadius: '16px', padding: '18px', boxShadow: '0 4px 12px rgba(61, 39, 29, 0.03)', height: 'clamp(260px, 35vh, 320px)' }}>
           <h3 style={{ fontFamily: "'Luckiest Guy', cursive", color: '#3D271D', fontSize: '1.1rem', margin: '0 0 16px 0' }}>💳 Payment Preferences</h3>
           {pieChartData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <Pie data={pieChartData} cx="50%" cy="45%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
+                <Pie data={pieChartData} cx="50%" cy="45%" innerRadius={55} outerRadius={75} paddingAngle={5} dataKey="value">
                   {pieChartData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                   ))}
@@ -225,16 +225,16 @@ export default function SalesStatisticsPage() {
       </div>
 
       {/* Top Selling Items */}
-      <div style={{ background: '#FDFBFA', border: '1px solid #EFE9E1', borderRadius: '16px', padding: '20px', marginBottom: '20px', boxShadow: '0 4px 12px rgba(61, 39, 29, 0.03)' }}>
+      <div style={{ background: '#FDFBFA', border: '1px solid #EFE9E1', borderRadius: '16px', padding: '18px', marginBottom: '20px', boxShadow: '0 4px 12px rgba(61, 39, 29, 0.03)' }}>
         <h3 style={{ fontFamily: "'Luckiest Guy', cursive", color: '#3D271D', fontSize: '1.2rem', margin: '0 0 12px 0' }}>🔥 Top Selling Menu Items</h3>
         {topItems.length === 0 ? (
           <p style={{ color: '#888', fontSize: '0.9rem', margin: 0 }}>No item sales recorded for this period.</p>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '10px' }}>
             {topItems.map(([name, count], index) => (
-              <div key={name} style={{ background: '#F9F6F0', padding: '12px', borderRadius: '12px', border: '1px solid #EFE9E1', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '0.9rem', color: '#3D271D', fontWeight: 'bold' }}>{index + 1}. {name}</span>
-                <span style={{ background: '#311E18', color: '#FFD000', padding: '2px 8px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 'bold' }}>{count} sold</span>
+              <div key={name} style={{ background: '#F9F6F0', padding: '12px', borderRadius: '12px', border: '1px solid #EFE9E1', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '0.85rem', color: '#3D271D', fontWeight: 'bold' }}>{index + 1}. {name}</span>
+                <span style={{ background: '#311E18', color: '#FFD000', padding: '2px 8px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 'bold', whiteSpace: 'nowrap' }}>{count} sold</span>
               </div>
             ))}
           </div>

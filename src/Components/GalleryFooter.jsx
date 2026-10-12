@@ -18,7 +18,7 @@ export default function GalleryFooter() {
   const infiniteRow2 = [...galleryImagesRow2, ...galleryImagesRow2, ...galleryImagesRow2];
 
   return (
-    <footer className="scroll-section gallery-footer-section" id="gallery">
+    <footer className="scroll-section gallery-footer-section" id="contact">
       <div className="gallery-container">
         
         <div className="gallery-header">

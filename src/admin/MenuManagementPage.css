@@ -66,3 +66,32 @@
     grid-template-columns: 1fr 1fr;
   }
 }
+
+@media (max-width: 640px) {
+  .add-item-card {
+    padding: 16px 14px;
+    border-radius: 16px;
+  }
+
+  .add-item-form {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .btn-add-item {
+    width: 100%;
+    padding: 12px;
+  }
+
+  .menu-search-filter-bar {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 10px !important;
+    padding: 12px 14px !important;
+  }
+
+  .menu-search-filter-bar select {
+    min-width: 100% !important;
+    width: 100%;
+  }
+}

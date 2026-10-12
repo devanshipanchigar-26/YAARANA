@@ -231,6 +231,10 @@ export default function MenuPage({ addToCart }) {
         .mp-message { text-align: center; padding: 40px 0; }
 
         @media (max-width: 700px) {
+          .mp-page { padding: 85px 14px 40px; }
+          .mp-cats { gap: 16px; margin-bottom: 28px; }
+          .mp-circle { width: 72px; height: 72px; border-width: 3px; }
+          .mp-search { margin-bottom: 24px; }
           .mp-row, .mp-row.flip { grid-template-columns: 1fr; gap: 20px; }
           .mp-art { position: relative; top: 0; margin: 0 auto; order: -1; }
           .mp-title { font-size: 2.1rem; }

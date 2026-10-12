@@ -200,18 +200,18 @@ export default function MenuManagementPage() {
       </div>
 
       {/* Search & Filter Controls Bar */}
-      <div style={{ display: 'flex', gap: '12px', alignItems: 'center', background: '#FDFBFA', padding: '14px 20px', borderRadius: '16px', border: '1px solid #EFE9E1' }}>
+      <div className="menu-search-filter-bar" style={{ display: 'flex', gap: '12px', alignItems: 'center', background: '#FDFBFA', padding: '14px 20px', borderRadius: '16px', border: '1px solid #EFE9E1', flexWrap: 'wrap' }}>
         <input 
           type="text"
           placeholder="🔍 Search items by name or description..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          style={{ flex: 1, padding: '10px 14px', borderRadius: '10px', border: '1px solid #EFE9E1', background: '#F9F6F0', fontSize: '0.9rem', color: '#3D271D', outline: 'none' }}
+          style={{ flex: 1, minWidth: '200px', padding: '10px 14px', borderRadius: '10px', border: '1px solid #EFE9E1', background: '#F9F6F0', fontSize: '0.9rem', color: '#3D271D', outline: 'none' }}
         />
         <select 
           value={selectedCategoryFilter}
           onChange={(e) => setSelectedCategoryFilter(e.target.value)}
-          style={{ padding: '10px 14px', borderRadius: '10px', border: '1px solid #EFE9E1', background: '#F9F6F0', fontSize: '0.9rem', color: '#3D271D', outline: 'none', minWidth: '180px' }}
+          style={{ padding: '10px 14px', borderRadius: '10px', border: '1px solid #EFE9E1', background: '#F9F6F0', fontSize: '0.9rem', color: '#3D271D', outline: 'none', minWidth: '160px' }}
         >
           <option value="">All Categories</option>
           {categories.map(cat => (
