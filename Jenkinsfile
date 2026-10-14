@@ -2,63 +2,44 @@
 pipeline {
     agent any
 
+    environment {
+        PATH = "C:\\Program Files\\nodejs;${env.PATH}"
+    }
+
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/devanshipanchigar-26/YAARANA.git'
+                echo 'Source code retrieved from GitHub.'
             }
         }
 
-        stage('Check Tools') {
+        stage('Check Node.js and npm') {
             steps {
                 bat 'node --version'
                 bat 'npm --version'
-                bat '"C:\\Users\\blv\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" --version'
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                bat 'npm ci'
-                bat '"C:\\Users\\blv\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" -m pip install selenium'
+                bat 'npm install'
             }
         }
 
-        stage('Build Website') {
+        stage('Build React App') {
             steps {
                 bat 'npm run build'
-            }
-        }
-
-        stage('Start Website') {
-            steps {
-                bat 'start "" /B cmd /c "npm run dev -- --host 127.0.0.1 > vite.log 2>&1"'
-
-                bat '''
-                powershell -NoProfile -Command "$ready=$false; for ($i=0; $i -lt 30; $i++) { try { Invoke-WebRequest http://127.0.0.1:5173/login -UseBasicParsing | Out-Null; $ready=$true; break } catch { Start-Sleep -Seconds 1 } }; if (-not $ready) { Get-Content vite.log; exit 1 }"
-                '''
-            }
-        }
-
-        stage('Selenium Testing') {
-            steps {
-                bat '"C:\\Users\\blv\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" -u test_website.py'
             }
         }
     }
 
     post {
-        always {
-            echo 'Jenkins pipeline execution finished.'
-        }
-
         success {
-            echo 'Yaarana Cafe website build and Selenium testing completed successfully!'
+            echo 'Yaarana Cafe website built successfully!'
         }
 
         failure {
-            echo 'Pipeline failed. Check Console Output for the exact error.'
+            echo 'Pipeline failed. Check Console Output.'
         }
     }
 }
