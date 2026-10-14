@@ -26,16 +26,16 @@ pipeline {
             }
         }
 
-        stage('Build React App') {
+        stage('Start React App') {
             steps {
-                bat 'npm run build'
+                bat 'npm start'
             }
         }
     }
 
     post {
         success {
-            echo 'Yaarana Cafe website built successfully!'
+            echo 'Yaarana Cafe application started successfully!'
         }
 
         failure {
