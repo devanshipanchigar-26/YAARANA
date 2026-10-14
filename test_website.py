@@ -1,64 +1,62 @@
 
-pipeline {
-    agent any
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
-    stages {
-        stage('Checkout') {
-            steps {
-                git branch: 'main',
-                    url: 'https://github.com/devanshipanchigar-26/YAARANA.git'
-            }
-        }
 
-        stage('Check Tools') {
-            steps {
-                bat 'node --version'
-                bat 'npm --version'
-                bat '"C:\\Users\\blv\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" --version'
-            }
-        }
+def test_yaarana_login_page():
+    driver = None
 
-        stage('Install Dependencies') {
-            steps {
-                bat 'npm ci'
-                bat '"C:\\Users\\blv\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" -m pip install selenium'
-            }
-        }
+    try:
+        options = Options()
+        options.add_argument("--headless=new")
+        options.add_argument("--window-size=1366,768")
 
-        stage('Build Website') {
-            steps {
-                bat 'npm run build'
-            }
-        }
+        print("Starting Selenium test...", flush=True)
 
-        stage('Start Website') {
-            steps {
-                bat 'start "" /B cmd /c "npm run dev -- --host 127.0.0.1 > vite.log 2>&1"'
+        driver = webdriver.Chrome(options=options)
+        driver.get("http://127.0.0.1:5173/login")
 
-                bat '''
-                powershell -NoProfile -Command "$ready=$false; for ($i=0; $i -lt 30; $i++) { try { Invoke-WebRequest http://127.0.0.1:5173/login -UseBasicParsing | Out-Null; $ready=$true; break } catch { Start-Sleep -Seconds 1 } }; if (-not $ready) { Get-Content vite.log; exit 1 }"
-                '''
-            }
-        }
+        WebDriverWait(driver, 20).until(
+            lambda d: d.execute_script(
+                "return document.readyState"
+            ) == "complete"
+        )
 
-        stage('Selenium Testing') {
-            steps {
-                bat '"C:\\Users\\blv\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" -u test_website.py'
-            }
-        }
-    }
+        WebDriverWait(driver, 15).until(
+            EC.visibility_of_element_located(
+                (By.TAG_NAME, "body")
+            )
+        )
 
-    post {
-        always {
-            echo 'Jenkins pipeline execution finished.'
-        }
+        print("Page title:", driver.title, flush=True)
+        print("Current URL:", driver.current_url, flush=True)
 
-        success {
-            echo 'Yaarana Cafe website build and Selenium testing completed successfully!'
-        }
+        assert "/login" in driver.current_url, (
+            "Login page URL is incorrect"
+        )
 
-        failure {
-            echo 'Pipeline failed. Check Console Output for the exact error.'
-        }
-    }
-}
+        body_text = driver.find_element(
+            By.TAG_NAME, "body"
+        ).text.strip()
+
+        assert body_text, "Login page has no visible text"
+
+        print(
+            "TEST PASSED: Login page loaded and visible.",
+            flush=True
+        )
+
+    except Exception as e:
+        print("TEST FAILED:", repr(e), flush=True)
+        raise
+
+    finally:
+        if driver:
+            driver.quit()
+
+
+if __name__ == "__main__":
+    test_yaarana_login_page()
