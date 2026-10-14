@@ -28,7 +28,7 @@ pipeline {
 
         stage('Start React App') {
             steps {
-                bat 'npm start'
+                bat 'npm run dev -- --host 127.0.0.1'
             }
         }
     }
