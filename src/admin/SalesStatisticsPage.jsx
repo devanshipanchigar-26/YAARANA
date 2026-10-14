@@ -44,7 +44,7 @@ export default function SalesStatisticsPage() {
   // Filter orders based on selected time range
   const filteredOrders = orders.filter(order => {
     const orderDate = new Date(order.created_at);
-    const today = new Date('2026-09-23'); // Reference date
+    const today = new Date();
     
     if (filterRange === 'today') {
       return orderDate.toDateString() === today.toDateString();
@@ -65,7 +65,7 @@ export default function SalesStatisticsPage() {
   const validRevenueOrders = filteredOrders.filter(o => {
     const status = (o.order_status || '').toLowerCase();
     const pStatus = (o.payment_status || '').toLowerCase();
-    return status === 'completed' || status === 'delivered' || pStatus === 'paid' || true; 
+    return status === 'completed' || status === 'delivered' || pStatus === 'paid'; 
   });
   
   const totalRevenue = validRevenueOrders.reduce((sum, o) => sum + (parseFloat(o.total_amount) || 0), 0);

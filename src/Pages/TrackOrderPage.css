@@ -1,0 +1,674 @@
+/* Track Order Page Root */
+.track-order-page {
+  min-height: 100vh;
+  background-color: #fdfbfa;
+  color: #311e18;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header Bar */
+.track-header-bar {
+  background-color: #311e18;
+  color: #fffdf9;
+  padding: 14px 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 4px 16px rgba(49, 30, 24, 0.15);
+}
+
+.track-header-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.track-back-btn,
+.track-refresh-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fffdf9;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.track-back-btn:hover,
+.track-refresh-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.track-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.track-cafe-title {
+  font-family: 'Luckiest Guy', cursive, sans-serif;
+  font-size: 1.35rem;
+  color: #ffd000;
+  letter-spacing: 1px;
+  line-height: 1.1;
+}
+
+.track-live-tag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  color: #e6dfd5;
+  font-weight: 500;
+}
+
+.track-pulse-dot {
+  width: 7px;
+  height: 7px;
+  background-color: #2ecc71;
+  border-radius: 50%;
+  animation: pulseTracking 1.4s infinite;
+}
+
+@keyframes pulseTracking {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0.4; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Main Container */
+.track-main-container {
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px 20px 60px;
+  box-sizing: border-box;
+}
+
+/* State Cards (Loading / Error) */
+.track-state-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 48px 24px;
+  text-align: center;
+  border: 1px solid #efe9e1;
+  box-shadow: 0 8px 24px rgba(49, 30, 24, 0.04);
+  max-width: 500px;
+  margin: 40px auto;
+}
+
+.track-spinner {
+  width: 44px;
+  height: 44px;
+  border: 4px solid #efe9e1;
+  border-top-color: #ffd000;
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Content Grid */
+.track-content-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 860px) {
+  .track-content-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* General Track Card */
+.track-card {
+  background: #ffffff;
+  border: 1px solid #efe9e1;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 6px 20px rgba(49, 30, 24, 0.03);
+}
+
+/* Card Header */
+.track-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #f4ede5;
+  padding-bottom: 16px;
+}
+
+.track-meta-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #8c756b;
+  letter-spacing: 0.5px;
+}
+
+.track-order-id {
+  font-family: 'Luckiest Guy', cursive, sans-serif;
+  font-size: 1.9rem;
+  color: #311e18;
+  margin: 2px 0 0;
+  letter-spacing: 0.5px;
+}
+
+.track-badges-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.track-type-badge {
+  background: #f4ede5;
+  color: #5a4238;
+  font-weight: 600;
+  font-size: 0.8rem;
+  padding: 4px 12px;
+  border-radius: 12px;
+}
+
+.track-payment-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+.track-payment-badge.paid {
+  background: #eafaf1;
+  color: #27ae60;
+  border: 1px solid #b7efcf;
+}
+
+.track-payment-badge.pending {
+  background: #fef9e7;
+  color: #d35400;
+  border: 1px solid #fcdfa6;
+}
+
+/* Alert Banners */
+.track-alert-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-radius: 14px;
+  margin-bottom: 20px;
+}
+
+.track-alert-banner.cancelled {
+  background: #fde8e8;
+  color: #c0392b;
+  border: 1px solid #f8b4b4;
+}
+
+.track-alert-banner.completed {
+  background: #eafaf1;
+  color: #27ae60;
+  border: 1px solid #b7efcf;
+}
+
+.track-alert-banner p {
+  margin: 2px 0 0;
+  font-size: 0.82rem;
+}
+
+/* Stepper Progress Bar */
+.track-stepper-container {
+  margin: 32px 0 28px;
+  position: relative;
+}
+
+.track-stepper-progress-bar {
+  position: absolute;
+  top: 22px;
+  left: 36px;
+  right: 36px;
+  height: 4px;
+  background: #efe9e1;
+  z-index: 1;
+  border-radius: 4px;
+}
+
+.track-stepper-progress-fill {
+  height: 100%;
+  background: #ffd000;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.track-steps-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  position: relative;
+  z-index: 2;
+  text-align: center;
+}
+
+.track-step-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.track-step-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  border: 3px solid #efe9e1;
+  color: #8c756b;
+  margin-bottom: 8px;
+  transition: all 0.3s ease;
+}
+
+.track-step-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #6b554b;
+  margin-bottom: 2px;
+}
+
+.track-step-desc {
+  font-size: 0.68rem;
+  color: #8c756b;
+  max-width: 100px;
+  line-height: 1.2;
+}
+
+/* Step Active & Done States */
+.step-done .track-step-circle {
+  background: #27ae60;
+  border-color: #27ae60;
+  color: #ffffff;
+}
+
+.step-done .track-step-title {
+  color: #27ae60;
+}
+
+.step-current .track-step-circle {
+  background: #ffd000;
+  border-color: #311e18;
+  color: #311e18;
+  box-shadow: 0 0 0 4px rgba(255, 208, 0, 0.3);
+  transform: scale(1.1);
+}
+
+.step-current .track-step-title {
+  color: #311e18;
+  font-weight: 800;
+}
+
+/* Prep Time Indicator */
+.track-prep-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fdf7ec;
+  border: 1px solid #f6e6cd;
+  color: #8a5316;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 0.86rem;
+  margin-bottom: 24px;
+}
+
+.prep-clock-icon {
+  color: #d35400;
+}
+
+/* Card Actions */
+.track-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.track-action-btn {
+  flex: 1;
+  min-width: 170px;
+  padding: 12px 18px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.track-action-btn.primary {
+  background: #311e18;
+  color: #ffd000;
+}
+
+.track-action-btn.primary:hover {
+  background: #472c23;
+  transform: translateY(-1px);
+}
+
+.track-action-btn.secondary {
+  background: #ffd000;
+  color: #311e18;
+}
+
+.track-action-btn.secondary:hover {
+  background: #ffdb33;
+  transform: translateY(-1px);
+}
+
+/* Right Column: Payment Card */
+.track-section-title {
+  font-family: 'Luckiest Guy', cursive, sans-serif;
+  font-size: 1.25rem;
+  color: #311e18;
+  margin: 0 0 16px;
+}
+
+/* Settled State */
+.track-payment-settled {
+  background: #f6fcf8;
+  border: 1px solid #b7efcf;
+  border-radius: 14px;
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.settled-icon-wrap {
+  margin-bottom: 6px;
+}
+
+.track-payment-settled h3 {
+  color: #27ae60;
+  margin: 0 0 4px;
+  font-size: 1.1rem;
+}
+
+.settled-amount {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #311e18;
+  margin: 0 0 2px;
+}
+
+.settled-sub {
+  font-size: 0.78rem;
+  color: #6b554b;
+  margin: 0;
+}
+
+.settled-ref {
+  font-size: 0.74rem;
+  color: #8c756b;
+  margin: 8px 0 0;
+}
+
+/* Unsettled State */
+.track-payment-unsettled {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.unsettled-amount-box {
+  background: #f9f6f0;
+  border: 1px solid #efe9e1;
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.unsettled-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #6b554b;
+}
+
+.unsettled-value {
+  font-size: 1.45rem;
+  color: #d35400;
+  font-weight: 800;
+}
+
+.unsettled-instruction {
+  background: #fef9e7;
+  border: 1px solid #fcdfa6;
+  border-radius: 12px;
+  padding: 14px;
+  font-size: 0.82rem;
+  color: #684b12;
+}
+
+.inst-badge {
+  display: inline-block;
+  background: #d35400;
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.unsettled-instruction p {
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* UPI Box */
+.track-upi-box {
+  background: #fbf9f6;
+  border: 1px solid #efe9e1;
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.track-upi-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #311e18;
+  margin-bottom: 8px;
+}
+
+.toggle-qr-btn {
+  background: none;
+  border: none;
+  color: #2355c4;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.toggle-qr-btn:hover {
+  text-decoration: underline;
+}
+
+.track-vpa-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #efe9e1;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.vpa-text {
+  font-family: monospace;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #311e18;
+}
+
+.copy-vpa-btn {
+  background: #f4ede5;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #311e18;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.track-qr-preview {
+  text-align: center;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed #efe9e1;
+}
+
+.track-qr-img {
+  width: 170px;
+  height: 170px;
+  border-radius: 10px;
+  border: 1px solid #efe9e1;
+}
+
+.track-qr-note {
+  font-size: 0.72rem;
+  color: #8c756b;
+  margin: 6px 0 0;
+}
+
+/* UTR Form */
+.track-utr-form {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #efe9e1;
+}
+
+.utr-label {
+  display: block;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #6b554b;
+  margin-bottom: 6px;
+}
+
+.utr-input-group {
+  display: flex;
+  gap: 6px;
+}
+
+.utr-input {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #efe9e1;
+  background: #ffffff;
+  font-size: 0.8rem;
+  color: #311e18;
+}
+
+.utr-submit-btn {
+  background: #311e18;
+  color: #ffd000;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.utr-submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.utr-success-text {
+  font-size: 0.72rem;
+  color: #27ae60;
+  margin: 4px 0 0;
+  font-weight: 600;
+}
+
+/* Summary Box */
+.track-order-summary-box {
+  background: #f9f6f0;
+  border: 1px solid #efe9e1;
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.summary-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #8c756b;
+  margin: 0 0 10px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.summary-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.summary-item-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+}
+
+.summary-item-name {
+  color: #311e18;
+  font-weight: 600;
+}
+
+.summary-item-price {
+  color: #6b554b;
+  font-weight: 600;
+}
+
+.no-items-text {
+  font-size: 0.76rem;
+  color: #8c756b;
+  margin: 0;
+}

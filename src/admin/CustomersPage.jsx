@@ -28,7 +28,7 @@ export default function CustomersPage() {
 
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
-        .select('user_id, total_amount, id, created_at, status');
+        .select('user_id, total_amount, id, created_at, order_status');
 
       if (orderError) {
         console.error('Supabase orders error:', orderError.message);
@@ -205,7 +205,9 @@ export default function CustomersPage() {
                     </div>
                     <div style={{ textAlign: 'right' }}>
                       <strong style={{ color: '#3D271D' }}>₹{order.total_amount}</strong>
-                      <div style={{ fontSize: '0.75rem', color: order.status === 'completed' ? '#27ae60' : '#e67e22' }}>{order.status}</div>
+                      <div style={{ fontSize: '0.75rem', color: (order.order_status || '').toLowerCase() === 'completed' ? '#27ae60' : '#e67e22' }}>
+                        {order.order_status || 'Pending'}
+                      </div>
                     </div>
                   </div>
                 ))}

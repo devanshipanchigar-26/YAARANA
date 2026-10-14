@@ -63,17 +63,19 @@ export default function OrderHistoryPage() {
   };
 
   const filteredOrders = orders.filter(order => {
-    const todayStr = '2026-09-23';
+    const now = new Date();
+    const todayStr = now.toISOString().split('T')[0];
     if (filter === 'today') {
       return order.date === todayStr;
     }
     if (filter === 'week') {
       const orderTime = order.rawDate.getTime();
-      const oneWeekAgo = new Date('2026-09-16').getTime();
+      const oneWeekAgo = now.getTime() - 7 * 24 * 60 * 60 * 1000;
       return orderTime >= oneWeekAgo;
     }
     if (filter === 'month') {
-      return order.date.startsWith('2026-09');
+      const currentYearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      return order.date.startsWith(currentYearMonth);
     }
     return true; // 'all'
   });

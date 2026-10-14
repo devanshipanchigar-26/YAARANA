@@ -1,29 +1,81 @@
 import React, { useState, useEffect } from 'react';
+import {
+  CheckCircle,
+  Clock,
+  ChefHat,
+  BellRing,
+  CheckCircle2,
+  Receipt,
+  AlertCircle,
+  Phone,
+  User,
+  Coffee,
+  X,
+  CreditCard,
+  DollarSign,
+} from 'lucide-react';
 import { supabase } from '../supabaseClient';
+import { getCafeSettings, playOrderChimeSound } from '../utils/cafeSettings';
+import OrderBillModal from '../Components/OrderBillModal';
 import './LiveOrdersPage.css';
 
 export default function LiveOrdersPage() {
   const [orders, setOrders] = useState([]);
   const [menuItems, setMenuItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+
   // State for Editing Modal
   const [editingOrder, setEditingOrder] = useState(null);
   const [editTableNo, setEditTableNo] = useState('');
   const [editTotalAmount, setEditTotalAmount] = useState('');
-  
-  // State for adding new items
+
+  // State for adding new items in edit modal
   const [selectedMenuItemId, setSelectedMenuItemId] = useState('');
   const [itemQuantity, setItemQuantity] = useState(1);
   const [originalOrderTotal, setOriginalOrderTotal] = useState(0);
 
+  // State for Mark-As-Paid Confirmation Modal
+  const [confirmingPaymentOrder, setConfirmingPaymentOrder] = useState(null);
+  const [markingPaid, setMarkingPaid] = useState(false);
+
+  // State for Viewing/Printing Customer Bill
+  const [viewingBillOrder, setViewingBillOrder] = useState(null);
+
   useEffect(() => {
     fetchLiveOrders();
     fetchMenuItems();
+
+    // Subscribe to realtime changes on orders table
+    const ordersChannel = supabase
+      .channel('live-orders-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'orders' },
+        (payload) => {
+          fetchLiveOrders(true);
+          if (payload.eventType === 'INSERT') {
+            const currentSettings = getCafeSettings();
+            if (currentSettings.newOrderAlerts !== false) {
+              playOrderChimeSound();
+            }
+          }
+        }
+      )
+      .subscribe();
+
+    // Polling fallback every 15s to guarantee fresh orders
+    const interval = setInterval(() => {
+      fetchLiveOrders(true);
+    }, 15000);
+
+    return () => {
+      supabase.removeChannel(ordersChannel);
+      clearInterval(interval);
+    };
   }, []);
 
-  const fetchLiveOrders = async () => {
-    setLoading(true);
+  const fetchLiveOrders = async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
     try {
       const { data, error } = await supabase
         .from('orders')
@@ -31,39 +83,57 @@ export default function LiveOrdersPage() {
           *,
           order_items (
             quantity,
+            unit_price,
             menu_items (
-              name
+              name,
+              price
             )
           )
         `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      
-      const activeData = (data || []).filter(order => {
+
+      const activeData = (data || []).filter((order) => {
         const status = (order.order_status || '').toLowerCase();
         return status !== 'completed' && status !== 'delivered' && status !== 'cancelled';
       });
 
-      const formattedOrders = activeData.map(order => {
+      const formattedOrders = activeData.map((order) => {
         let itemsDescription = 'Café Order Items';
         if (order.order_items && order.order_items.length > 0) {
-          itemsDescription = order.order_items.map(item => {
-            const dishName = item.menu_items?.name || 'Item';
-            return `${item.quantity}x ${dishName}`;
-          }).join(', ');
+          itemsDescription = order.order_items
+            .map((item) => {
+              const dishName = item.item_name || item.menu_items?.name || 'Item';
+              return `${item.quantity}x ${dishName}`;
+            })
+            .join(', ');
         }
 
+        const orderNum = order.order_number || `#YRN-${order.id}`;
+
         return {
-          id: `#${order.id}`,
+          id: orderNum,
           rawId: order.id,
-          tableNo: order.table_no || 'Table 1',
-          bookedTime: new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          orderNumber: orderNum,
+          customerName: order.customer_name || 'Guest',
+          customerPhone: order.customer_phone || '',
+          orderType: order.order_type || 'dine-in',
+          tableNo: order.table_no || (order.order_type === 'takeaway' ? 'Takeaway' : 'Table 1'),
+          pickupTime: order.pickup_time || '',
+          bookedTime: new Date(order.created_at).toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
           items: itemsDescription,
           totalAmount: parseFloat(order.total_amount || 0),
           paymentMode: order.payment_mode ? order.payment_mode.toUpperCase() : 'ONLINE',
           paymentStatus: order.payment_status ? order.payment_status.toUpperCase() : 'PENDING',
-          orderStatus: order.order_status || 'Pending'
+          orderStatus: order.order_status || 'Pending',
+          paymentReference: order.payment_reference || '',
+          paidAt: order.paid_at || null,
+          verifiedBy: order.verified_by || null,
+          rawOrder: order,
         };
       });
 
@@ -85,42 +155,33 @@ export default function LiveOrdersPage() {
     }
   };
 
-  const handleCompleteOrder = async (rawId) => {
+  // Step-by-step preparation status transitions
+  const handleUpdateOrderStatus = async (rawId, nextStatus) => {
     try {
       const { error } = await supabase
         .from('orders')
-        .update({ order_status: 'Completed' })
+        .update({ order_status: nextStatus })
         .eq('id', rawId);
 
       if (error) throw error;
-      setOrders(orders.filter(order => order.rawId !== rawId));
-    } catch (error) {
-      console.error('Error completing order:', error.message);
-      alert('Failed to complete order: ' + error.message);
-    }
-  };
 
-  const handleMarkPaid = async (rawId) => {
-    try {
-      const { error } = await supabase
-        .from('orders')
-        .update({ payment_status: 'Paid' })
-        .eq('id', rawId);
-
-      if (error) throw error;
-      setOrders(orders.map(order => {
-        if (order.rawId === rawId) {
-          return { ...order, paymentStatus: 'PAID' };
-        }
-        return order;
-      }));
+      if (nextStatus.toLowerCase() === 'completed') {
+        setOrders((prev) => prev.filter((o) => o.rawId !== rawId));
+      } else {
+        setOrders((prev) =>
+          prev.map((o) => (o.rawId === rawId ? { ...o, orderStatus: nextStatus } : o))
+        );
+      }
     } catch (error) {
-      console.error('Error updating payment status:', error.message);
-      alert('Failed to update payment status: ' + error.message);
+      console.error(`Error updating order status to ${nextStatus}:`, error.message);
+      alert(`Failed to update order status: ${error.message}`);
     }
   };
 
   const handleCancelOrder = async (rawId) => {
+    const confirmed = window.confirm('Are you sure you want to cancel this order? This cannot be undone.');
+    if (!confirmed) return;
+
     try {
       const { error } = await supabase
         .from('orders')
@@ -128,10 +189,37 @@ export default function LiveOrdersPage() {
         .eq('id', rawId);
 
       if (error) throw error;
-      setOrders(orders.filter(order => order.rawId !== rawId));
+      setOrders(orders.filter((order) => order.rawId !== rawId));
     } catch (error) {
       console.error('Error cancelling order:', error.message);
       alert('Failed to cancel order: ' + error.message);
+    }
+  };
+
+  // Execute Mark as Paid with audit metadata after staff confirmation
+  const handleConfirmPaid = async () => {
+    if (!confirmingPaymentOrder) return;
+    setMarkingPaid(true);
+
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ payment_status: 'Paid' })
+        .eq('id', confirmingPaymentOrder.rawId);
+
+      if (error) throw error;
+
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.rawId === confirmingPaymentOrder.rawId ? { ...o, paymentStatus: 'PAID' } : o
+        )
+      );
+      setConfirmingPaymentOrder(null);
+    } catch (error) {
+      console.error('Error updating payment status:', error.message);
+      alert('Failed to update payment status: ' + error.message);
+    } finally {
+      setMarkingPaid(false);
     }
   };
 
@@ -152,7 +240,7 @@ export default function LiveOrdersPage() {
       setEditTotalAmount(originalOrderTotal);
       return;
     }
-    const item = menuItems.find(m => String(m.id) === String(menuId));
+    const item = menuItems.find((m) => String(m.id) === String(menuId));
     if (item) {
       const addedCost = parseFloat(item.price) * parseInt(qty || 1);
       setEditTotalAmount((parseFloat(originalOrderTotal) + addedCost).toFixed(2));
@@ -162,7 +250,7 @@ export default function LiveOrdersPage() {
   const handleQuantityChange = (qty) => {
     setItemQuantity(qty);
     if (!selectedMenuItemId) return;
-    const item = menuItems.find(m => String(m.id) === String(selectedMenuItemId));
+    const item = menuItems.find((m) => String(m.id) === String(selectedMenuItemId));
     if (item) {
       const addedCost = parseFloat(item.price) * parseInt(qty || 1);
       setEditTotalAmount((parseFloat(originalOrderTotal) + addedCost).toFixed(2));
@@ -179,24 +267,21 @@ export default function LiveOrdersPage() {
         .from('orders')
         .update({
           table_no: editTableNo,
-          total_amount: parseFloat(editTotalAmount)
+          total_amount: parseFloat(editTotalAmount),
         })
         .eq('id', editingOrder.rawId);
 
       if (orderError) throw orderError;
 
       if (selectedMenuItemId) {
-        const selectedItem = menuItems.find(m => String(m.id) === String(selectedMenuItemId));
+        const selectedItem = menuItems.find((m) => String(m.id) === String(selectedMenuItemId));
         const unitPrice = selectedItem ? selectedItem.price : 0;
-
-        const { error: itemError } = await supabase
-          .from('order_items')
-          .insert({
-            order_id: editingOrder.rawId,
-            menu_item_id: parseInt(selectedMenuItemId),
-            quantity: parseInt(itemQuantity),
-            unit_price: unitPrice
-          });
+        const { error: itemError } = await supabase.from('order_items').insert({
+          order_id: editingOrder.rawId,
+          menu_item_id: parseInt(selectedMenuItemId),
+          quantity: parseInt(itemQuantity),
+          unit_price: unitPrice,
+        });
 
         if (itemError) throw itemError;
       }
@@ -210,7 +295,7 @@ export default function LiveOrdersPage() {
   };
 
   const activeOrdersCount = orders.length;
-  const pendingPaymentsCount = orders.filter(o => o.paymentStatus === 'PENDING').length;
+  const pendingPaymentsCount = orders.filter((o) => o.paymentStatus === 'PENDING').length;
 
   return (
     <div className="live-orders-page">
@@ -224,7 +309,7 @@ export default function LiveOrdersPage() {
       <div className="live-orders-layout">
         <div className="queue-summary-box">
           <h3 className="summary-heading">QUEUE SUMMARY</h3>
-          
+
           <div className="summary-card">
             <span className="summary-label">ACTIVE ORDERS</span>
             <span className="summary-number text-blue">
@@ -252,53 +337,144 @@ export default function LiveOrdersPage() {
           ) : (
             orders.map((order) => {
               const isPendingPayment = order.paymentStatus === 'PENDING';
+              const normStatus = (order.orderStatus || 'Pending').toLowerCase();
+
               return (
-                <div 
-                  key={order.rawId} 
+                <div
+                  key={order.rawId}
                   className={`order-card ${isPendingPayment ? 'highlight-pending' : ''}`}
                 >
                   <div className="order-card-header">
                     <div className="order-meta-left">
                       <span className="order-id-badge">{order.id}</span>
-                      <span className="order-timer">⏱️ {order.bookedTime} ({order.tableNo})</span>
+                      <span className="order-timer">⏱️ {order.bookedTime}</span>
+                      <span className="order-type-tag">
+                        {order.orderType === 'dine-in'
+                          ? `🍽️ Table ${order.tableNo}`
+                          : `🛍️ Takeaway (${order.pickupTime || 'ASAP'})`}
+                      </span>
                     </div>
-                    <div className={`order-status-badge ${isPendingPayment ? 'badge-cash-pending' : 'badge-online-paid'}`}>
-                      {order.paymentMode} • {order.paymentStatus}
+
+                    <div className="order-badges-right">
+                      {/* Kitchen Status Badge */}
+                      <span className={`kitchen-status-pill status-${normStatus}`}>
+                        {normStatus === 'ready' && '🔔 Ready'}
+                        {normStatus === 'preparing' && '🍳 Cooking'}
+                        {normStatus === 'accepted' && '✓ Accepted'}
+                        {normStatus === 'pending' && '⏳ Pending'}
+                      </span>
+
+                      {/* Payment Status Badge */}
+                      <div
+                        className={`order-status-badge ${
+                          isPendingPayment ? 'badge-cash-pending' : 'badge-online-paid'
+                        }`}
+                      >
+                        {order.paymentMode} • {order.paymentStatus}
+                      </div>
                     </div>
                   </div>
 
                   <div className="order-body">
+                    {/* Customer info */}
+                    <div className="order-customer-info">
+                      <span>
+                        <User size={13} style={{ verticalAlign: '-1px' }} />{' '}
+                        <strong>{order.customerName}</strong>
+                      </span>
+                      {order.customerPhone && (
+                        <span>
+                          <Phone size={13} style={{ verticalAlign: '-1px' }} />{' '}
+                          {order.customerPhone}
+                        </span>
+                      )}
+                      {order.paymentReference && (
+                        <span className="order-utr-tag">
+                          UTR: <code>{order.paymentReference}</code>
+                        </span>
+                      )}
+                    </div>
+
                     <p className="order-items-text">{order.items}</p>
+
                     <p className="order-total-text">
                       Total Amount: <strong>₹{order.totalAmount}</strong>
-                      {isPendingPayment && <span className="payment-pending-note"> (Payment pending collection)</span>}
+                      {isPendingPayment && (
+                        <span className="payment-pending-note">
+                          {' '}
+                          (Payment pending counter collection)
+                        </span>
+                      )}
                     </p>
                   </div>
 
+                  {/* ACTION CONTROLS ROW */}
                   <div className="order-actions-row">
+                    {/* 1. Sequential Food Prep Transitions */}
+                    {normStatus === 'pending' && (
+                      <button
+                        className="btn-action btn-stage-advance"
+                        onClick={() => handleUpdateOrderStatus(order.rawId, 'Accepted')}
+                      >
+                        ✓ Accept Order
+                      </button>
+                    )}
+                    {normStatus === 'accepted' && (
+                      <button
+                        className="btn-action btn-stage-advance"
+                        onClick={() => handleUpdateOrderStatus(order.rawId, 'Preparing')}
+                      >
+                        🍳 Start Cooking
+                      </button>
+                    )}
+                    {normStatus === 'preparing' && (
+                      <button
+                        className="btn-action btn-stage-ready"
+                        onClick={() => handleUpdateOrderStatus(order.rawId, 'Ready')}
+                      >
+                        🔔 Mark Ready to Serve
+                      </button>
+                    )}
+                    {normStatus === 'ready' && (
+                      <button
+                        className="btn-action btn-complete"
+                        onClick={() => handleUpdateOrderStatus(order.rawId, 'Completed')}
+                      >
+                        ✓ Complete & Clear
+                      </button>
+                    )}
+
+                    {/* 2. Cash / Counter Payment Verification Button */}
                     {isPendingPayment && (
-                      <>
-                        <button className="btn-action btn-cancel" onClick={() => handleCancelOrder(order.rawId)}>
-                          Cancel Order
-                        </button>
-                        <button className="btn-action btn-edit" onClick={() => openEditModal(order)}>
-                          Edit Order
-                        </button>
-                        <button className="btn-action btn-mark-paid" onClick={() => handleMarkPaid(order.rawId)}>
-                          Mark Paid & Ready
-                        </button>
-                      </>
+                      <button
+                        className="btn-action btn-mark-paid"
+                        onClick={() => setConfirmingPaymentOrder(order)}
+                        title="Confirm received payment"
+                      >
+                        💵 Mark as Paid
+                      </button>
                     )}
-                    {!isPendingPayment && (
-                      <>
-                        <button className="btn-action btn-edit" onClick={() => openEditModal(order)}>
-                          Edit Order
-                        </button>
-                        <button className="btn-action btn-complete" onClick={() => handleCompleteOrder(order.rawId)}>
-                          Complete & Clear
-                        </button>
-                      </>
-                    )}
+
+                    {/* 3. View / Print Bill */}
+                    <button
+                      className="btn-action btn-bill"
+                      onClick={() => setViewingBillOrder(order.rawOrder)}
+                    >
+                      <Receipt size={14} style={{ verticalAlign: '-1px' }} /> Bill
+                    </button>
+
+                    {/* 4. Edit Order */}
+                    <button className="btn-action btn-edit" onClick={() => openEditModal(order)}>
+                      Edit
+                    </button>
+
+                    {/* 5. Cancel */}
+                    <button
+                      className="btn-action btn-cancel"
+                      onClick={() => handleCancelOrder(order.rawId)}
+                    >
+                      Cancel
+                    </button>
                   </div>
                 </div>
               );
@@ -307,61 +483,193 @@ export default function LiveOrdersPage() {
         </div>
       </div>
 
+      {/* CONFIRM MARK AS PAID MODAL POPUP */}
+      {confirmingPaymentOrder && (
+        <div className="admin-confirm-overlay">
+          <div className="admin-confirm-modal">
+            <div className="admin-confirm-header">
+              <DollarSign size={24} className="text-orange" />
+              <h3>Confirm Cash / UPI Payment</h3>
+            </div>
+            <div className="admin-confirm-body">
+              <p>
+                Have you physically received and verified payment for order{' '}
+                <strong>{confirmingPaymentOrder.id}</strong>?
+              </p>
+              <div className="confirm-amount-callout">
+                <span>Amount to Collect:</span>
+                <strong>₹{confirmingPaymentOrder.totalAmount.toFixed(2)}</strong>
+              </div>
+              <p className="confirm-cust-meta">
+                Customer: <strong>{confirmingPaymentOrder.customerName}</strong>
+                {confirmingPaymentOrder.customerPhone && ` (${confirmingPaymentOrder.customerPhone})`}
+              </p>
+              {confirmingPaymentOrder.paymentReference && (
+                <p className="confirm-cust-meta">
+                  Customer UTR: <code>{confirmingPaymentOrder.paymentReference}</code>
+                </p>
+              )}
+              <p className="confirm-warning">
+                This action updates the customer's tracking screen to <strong>PAID</strong> in real-time.
+              </p>
+            </div>
+            <div className="admin-confirm-actions">
+              <button
+                type="button"
+                className="btn-modal-cancel"
+                onClick={() => setConfirmingPaymentOrder(null)}
+                disabled={markingPaid}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn-modal-confirm"
+                onClick={handleConfirmPaid}
+                disabled={markingPaid}
+              >
+                {markingPaid ? 'Saving...' : 'Yes, Payment Received'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* VIEW BILL MODAL POPUP */}
+      {viewingBillOrder && (
+        <OrderBillModal
+          isOpen={Boolean(viewingBillOrder)}
+          onClose={() => setViewingBillOrder(null)}
+          order={viewingBillOrder}
+        />
+      )}
+
       {/* EDIT ORDER MODAL POPUP */}
       {editingOrder && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
-          backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000
-        }}>
-          <div style={{
-            background: '#FDFBFA', padding: 'clamp(16px, 4vw, 24px)', borderRadius: '16px', width: 'min(460px, 92vw)',
-            boxShadow: '0 8px 24px rgba(61,39,29,0.2)', border: '1px solid #EFE9E1', maxHeight: '90vh', overflowY: 'auto', boxSizing: 'border-box'
-          }}>
-            <h3 style={{ fontFamily: "'Luckiest Guy', cursive", color: '#3D271D', marginTop: 0, marginBottom: '16px' }}>
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1000,
+          }}
+        >
+          <div
+            style={{
+              background: '#FDFBFA',
+              padding: 'clamp(16px, 4vw, 24px)',
+              borderRadius: '16px',
+              width: 'min(460px, 92vw)',
+              boxShadow: '0 8px 24px rgba(61,39,29,0.2)',
+              border: '1px solid #EFE9E1',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              boxSizing: 'border-box',
+            }}
+          >
+            <h3
+              style={{
+                fontFamily: "'Luckiest Guy', cursive",
+                color: '#3D271D',
+                marginTop: 0,
+                marginBottom: '16px',
+              }}
+            >
               Edit Order {editingOrder.id}
             </h3>
-            
+
             <form onSubmit={handleSaveEdit}>
               <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 'bold', color: '#6B554B', marginBottom: '6px' }}>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: '0.85rem',
+                    fontWeight: 'bold',
+                    color: '#6B554B',
+                    marginBottom: '6px',
+                  }}
+                >
                   Table Number
                 </label>
-                <input 
-                  type="text" 
-                  value={editTableNo} 
+                <input
+                  type="text"
+                  value={editTableNo}
                   onChange={(e) => setEditTableNo(e.target.value)}
-                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #EFE9E1', background: '#F9F6F0', boxSizing: 'border-box' }}
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    borderRadius: '8px',
+                    border: '1px solid #EFE9E1',
+                    background: '#F9F6F0',
+                    boxSizing: 'border-box',
+                  }}
                   required
                 />
               </div>
 
               <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 'bold', color: '#6B554B', marginBottom: '6px' }}>
-                  Total Amount (₹) <span style={{ fontSize: '0.75rem', color: '#27ae60' }}>(Updates automatically)</span>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: '0.85rem',
+                    fontWeight: 'bold',
+                    color: '#6B554B',
+                    marginBottom: '6px',
+                  }}
+                >
+                  Total Amount (₹){' '}
+                  <span style={{ fontSize: '0.75rem', color: '#27ae60' }}>
+                    (Updates automatically)
+                  </span>
                 </label>
-                <input 
-                  type="number" 
+                <input
+                  type="number"
                   step="0.01"
-                  value={editTotalAmount} 
+                  value={editTotalAmount}
                   onChange={(e) => setEditTotalAmount(e.target.value)}
-                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #EFE9E1', background: '#F9F6F0', boxSizing: 'border-box', fontWeight: 'bold', color: '#27ae60' }}
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    borderRadius: '8px',
+                    border: '1px solid #EFE9E1',
+                    background: '#F9F6F0',
+                    boxSizing: 'border-box',
+                    fontWeight: 'bold',
+                    color: '#27ae60',
+                  }}
                   required
                 />
               </div>
 
               <hr style={{ border: 'none', borderTop: '1px solid #EFE9E1', margin: '16px 0' }} />
 
-              <h4 style={{ color: '#3D271D', fontSize: '0.95rem', margin: '0 0 10px 0' }}>➕ Add Menu Item from Database</h4>
-              
+              <h4 style={{ color: '#3D271D', fontSize: '0.95rem', margin: '0 0 10px 0' }}>
+                ➕ Add Menu Item from Database
+              </h4>
+
               <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
                 <div style={{ flex: 2 }}>
-                  <select 
-                    value={selectedMenuItemId} 
+                  <select
+                    value={selectedMenuItemId}
                     onChange={(e) => handleMenuItemChange(e.target.value, itemQuantity)}
-                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #EFE9E1', background: '#F9F6F0', boxSizing: 'border-box', fontSize: '0.85rem' }}
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      borderRadius: '8px',
+                      border: '1px solid #EFE9E1',
+                      background: '#F9F6F0',
+                      boxSizing: 'border-box',
+                      fontSize: '0.85rem',
+                    }}
                   >
                     <option value="">-- Select dish --</option>
-                    {menuItems.map(item => (
+                    {menuItems.map((item) => (
                       <option key={item.id} value={item.id}>
                         {item.name} (₹{item.price})
                       </option>
@@ -369,28 +677,51 @@ export default function LiveOrdersPage() {
                   </select>
                 </div>
                 <div style={{ flex: 1 }}>
-                  <input 
-                    type="number" 
-                    min="1" 
-                    value={itemQuantity} 
+                  <input
+                    type="number"
+                    min="1"
+                    value={itemQuantity}
                     onChange={(e) => handleQuantityChange(e.target.value)}
                     placeholder="Qty"
-                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #EFE9E1', background: '#F9F6F0', boxSizing: 'border-box' }}
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      borderRadius: '8px',
+                      border: '1px solid #EFE9E1',
+                      background: '#F9F6F0',
+                      boxSizing: 'border-box',
+                    }}
                   />
                 </div>
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={() => setEditingOrder(null)}
-                  style={{ padding: '8px 14px', borderRadius: '8px', border: '1px solid #EFE9E1', background: '#FFF', color: '#6B554B', cursor: 'pointer', fontWeight: 'bold' }}
+                  style={{
+                    padding: '8px 14px',
+                    borderRadius: '8px',
+                    border: '1px solid #EFE9E1',
+                    background: '#FFF',
+                    color: '#6B554B',
+                    cursor: 'pointer',
+                    fontWeight: 'bold',
+                  }}
                 >
                   Cancel
                 </button>
-                <button 
-                  type="submit" 
-                  style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: '#311E18', color: '#FFD000', cursor: 'pointer', fontWeight: 'bold' }}
+                <button
+                  type="submit"
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    background: '#311E18',
+                    color: '#FFD000',
+                    cursor: 'pointer',
+                    fontWeight: 'bold',
+                  }}
                 >
                   Save Changes
                 </button>

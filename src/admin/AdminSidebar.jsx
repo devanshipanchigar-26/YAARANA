@@ -1,5 +1,6 @@
 import React from 'react';
 import { X } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 export default function AdminSidebar({
   activeTab,
@@ -8,6 +9,7 @@ export default function AdminSidebar({
   onClose,
   onBackToWebsite,
 }) {
+  const { user, profile, signOut } = useAuth();
   const navItems = [
     { id: 'live-orders', label: 'Live Orders', icon: '🔥' },
     { id: 'order-history', label: 'Order History', icon: '📦' },
@@ -15,7 +17,6 @@ export default function AdminSidebar({
     { id: 'customers', label: 'Customers', icon: '👥' },
     { id: 'sales', label: 'Sales Statistics', icon: '📊' },
     { id: 'reviews', label: 'Reviews & Ratings', icon: '⭐' },
-    { id: 'inventory', label: 'Inventory Status', icon: '📦' },
     { id: 'settings', label: 'Settings', icon: '⚙️' },
   ];
 
@@ -68,11 +69,38 @@ export default function AdminSidebar({
         )}
 
         <div className="sidebar-user-footer">
-          <div className="user-avatar">A</div>
-          <div className="user-info">
-            <span className="user-name">Admin User</span>
-            <span className="user-logout">Logout</span>
-          </div>
+          <button
+            type="button"
+            className="sidebar-user-profile-btn"
+            onClick={() => handleNavClick('settings')}
+            title="Click to manage Admin Profile & Security Settings"
+          >
+            <div className="user-avatar">
+              {(profile?.name || user?.email || 'A').charAt(0).toUpperCase()}
+            </div>
+            <div className="user-info">
+              <span className="user-name">
+                {profile?.name || user?.email?.split('@')[0] || 'Admin User'}
+              </span>
+              <span className="user-role-badge">
+                <span className="status-dot-green">●</span> Admin
+              </span>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            className="user-logout-btn"
+            title="Log out from Admin session"
+            onClick={async () => {
+              if (window.confirm('Are you sure you want to log out from the Admin Panel?')) {
+                await signOut();
+                if (onBackToWebsite) onBackToWebsite();
+              }
+            }}
+          >
+            Logout
+          </button>
         </div>
       </div>
     </aside>

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Heart, ShoppingCart, User, LogOut, Menu, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Heart, ShoppingCart, User, LogOut, Menu, X, Clock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
 
@@ -9,10 +10,21 @@ export default function Navbar({
   onNavigate = () => {},
   currentPage = 'home',
 }) {
+  const navigate = useNavigate();
   const { user, profile, signOut } = useAuth();
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [lastOrderId, setLastOrderId] = useState(() => localStorage.getItem('yaarana_last_order_id'));
   const profileMenuRef = useRef(null);
+
+  useEffect(() => {
+    // Keep lastOrderId synced with storage
+    const syncOrderId = () => {
+      setLastOrderId(localStorage.getItem('yaarana_last_order_id'));
+    };
+    window.addEventListener('storage', syncOrderId);
+    return () => window.removeEventListener('storage', syncOrderId);
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -68,15 +80,6 @@ export default function Navbar({
         onClick={(e) => goToPage(e, 'home')}
         style={{ cursor: 'pointer' }}
       >
---
-
-
-
-
-
-
-
-
         <span>Y</span>
         <span className="dot dot-pink" />
         <span>A</span>
@@ -119,6 +122,22 @@ export default function Navbar({
             Book a Table
           </a>
         </li>
+        {lastOrderId && (
+          <li>
+            <a
+              href={`/track-order/${lastOrderId}`}
+              className="nav-link"
+              style={{ color: '#D35400', fontWeight: 'bold' }}
+              onClick={(e) => {
+                e.preventDefault();
+                setMobileMenuOpen(false);
+                navigate(`/track-order/${lastOrderId}`);
+              }}
+            >
+              ⏱️ Track Order
+            </a>
+          </li>
+        )}
       </ul>
 
       {/* Action Buttons */}
@@ -155,7 +174,35 @@ export default function Navbar({
                   <p className="profile-name">{profile?.name || user.email?.split('@')[0] || 'Member'}</p>
                   <p className="profile-email">{user.email}</p>
                 </div>
-                <div className="profile-divider" />
+                {profile?.role === 'admin' && (
+                  <>
+                    <button
+                      type="button"
+                      className="profile-logout-btn"
+                      style={{ color: '#0086FF' }}
+                      onClick={() => {
+                        setProfileMenuOpen(false);
+                        onNavigate('admin');
+                      }}
+                    >
+                      🚀 Admin Panel
+                    </button>
+                    <div className="profile-divider" />
+                  </>
+                )}
+                {lastOrderId && (
+                  <button
+                    type="button"
+                    className="profile-logout-btn"
+                    style={{ color: '#D35400', fontWeight: 'bold' }}
+                    onClick={() => {
+                      setProfileMenuOpen(false);
+                      navigate(`/track-order/${lastOrderId}`);
+                    }}
+                  >
+                    <Clock size={16} /> Track Active Order
+                  </button>
+                )}
                 <button
                   type="button"
                   className="profile-logout-btn"

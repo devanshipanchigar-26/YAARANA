@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import '../Components/ForgotPassword.css';
@@ -10,6 +10,29 @@ function ResetPassword() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
+  const [hasValidSession, setHasValidSession] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        setHasValidSession(true);
+      }
+      setCheckingSession(false);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY' || session) {
+        setHasValidSession(true);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -59,7 +82,20 @@ function ResetPassword() {
           </div>
         )}
 
-        {success ? (
+        {checkingSession ? (
+          <p className="subtitle" style={{ textAlign: 'center', padding: '20px 0' }}>
+            Verifying password reset request...
+          </p>
+        ) : !hasValidSession && !success ? (
+          <div style={{ textAlign: 'center', padding: '10px 0' }}>
+            <div style={{ background: '#FEE2E2', color: '#B91C1C', padding: '14px', borderRadius: '12px', marginBottom: '20px', fontSize: '13px', lineHeight: '1.5' }}>
+              Invalid or expired password reset link. Please request a new link from the forgot password page.
+            </div>
+            <Link to="/forgot-password" style={{ color: '#0086FF', fontWeight: 'bold', textDecoration: 'none' }}>
+              ← Request New Link
+            </Link>
+          </div>
+        ) : success ? (
           <div style={{ textAlign: 'center', padding: '10px 0' }}>
             <div style={{ background: '#DCFCE7', color: '#15803D', padding: '14px', borderRadius: '12px', marginBottom: '20px', fontSize: '14px' }}>
               ✓ Your password has been successfully updated!

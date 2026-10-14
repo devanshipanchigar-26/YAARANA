@@ -25,7 +25,6 @@ export default function AdminLayout({ children, activeTab, setActiveTab, onBackT
     'sales-statistics': 'Sales Statistics',
     'sales-stats': 'Sales Statistics',
     'reviews': 'Reviews & Ratings',
-    'inventory': 'Inventory Status',
     'settings': 'Settings',
   };
 

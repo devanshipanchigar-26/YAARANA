@@ -139,7 +139,7 @@ export default function MenuManagementPage() {
   const filteredItems = menuItems.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           (item.description && item.description.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesCategory = selectedCategoryFilter === '' || item.category_id.toString() === selectedCategoryFilter;
+    const matchesCategory = selectedCategoryFilter === '' || String(item.category_id || '') === selectedCategoryFilter;
     return matchesSearch && matchesCategory;
   });
 

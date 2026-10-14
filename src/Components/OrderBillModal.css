@@ -1,0 +1,357 @@
+/* Modal Backdrop */
+.order-bill-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(49, 30, 24, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2500;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+/* Modal Container */
+.order-bill-container {
+  background: #fdfbfa;
+  border-radius: 20px;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: 0 20px 50px rgba(49, 30, 24, 0.35);
+  border: 1px solid #efe9e1;
+  overflow: hidden;
+  animation: billModalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes billModalPop {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Modal Actions Bar (Header) */
+.bill-actions-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  background: #311e18;
+  color: #fffdf9;
+}
+
+.bill-actions-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.bill-actions-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  cursor: pointer;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.bill-btn-print {
+  background: #ffd000;
+  color: #311e18;
+  padding: 6px 14px;
+}
+
+.bill-btn-print:hover {
+  background: #ffdb33;
+  transform: translateY(-1px);
+}
+
+.bill-btn-close {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fffdf9;
+  padding: 6px 8px;
+}
+
+.bill-btn-close:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Printable Paper Surface */
+.bill-receipt-paper {
+  background: #ffffff;
+  padding: 24px 28px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: #2b1f1a;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+/* Cafe Header */
+.bill-receipt-header {
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.bill-brand-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.bill-brand-icon {
+  color: #ffd000;
+  background: #311e18;
+  padding: 4px;
+  border-radius: 6px;
+}
+
+.bill-cafe-name {
+  font-family: 'Luckiest Guy', cursive, sans-serif;
+  font-size: 1.55rem;
+  color: #311e18;
+  margin: 0;
+  letter-spacing: 1px;
+}
+
+.bill-cafe-tagline {
+  font-size: 0.75rem;
+  color: #8c756b;
+  margin: 2px 0 4px;
+  font-style: italic;
+}
+
+.bill-cafe-contact {
+  font-size: 0.72rem;
+  color: #6b554b;
+  margin: 0;
+  line-height: 1.3;
+}
+
+/* Dashed divider */
+.bill-divider-dash {
+  border-top: 1.5px dashed #d5c8be;
+  margin: 14px 0;
+}
+
+/* Meta Grid */
+.bill-meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  row-gap: 8px;
+  column-gap: 12px;
+  font-size: 0.78rem;
+}
+
+.bill-meta-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.bill-meta-item.text-right {
+  text-align: right;
+  align-items: flex-end;
+}
+
+.bill-meta-label {
+  font-size: 0.68rem;
+  color: #8c756b;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.bill-meta-value {
+  color: #311e18;
+  font-weight: 600;
+}
+
+.highlight-num {
+  font-size: 0.95rem;
+  color: #311e18;
+  font-family: monospace;
+}
+
+/* Items Table */
+.bill-items-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.bill-items-table th {
+  font-size: 0.68rem;
+  color: #8c756b;
+  text-align: left;
+  padding: 6px 4px;
+  border-bottom: 1px solid #efe9e1;
+  letter-spacing: 0.5px;
+}
+
+.bill-items-table td {
+  padding: 7px 4px;
+  border-bottom: 1px dashed #f2ece4;
+}
+
+.th-qty, .td-qty {
+  text-align: center;
+  width: 40px;
+}
+
+.th-price, .td-price {
+  text-align: right;
+  width: 65px;
+  color: #6b554b;
+}
+
+.th-total, .td-total {
+  text-align: right;
+  width: 75px;
+  font-weight: 600;
+}
+
+.dish-name {
+  font-weight: 600;
+  color: #311e18;
+}
+
+/* Totals */
+.bill-totals-section {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 0.82rem;
+  margin-top: 4px;
+}
+
+.bill-total-row {
+  display: flex;
+  justify-content: space-between;
+  color: #6b554b;
+}
+
+.bill-grand-total {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #311e18;
+  padding-top: 6px;
+  border-top: 1px solid #efe9e1;
+  margin-top: 2px;
+}
+
+.bill-grand-total strong {
+  color: #27ae60;
+  font-size: 1.15rem;
+}
+
+/* Payment Status Box */
+.bill-payment-box {
+  background: #fbf9f6;
+  border-radius: 10px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.78rem;
+  border: 1px solid #f0e9df;
+}
+
+.payment-status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.bill-payment-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 12px;
+  letter-spacing: 0.4px;
+}
+
+.pill-paid {
+  background: #eafaf1;
+  color: #27ae60;
+  border: 1px solid #b7efcf;
+}
+
+.pill-pending {
+  background: #fef9e7;
+  color: #d35400;
+  border: 1px solid #fcdfa6;
+}
+
+.font-mono {
+  font-family: monospace;
+}
+
+/* Footer */
+.bill-receipt-footer {
+  text-align: center;
+  margin-top: 16px;
+  padding-top: 10px;
+  border-top: 1px dashed #d5c8be;
+}
+
+.bill-thankyou {
+  font-family: 'Luckiest Guy', cursive, sans-serif;
+  font-size: 0.95rem;
+  color: #311e18;
+  margin: 0 0 4px;
+  letter-spacing: 0.5px;
+}
+
+.bill-footnote {
+  font-size: 0.68rem;
+  color: #8c756b;
+  margin: 0;
+}
+
+/* PRINT MEDIA STYLES */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .order-bill-overlay {
+    position: static !important;
+    background: transparent !important;
+    padding: 0 !important;
+    display: block !important;
+  }
+  .order-bill-container {
+    box-shadow: none !important;
+    border: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+  .order-bill-container * {
+    visibility: visible;
+  }
+  .bill-receipt-paper {
+    padding: 10px !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}

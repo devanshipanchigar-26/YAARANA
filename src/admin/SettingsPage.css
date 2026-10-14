@@ -1,0 +1,808 @@
+/* Settings Page Styling */
+
+.settings-page {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 20px;
+  padding-bottom: 24px;
+  box-sizing: border-box;
+}
+
+/* Header */
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.settings-title {
+  font-family: 'Luckiest Guy', cursive;
+  font-size: 2.2rem;
+  color: #311E18;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.settings-subtitle {
+  color: #6B554B;
+  font-size: 0.95rem;
+  margin: 6px 0 0 0;
+}
+
+.settings-top-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.btn-settings-save {
+  background-color: #311E18;
+  color: #FFD000;
+  font-family: 'Luckiest Guy', cursive;
+  font-size: 0.95rem;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 12px rgba(49, 30, 24, 0.15);
+  transition: opacity 0.2s ease, transform 0.1s ease;
+}
+
+.btn-settings-save:hover:not(:disabled) {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+.btn-settings-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-settings-reset {
+  background-color: transparent;
+  color: #6B554B;
+  border: 1px solid #D3C4BC;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 9px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-settings-reset:hover:not(:disabled) {
+  background-color: #EFE9E1;
+  color: #311E18;
+}
+
+/* Toast Notification */
+.settings-toast {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  border-radius: 14px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  animation: slideDown 0.3s ease-out;
+}
+
+.settings-toast.success {
+  background-color: #E8F5E9;
+  color: #1B5E20;
+  border: 1px solid #A5D6A7;
+}
+
+.settings-toast.error {
+  background-color: #FFEBEE;
+  color: #C62828;
+  border: 1px solid #FFCDD2;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Sub-nav / Filter Tabs */
+.settings-filter-bar {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.settings-tab-btn {
+  background-color: #EFE9E1;
+  border: none;
+  color: #6B554B;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.settings-tab-btn:hover {
+  background-color: #E2DAD0;
+  color: #311E18;
+}
+
+.settings-tab-btn.active {
+  background-color: #311E18;
+  color: #FFD000;
+}
+
+/* Settings Grid */
+.settings-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Cards */
+.settings-card {
+  background-color: #FDFBFA;
+  border: 1px solid #EFE9E1;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 4px 16px rgba(49, 30, 24, 0.03);
+}
+
+.settings-card-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #F0EAE2;
+  margin-bottom: 20px;
+}
+
+.card-header-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-icon {
+  background-color: #E3F2FD;
+  color: #1976D2;
+}
+
+.orders-icon {
+  background-color: #FFF8E1;
+  color: #F57F17;
+}
+
+.payments-icon {
+  background-color: #E8F5E9;
+  color: #2E7D32;
+}
+
+.notifications-icon {
+  background-color: #F3E5F5;
+  color: #7B1FA2;
+}
+
+.security-icon {
+  background-color: #ECEFF1;
+  color: #37474F;
+}
+
+.settings-card-header h2 {
+  font-family: 'Luckiest Guy', cursive;
+  font-size: 1.35rem;
+  color: #311E18;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.settings-card-header p {
+  color: #8C786E;
+  font-size: 0.88rem;
+  margin: 2px 0 0 0;
+}
+
+/* Card Body & Form Controls */
+.settings-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.flex-2 {
+  flex: 2;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #4A352B;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid #EFE9E1;
+  background-color: #F9F6F0;
+  font-family: inherit;
+  font-size: 0.92rem;
+  color: #311E18;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+  box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #311E18;
+  background-color: #ffffff;
+}
+
+.field-hint {
+  font-size: 0.8rem;
+  color: #8C786E;
+  margin-top: 2px;
+}
+
+/* Logo Preview */
+.logo-preview-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.logo-preview-box span {
+  font-size: 0.82rem;
+  color: #6B554B;
+}
+
+.logo-preview-img {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid #EFE9E1;
+}
+
+/* Day Pills */
+.day-pills-container {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.day-pill {
+  background-color: #F0ECE4;
+  border: 1px solid #DFD7CB;
+  color: #4A352B;
+  padding: 7px 14px;
+  border-radius: 16px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.day-pill:hover {
+  background-color: #E4DDD1;
+}
+
+.day-pill.active {
+  background-color: #C62828;
+  border-color: #B71C1C;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Accepting Orders Banner */
+.order-status-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-radius: 16px;
+  border: 1px solid transparent;
+  gap: 16px;
+}
+
+.order-status-banner.status-open {
+  background-color: #F1F8E9;
+  border-color: #C8E6C9;
+}
+
+.order-status-banner.status-closed {
+  background-color: #FFEBEE;
+  border-color: #FFCDD2;
+}
+
+.status-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.status-indicator-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-open .status-indicator-dot {
+  background-color: #2E7D32;
+  box-shadow: 0 0 0 4px rgba(46, 125, 50, 0.2);
+}
+
+.status-closed .status-indicator-dot {
+  background-color: #C62828;
+  box-shadow: 0 0 0 4px rgba(198, 40, 40, 0.2);
+}
+
+.status-info strong {
+  font-size: 1rem;
+  color: #311E18;
+  display: block;
+}
+
+.status-info p {
+  font-size: 0.85rem;
+  color: #6B554B;
+  margin: 3px 0 0 0;
+}
+
+/* Toggle Switch Button */
+.toggle-switch-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  transition: transform 0.1s ease;
+}
+
+.toggle-switch-btn.on {
+  color: #2E7D32;
+}
+
+.toggle-switch-btn.off {
+  color: #BDBDBD;
+}
+
+.toggle-switch-btn:hover {
+  transform: scale(1.05);
+}
+
+/* Quick Presets */
+.quick-presets {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.quick-presets span {
+  font-size: 0.8rem;
+  color: #8C786E;
+  margin-right: 4px;
+}
+
+.preset-btn {
+  background-color: #EFE9E1;
+  border: 1px solid #DCD4CA;
+  color: #4A352B;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.preset-btn:hover {
+  background-color: #311E18;
+  color: #FFD000;
+  border-color: #311E18;
+}
+
+/* Toggle Rows */
+.settings-toggle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  background-color: #F9F6F0;
+  border: 1px solid #EFE9E1;
+  border-radius: 14px;
+  gap: 16px;
+}
+
+.toggle-info strong {
+  font-size: 0.95rem;
+  color: #311E18;
+  display: block;
+}
+
+.toggle-info p {
+  font-size: 0.84rem;
+  color: #6B554B;
+  margin: 2px 0 0 0;
+}
+
+.btn-test-chime {
+  background-color: #EFE9E1;
+  border: 1px solid #D1C7BD;
+  color: #311E18;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-test-chime:hover {
+  background-color: #311E18;
+  color: #FFD000;
+  border-color: #311E18;
+}
+
+
+/* Security Notice */
+.security-notice-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 16px;
+  background-color: #E3F2FD;
+  border: 1px solid #BBDEFB;
+  border-radius: 12px;
+  color: #0D47A1;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  margin-top: 10px;
+}
+
+.security-notice-box svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* Account & Security Card */
+.admin-profile-badge {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background-color: #F7F4EE;
+  border: 1px solid #EAE3D9;
+  border-radius: 16px;
+}
+
+.admin-avatar-lg {
+  width: 54px;
+  height: 54px;
+  border-radius: 18px;
+  background-color: #311E18;
+  color: #FFD000;
+  font-family: 'Luckiest Guy', cursive;
+  font-size: 1.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.admin-badge-info {
+  flex: 1;
+}
+
+.admin-badge-info h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #311E18;
+}
+
+.admin-email {
+  margin: 2px 0 4px 0;
+  font-size: 0.88rem;
+  color: #6B554B;
+}
+
+.admin-role-tag {
+  display: inline-block;
+  background-color: #FFD000;
+  color: #311E18;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.btn-admin-logout {
+  background: none;
+  border: 1px solid #E57373;
+  color: #C62828;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.btn-admin-logout:hover {
+  background-color: #FFEBEE;
+}
+
+/* Password Change Box */
+.password-change-box {
+  padding: 18px;
+  background-color: #ffffff;
+  border: 1px solid #EFE9E1;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.box-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #311E18;
+}
+
+.box-title h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.password-alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 0.88rem;
+}
+
+.password-alert.success {
+  background-color: #E8F5E9;
+  color: #1B5E20;
+}
+
+.password-alert.error {
+  background-color: #FFEBEE;
+  color: #C62828;
+}
+
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-wrapper input {
+  width: 100%;
+  padding-right: 40px;
+}
+
+.toggle-pw-visibility {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  color: #8C786E;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.btn-update-password {
+  background-color: #311E18;
+  color: #ffffff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  align-self: flex-start;
+  margin-top: 6px;
+}
+
+.btn-update-password:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.btn-update-password:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Session Info Strip */
+.session-info-strip {
+  display: flex;
+  justify-content: space-between;
+  background-color: #F9F6F0;
+  border: 1px solid #EFE9E1;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-size: 0.82rem;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.session-label {
+  color: #8C786E;
+  margin-right: 6px;
+}
+
+.session-value {
+  color: #311E18;
+  font-weight: 600;
+}
+
+/* Bottom Action Card (In-flow, no viewport overlap) */
+.settings-bottom-bar {
+  background-color: #FDFBFA;
+  border: 1px solid #EFE9E1;
+  border-radius: 18px;
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 16px rgba(49, 30, 24, 0.03);
+  box-sizing: border-box;
+  margin-top: 10px;
+}
+
+.settings-bottom-bar span {
+  font-size: 0.88rem;
+  color: #8C786E;
+}
+
+.bottom-bar-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* Schedule status indicator pills */
+.schedule-status-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-top: 4px;
+}
+
+.schedule-status-tag.open {
+  background-color: #E8F5E9;
+  color: #2E7D32;
+  border: 1px solid #C8E6C9;
+}
+
+.schedule-status-tag.outside_hours,
+.schedule-status-tag.weekly_closed {
+  background-color: #FFEBEE;
+  color: #C62828;
+  border: 1px solid #FFCDD2;
+}
+
+.schedule-status-tag.paused {
+  background-color: #FFF3E0;
+  color: #E65100;
+  border: 1px solid #FFE0B2;
+}
+
+/* Responsive Breakpoints */
+
+@media (max-width: 680px) {
+  .settings-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .settings-top-actions {
+    justify-content: flex-end;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .settings-card {
+    padding: 18px 14px;
+    border-radius: 16px;
+  }
+
+  .settings-bottom-bar {
+    flex-direction: column;
+    gap: 8px;
+    align-items: stretch;
+    text-align: center;
+    padding: 10px 16px;
+  }
+
+  .bottom-bar-actions {
+    justify-content: stretch;
+  }
+
+  .bottom-bar-actions button {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .admin-profile-badge {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .btn-admin-logout {
+    align-self: flex-start;
+  }
+}

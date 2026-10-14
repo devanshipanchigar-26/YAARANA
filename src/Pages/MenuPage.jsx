@@ -53,6 +53,7 @@ export default function MenuPage({ addToCart }) {
           supabase.from('categories').select('*').order('display_order'),
         ]);
         if (itemsRes.error) throw itemsRes.error;
+        if (catsRes.error) throw catsRes.error;
         setMenuItems(itemsRes.data || []);
         setCategories(catsRes.data || []);
       } catch (error) {

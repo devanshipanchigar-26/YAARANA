@@ -47,8 +47,49 @@
   letter-spacing: 2px;
 }
 
+/* Login type switcher */
+.login-type-switch {
+  display: flex;
+  background: #f5efe6;
+  border-radius: 18px;
+  padding: 6px;
+  margin: 20px 0 5px;
+  gap: 6px;
+}
+
+.login-card .login-type-btn {
+  flex: 1;
+  width: auto;
+  height: 44px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 14px;
+  background: transparent;
+  color: #6d5d58;
+  font-family: 'Carter One', cursive;
+  font-size: 13.5px;
+  letter-spacing: 0;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-card .login-type-btn.active {
+  background: #0086ff;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(0, 134, 255, 0.28);
+}
+
+.login-card .login-type-btn:hover:not(.active) {
+  color: #4a302c;
+  background: rgba(0, 134, 255, 0.08);
+  transform: none;
+}
+
 .login-card h1 {
-  margin-top: 28px;
+  margin-top: 18px;
 
   text-align: center;
 
