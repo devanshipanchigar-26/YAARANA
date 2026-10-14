@@ -14,14 +14,14 @@ pipeline {
             steps {
                 bat 'node --version'
                 bat 'npm --version'
-                bat 'python --version'
+                bat '"C:\\Users\\blv\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" --version'
             }
         }
 
         stage('Install Dependencies') {
             steps {
                 bat 'npm ci'
-                bat 'python -m pip install selenium'
+                bat '"C:\\Users\\blv\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" -m pip install selenium'
             }
         }
 
@@ -43,7 +43,7 @@ pipeline {
 
         stage('Selenium Testing') {
             steps {
-                bat 'python -u test_website.py'
+                bat '"C:\\Users\\blv\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" -u test_website.py'
             }
         }
     }
@@ -54,11 +54,11 @@ pipeline {
         }
 
         success {
-            echo 'Yaarana build and Selenium test passed!'
+            echo 'Yaarana Cafe website build and Selenium testing completed successfully!'
         }
 
         failure {
-            echo 'Build or test failed. Check Console Output.'
+            echo 'Pipeline failed. Check Console Output for the exact error.'
         }
     }
 }
