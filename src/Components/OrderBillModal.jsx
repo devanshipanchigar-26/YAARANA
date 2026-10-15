@@ -23,28 +23,52 @@ export default function OrderBillModal({ isOpen, onClose, order }) {
         timeStyle: 'short',
       });
 
+  const isMultiRound = (order.roundsCount > 1) || (Array.isArray(order.orders) && order.orders.length > 1);
   const orderNumber =
+    order.billNumber ||
+    (order.billId ? `#BILL-${order.billId}` : null) ||
     order.order_number ||
     (order.id ? (String(order.id).startsWith('#') ? order.id : `#YRN-${order.id}`) : '#YRN-0000');
 
   const orderTypeLabel =
-    order.order_type === 'dine-in'
-      ? `Dine-In (Table ${order.table_no || 'N/A'})`
-      : `Takeaway (Pickup: ${order.pickup_time || 'ASAP'})`;
+    (order.order_type || order.orderType) === 'dine-in' || order.table_no || order.tableNo
+      ? `Dine-In (Table ${order.table_no || order.tableNo || 'N/A'}${isMultiRound ? ` • ${order.roundsCount || order.orders?.length} Rounds` : ''})`
+      : `Takeaway (Pickup: ${order.pickup_time || order.pickupTime || 'ASAP'})`;
 
-  // Determine items list from order snapshot or joined order_items
-  const items = Array.isArray(order.order_items) && order.order_items.length > 0
-    ? order.order_items
-    : Array.isArray(order.items)
-    ? order.items
-    : [];
+  // Determine items list from consolidated bill, order snapshot, or joined order_items
+  let items = [];
+  if (Array.isArray(order.allItems) && order.allItems.length > 0) {
+    items = order.allItems;
+  } else if (Array.isArray(order.orders) && order.orders.length > 0) {
+    order.orders.forEach((ord, oIdx) => {
+      const rItems = ord.order_items || ord.items || [];
+      rItems.forEach((it) => {
+        items.push({
+          ...it,
+          round: it.round || oIdx + 1,
+          orderId: ord.id,
+        });
+      });
+    });
+  } else if (Array.isArray(order.order_items) && order.order_items.length > 0) {
+    items = order.order_items;
+  } else if (Array.isArray(order.items)) {
+    items = order.items;
+  }
 
-  const subtotal = Number(order.total_amount || order.total || 0);
+  // Recalculate accurate subtotal directly from line items
+  const computedTotal = items.reduce((sum, item) => {
+    const qty = Number(item.quantity) || 1;
+    const price = Number(item.unit_price || item.price || item.menu_items?.price || 0);
+    return sum + (qty * price);
+  }, 0);
+
+  const subtotal = computedTotal > 0 ? computedTotal : Number(order.total_amount || order.total || 0);
   const tax = 0; // Tax configuration hook
   const total = subtotal + tax;
 
-  const isPaid = (order.payment_status || '').toLowerCase() === 'paid';
-  const paymentModeLabel = (order.payment_mode || 'Cash').toUpperCase();
+  const isPaid = (order.payment_status || order.paymentStatus || '').toLowerCase() === 'paid';
+  const paymentModeLabel = (order.payment_mode || order.paymentMode || 'Cash').toUpperCase();
 
   return (
     <div className="order-bill-overlay" onClick={onClose} role="dialog" aria-modal="true">
@@ -150,6 +174,22 @@ export default function OrderBillModal({ isOpen, onClose, order }) {
                     <tr key={item.id || idx}>
                       <td className="td-item">
                         <span className="dish-name">{name}</span>
+                        {item.round && isMultiRound && (
+                          <span
+                            style={{
+                              marginLeft: '8px',
+                              fontSize: '0.7rem',
+                              fontWeight: '700',
+                              color: '#D35400',
+                              background: '#FFF3E0',
+                              padding: '2px 6px',
+                              borderRadius: '4px',
+                              border: '1px solid #FFE0B2',
+                            }}
+                          >
+                            R{item.round}
+                          </span>
+                        )}
                       </td>
                       <td className="td-qty">{qty}</td>
                       <td className="td-price">₹{unitPrice.toFixed(2)}</td>

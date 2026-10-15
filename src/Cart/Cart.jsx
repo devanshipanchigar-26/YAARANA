@@ -3,6 +3,7 @@ import { X, Trash2, ShoppingCart, ArrowLeft, CheckCircle2, Lock, AlertCircle, Re
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
 import { useCafeSettings, checkStoreOpenStatus } from '../utils/cafeSettings';
+import { fetchActiveTableOrder, addItemsToExistingOrder, normalizeTableNo, formatTableLabel } from '../utils/billingUtils';
 import OrderBillModal from '../Components/OrderBillModal';
 import './Cart.css';
 
@@ -43,12 +44,32 @@ export default function Cart({
   // 'cart' -> 'checkout' -> 'success'
   const [step, setStep] = useState(initialStep);
 
-  const [customerName, setCustomerName] = useState(() => loadSavedCustomer().name || '');
-  const [customerPhone, setCustomerPhone] = useState(() => loadSavedCustomer().phone || '');
+  const [customerName, setCustomerName] = useState(() => {
+    return (
+      profile?.name ||
+      user?.user_metadata?.name ||
+      user?.user_metadata?.full_name ||
+      loadSavedCustomer(user?.id).name ||
+      ''
+    );
+  });
+  const [customerPhone, setCustomerPhone] = useState(() => {
+    return (
+      profile?.phone ||
+      user?.user_metadata?.phone ||
+      user?.phone ||
+      loadSavedCustomer(user?.id).phone ||
+      ''
+    );
+  });
   const [orderType, setOrderType] = useState(defaultTable ? 'dine-in' : 'dine-in');
   const [tableNo, setTableNo] = useState(defaultTable);
   const [pickupTime, setPickupTime] = useState(PICKUP_OPTIONS[0]);
   const [paymentMode, setPaymentMode] = useState(cashEnabled ? 'cash' : 'upi');
+
+  // Active open order for the selected table (if one already exists, new items attach to it)
+  const [activeTableOrder, setActiveTableOrder] = useState(null);
+  const [checkingBill, setCheckingBill] = useState(false);
 
   const [placing, setPlacing] = useState(false);
   const submittingRef = useRef(false);
@@ -80,18 +101,19 @@ export default function Cart({
   // Auto-fill user profile details or load isolated saved customer details when user changes
   useEffect(() => {
     if (user) {
-      if (profile?.name) {
-        setCustomerName(profile.name);
-      } else {
-        const saved = loadSavedCustomer(user.id);
-        setCustomerName(saved.name || '');
-      }
-      if (profile?.phone) {
-        setCustomerPhone(profile.phone);
-      } else {
-        const saved = loadSavedCustomer(user.id);
-        setCustomerPhone(saved.phone || '');
-      }
+      const bestName =
+        profile?.name ||
+        user?.user_metadata?.name ||
+        user?.user_metadata?.full_name ||
+        loadSavedCustomer(user.id).name;
+      if (bestName) setCustomerName(bestName);
+
+      const bestPhone =
+        profile?.phone ||
+        user?.user_metadata?.phone ||
+        user?.phone ||
+        loadSavedCustomer(user.id).phone;
+      if (bestPhone) setCustomerPhone(bestPhone);
     } else {
       // Guest mode
       const saved = loadSavedCustomer(null);
@@ -99,6 +121,27 @@ export default function Cart({
       setCustomerPhone(saved.phone || '');
     }
   }, [user, profile]);
+
+  // Check if selected dine-in table already has an active unpaid order
+  useEffect(() => {
+    let isCancelled = false;
+    const checkTableOrder = async () => {
+      if (orderType !== 'dine-in' || !tableNo.trim()) {
+        setActiveTableOrder(null);
+        return;
+      }
+      setCheckingBill(true);
+      const openOrder = await fetchActiveTableOrder(tableNo);
+      if (!isCancelled) {
+        setActiveTableOrder(openOrder);
+        setCheckingBill(false);
+      }
+    };
+    checkTableOrder();
+    return () => {
+      isCancelled = true;
+    };
+  }, [orderType, tableNo]);
 
   // Table number from the QR link
   useEffect(() => {
@@ -167,12 +210,72 @@ export default function Cart({
       quantity: item.quantity,
     }));
 
+    // If this is dine-in and an unpaid order already exists on this table:
+    // ADD NEW ITEMS TO THE SAME BILL / ORDER (do not create a separate new order)
+    if (orderType === 'dine-in' && tableNo.trim()) {
+      const activeOrder = activeTableOrder || (await fetchActiveTableOrder(tableNo));
+      if (activeOrder && activeOrder.id) {
+        try {
+          const { updatedTotal } = await addItemsToExistingOrder(activeOrder, snapshotItems);
+
+          try {
+            localStorage.setItem(
+              getSavedCustomerKey(user?.id),
+              JSON.stringify({ name: customerName.trim(), phone: customerPhone.trim() })
+            );
+            localStorage.setItem('yaarana_last_order_id', String(activeOrder.id));
+            window.dispatchEvent(new Event('storage'));
+          } catch {}
+
+          const orderData = {
+            orderId: activeOrder.id,
+            id: activeOrder.id,
+            user_id: user?.id || activeOrder.user_id || null,
+            isAddedToExistingBill: true,
+            order_number: activeOrder.order_number || `#YRN-${activeOrder.id}`,
+            total: updatedTotal,
+            total_amount: updatedTotal,
+            orderType: 'dine-in',
+            order_type: 'dine-in',
+            tableNo,
+            table_no: tableNo,
+            pickupTime: activeOrder.pickup_time || 'Dine-In',
+            pickup_time: activeOrder.pickup_time || 'Dine-In',
+            paymentMode: activeOrder.payment_mode || paymentMode,
+            payment_mode: activeOrder.payment_mode || paymentMode,
+            payment_status: 'Pending',
+            customerName: customerName.trim(),
+            customerPhone: customerPhone.trim(),
+            items: [...(activeOrder.order_items || []), ...snapshotItems],
+            created_at: activeOrder.created_at,
+          };
+
+          try {
+            localStorage.setItem('yaarana_last_order', JSON.stringify(orderData));
+          } catch {}
+
+          clearCart();
+          setResult(orderData);
+          setStep('success');
+          setPlacing(false);
+          submittingRef.current = false;
+          return;
+        } catch (addErr) {
+          console.error('Error adding items to existing bill:', addErr);
+          setError(addErr.message || 'Could not add items to existing bill');
+          setPlacing(false);
+          submittingRef.current = false;
+          return;
+        }
+      }
+    }
+
     const { data, error: rpcError } = await supabase.rpc('place_order', {
       p_customer_name: customerName.trim(),
       p_customer_phone: customerPhone.trim(),
       p_order_type: orderType,
       p_table_no: orderType === 'dine-in' ? (tableNo.trim() || 'Table 1') : 'Takeaway',
-      p_pickup_time: orderType === 'takeaway' ? pickupTime : null,
+      p_pickup_time: orderType === 'takeaway' ? pickupTime : 'ASAP',
       p_payment_mode: paymentMode,
       p_items: rpcItemsPayload,
     });
@@ -187,15 +290,15 @@ export default function Cart({
 
     const createdOrderId = data?.order_id || data?.id;
 
-    // Associate order with logged-in user if available
+    // Associate order with logged-in user
     if (user?.id && createdOrderId) {
       try {
         await supabase
           .from('orders')
           .update({ user_id: user.id })
           .eq('id', createdOrderId);
-      } catch {
-        // Best-effort linking in case user_id column or RLS policy restricts update
+      } catch (linkErr) {
+        console.warn('Could not update order user_id:', linkErr);
       }
     }
 
@@ -207,21 +310,24 @@ export default function Cart({
       if (createdOrderId) {
         localStorage.setItem('yaarana_last_order_id', String(createdOrderId));
       }
+      window.dispatchEvent(new Event('storage'));
     } catch {
       /* ignore */
     }
 
-    setResult({
+    const orderData = {
       orderId: createdOrderId,
-      order_number: data?.order_number || `#YRN-${createdOrderId}`,
+      id: createdOrderId,
+      user_id: user?.id || null,
+      order_number: data?.order_number || (String(createdOrderId).startsWith('#') ? createdOrderId : `#YRN-${createdOrderId}`),
       total: Number(data?.total || total),
       total_amount: Number(data?.total || total),
       orderType,
       order_type: orderType,
       tableNo,
       table_no: tableNo,
-      pickupTime,
-      pickup_time: pickupTime,
+      pickupTime: orderType === 'takeaway' ? pickupTime : 'ASAP',
+      pickup_time: orderType === 'takeaway' ? pickupTime : 'ASAP',
       paymentMode,
       payment_mode: paymentMode,
       payment_status: 'Pending',
@@ -230,8 +336,15 @@ export default function Cart({
       customer_phone: customerPhone,
       created_at: new Date().toISOString(),
       order_items: snapshotItems,
-    });
+    };
 
+    try {
+      localStorage.setItem('yaarana_last_order', JSON.stringify(orderData));
+    } catch {
+      /* ignore */
+    }
+
+    setResult(orderData);
     clearCart();
     setStep('success');
     setPlacing(false);
@@ -292,6 +405,24 @@ export default function Cart({
             <span>{storeStatus.message}</span>
           </div>
         )}
+
+        {/* User Account Connectivity Status */}
+        <div className={`cart-user-badge ${user ? 'connected' : 'guest'}`}>
+          <span className={`cart-user-dot ${user ? 'active' : 'guest'}`} />
+          <div className="cart-user-info">
+            <span className="cart-user-state">{user ? 'CONNECTED ACCOUNT' : 'GUEST CART'}</span>
+            <span className="cart-user-identifier">
+              {user ? (
+                <>
+                  {profile?.name || user?.user_metadata?.name || user?.email?.split('@')[0]}
+                  <span className="cart-user-email"> ({user?.email})</span>
+                </>
+              ) : (
+                'Sign in at checkout to link order'
+              )}
+            </span>
+          </div>
+        </div>
 
         {/* STEP 1: CART */}
         {step === 'cart' && (
@@ -413,6 +544,23 @@ export default function Cart({
                 </div>
               </div>
 
+              {/* Account Connection confirmation banner */}
+              {user && (
+                <div className="checkout-account-box">
+                  <div className="cab-icon">
+                    <CheckCircle2 size={16} />
+                  </div>
+                  <div className="cab-content">
+                    <div className="cab-headline">
+                      Ordering as <strong>{profile?.name || user?.user_metadata?.name || 'Customer'}</strong>
+                    </div>
+                    <div className="cab-subtext">
+                      {user?.email} • Live updates will show in <strong>My Orders</strong>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {cafeSettings?.estimatedPrepTime && (
                 <div className="prep-time-indicator">
                   ⏱️ Estimated prep time: <strong>{cafeSettings.estimatedPrepTime}</strong>
@@ -453,6 +601,23 @@ export default function Cart({
                     placeholder="e.g. 5"
                     required
                   />
+
+                  {activeTableOrder && (
+                    <div className="active-bill-checkout-card">
+                      <div className="abcc-top">
+                        <span className="abcc-pill">OPEN BILL ATTACHED</span>
+                        <span className="abcc-table">{formatTableLabel(activeTableOrder.table_no)}</span>
+                      </div>
+                      <div className="abcc-content">
+                        <p className="abcc-text">
+                          Current bill amount: <strong>₹{Number(activeTableOrder.total_amount || 0).toFixed(2)}</strong>.
+                        </p>
+                        <p className="abcc-subtext">
+                          ✨ These items (+<strong>₹{total.toFixed(2)}</strong>) will be added directly into your <strong>same meal bill</strong> (New total: <strong>₹{(Number(activeTableOrder.total_amount || 0) + total).toFixed(2)}</strong>).
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="cf-field">
@@ -548,7 +713,9 @@ export default function Cart({
                     ? 'Store Closed'
                     : 'Ordering Paused'
                   : placing
-                  ? 'Placing order...'
+                  ? 'Sending to Kitchen...'
+                  : activeTableOrder
+                  ? `Add to Table Bill · ₹${total}`
                   : `Place order (${paymentMode === 'cash' ? 'Cash' : 'UPI'}) · ₹${total}`}
                 <span>→</span>
               </button>
@@ -562,44 +729,92 @@ export default function Cart({
         {/* STEP 3: SUCCESS */}
         {step === 'success' && result && (
           <div className="cart-success">
-            <CheckCircle2 size={64} strokeWidth={1.6} className="success-icon" />
-            <h3>Thank you, {customerName}!</h3>
-            <p className="success-id">{result.order_number || `Order #${result.orderId}`}</p>
-            <p>
-              {result.orderType === 'dine-in'
-                ? `We'll bring your order to table ${result.tableNo}.`
-                : `Your order will be ready for pickup: ${(result.pickupTime || 'asap').toLowerCase()}.`}
-            </p>
-            <p className="success-total">Total to pay: ₹{result.total}</p>
+            <div className="success-badge-wrap">
+              <div className="success-badge-pulse" />
+              <div className="success-badge-circle">
+                <CheckCircle2 size={40} strokeWidth={2.4} className="success-badge-icon" />
+              </div>
+            </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '16px', width: '100%' }}>
+            <div className="success-header-text">
+              <span className="success-kicker">
+                {result.isAddedToExistingBill ? 'ADDED TO SAME BILL' : 'ORDER CONFIRMED'}
+              </span>
+              <h3 className="success-title">
+                {result.isAddedToExistingBill
+                  ? `Added to Table ${result.tableNo} Bill!`
+                  : `Thank you, ${customerName}!`}
+              </h3>
+              <p className="success-subtitle">
+                {result.isAddedToExistingBill
+                  ? 'Your new items were added directly to your current bill. Kitchen has started preparation!'
+                  : 'Kitchen has received your order and started preparation.'}
+              </p>
+            </div>
+
+            <div className="success-summary-card">
+              <div className="summary-pill-row">
+                <span className="summary-order-badge">
+                  {result.order_number || `#YRN-${result.orderId}`}
+                </span>
+                <span className="summary-status-pill">
+                  <span className="status-pulse-dot" /> In Kitchen
+                </span>
+              </div>
+
+              <div className="summary-info-grid">
+                <div className="summary-info-item">
+                  <span className="info-item-label">SERVICE TYPE</span>
+                  <strong className="info-item-value">
+                    {result.orderType === 'dine-in'
+                      ? `🍽️ Table ${result.tableNo || 'Assigned'}`
+                      : `🛍️ Takeaway (${(result.pickupTime || 'asap').toUpperCase()})`}
+                  </strong>
+                </div>
+
+                <div className="summary-info-item text-right">
+                  <span className="info-item-label">TOTAL AMOUNT</span>
+                  <strong className="info-item-value highlight-price">₹{result.total}</strong>
+                </div>
+              </div>
+
+              <div className="summary-payment-mode-hint">
+                <span>
+                  {result.paymentMode === 'cash' ? '💵 Cash payment at counter' : '📱 UPI payment verified at counter'}
+                </span>
+              </div>
+            </div>
+
+            <div className="success-actions-stack">
               <button
                 type="button"
-                className="checkout-button"
-                style={{ backgroundColor: '#311E18', color: '#FFD000' }}
+                className="success-btn-primary"
                 onClick={() => {
                   onClose();
                   if (onTrackOrder) {
-                    onTrackOrder(result.orderId);
+                    onTrackOrder(result.orderId, result);
                   }
                 }}
               >
-                <ExternalLink size={16} style={{ marginRight: '6px', verticalAlign: '-2px' }} />
-                Track Live Order
+                <ExternalLink size={18} />
+                <span>Track in My Orders</span>
               </button>
 
               <button
                 type="button"
-                className="checkout-button"
-                style={{ backgroundColor: '#F4EDE5', color: '#311E18', border: '1px solid #EFE9E1' }}
+                className="success-btn-secondary"
                 onClick={() => setIsBillOpen(true)}
               >
-                <Receipt size={16} style={{ marginRight: '6px', verticalAlign: '-2px' }} />
-                View Bill / Receipt
+                <Receipt size={17} />
+                <span>View Bill / Receipt</span>
               </button>
 
-              <button type="button" className="checkout-button" onClick={onExplore || onClose}>
-                Back to menu
+              <button
+                type="button"
+                className="success-btn-tertiary"
+                onClick={onExplore || onClose}
+              >
+                Back to Menu
               </button>
             </div>
           </div>

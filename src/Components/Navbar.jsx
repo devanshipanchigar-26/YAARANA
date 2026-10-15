@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Heart, ShoppingCart, User, LogOut, Menu, X, Clock } from 'lucide-react';
+import { Heart, ShoppingCart, User, LogOut, Menu, X, Clock, Package } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
 
@@ -122,19 +122,19 @@ export default function Navbar({
             Book a Table
           </a>
         </li>
-        {lastOrderId && (
+        {(user || lastOrderId) && (
           <li>
             <a
-              href={`/track-order/${lastOrderId}`}
+              href="/my-orders"
               className="nav-link"
               style={{ color: '#D35400', fontWeight: 'bold' }}
               onClick={(e) => {
                 e.preventDefault();
                 setMobileMenuOpen(false);
-                navigate(`/track-order/${lastOrderId}`);
+                navigate(lastOrderId ? `/my-orders/${lastOrderId}` : '/my-orders');
               }}
             >
-              ⏱️ Track Order
+              📦 My Orders
             </a>
           </li>
         )}
@@ -190,19 +190,17 @@ export default function Navbar({
                     <div className="profile-divider" />
                   </>
                 )}
-                {lastOrderId && (
-                  <button
-                    type="button"
-                    className="profile-logout-btn"
-                    style={{ color: '#D35400', fontWeight: 'bold' }}
-                    onClick={() => {
-                      setProfileMenuOpen(false);
-                      navigate(`/track-order/${lastOrderId}`);
-                    }}
-                  >
-                    <Clock size={16} /> Track Active Order
-                  </button>
-                )}
+                <button
+                  type="button"
+                  className="profile-logout-btn"
+                  style={{ color: '#D35400', fontWeight: 'bold' }}
+                  onClick={() => {
+                    setProfileMenuOpen(false);
+                    navigate(lastOrderId ? `/my-orders/${lastOrderId}` : '/my-orders');
+                  }}
+                >
+                  <Package size={16} /> My Orders
+                </button>
                 <button
                   type="button"
                   className="profile-logout-btn"

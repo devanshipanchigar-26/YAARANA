@@ -18,22 +18,10 @@ import Signup from './Pages/Signup';
 import ForgotPassword from './Pages/ForgotPassword';
 import ResetPassword from './Pages/ResetPassword';
 import TrackOrderPage from './Pages/TrackOrderPage';
+import MyOrdersPage from './Pages/MyOrdersPage';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { CartProvider, useCart } from './context/CartContext';
 import './App.css';
-
-// Storage keys for isolated carts per user
-const getCartKey = (userId) => (userId ? `yaarana_cart_user_${userId}` : 'yaarana_cart_guest');
-
-// Read the saved cart for a specific user from browser storage
-const loadCartForUser = (userId) => {
-  try {
-    const raw = localStorage.getItem(getCartKey(userId));
-    const parsed = raw ? JSON.parse(raw) : [];
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-};
 
 function AppContent() {
   const navigate = useNavigate();
@@ -41,17 +29,27 @@ function AppContent() {
   const { user, profile } = useAuth();
   const isAdmin = profile?.role === 'admin' || user?.user_metadata?.role === 'admin';
 
+  // Cart operations from isolated CartContext
+  const {
+    cartItems,
+    cartItemCount,
+    isCartOpen,
+    cartInitialStep,
+    addToCart,
+    increaseQuantity,
+    decreaseQuantity,
+    removeItem,
+    clearCart,
+    openCart,
+    closeCart,
+  } = useCart();
+
   // Toggle between 'website' and 'admin' views
   const [currentView, setCurrentView] = useState('website');
   const [activeAdminTab, setActiveAdminTab] = useState('menu-management');
 
   // Which customer page is showing: 'home' | 'menu' | 'book-table'
   const [customerPage, setCustomerPage] = useState('home');
-
-  const [isCartOpen, setIsCartOpen] = useState(false);
-  const [cartInitialStep, setCartInitialStep] = useState('cart');
-  const [cartItems, setCartItems] = useState(() => loadCartForUser(user?.id));
-  const prevUserIdRef = useRef(user?.id);
 
   // Table number from the QR code link, e.g. yoursite.com/?table=5
   const [qrTable] = useState(
@@ -61,12 +59,11 @@ function AppContent() {
   // Resume checkout if user was redirected back from successful login
   useEffect(() => {
     if (location.state?.resumeCheckout) {
-      setIsCartOpen(true);
-      setCartInitialStep('checkout');
+      openCart('checkout');
       // Clear navigation state so it doesn't re-trigger unexpectedly
       navigate(location.pathname, { replace: true, state: {} });
     }
-  }, [location.state, navigate, location.pathname]);
+  }, [location.state, navigate, location.pathname, openCart]);
 
   // Handle direct openAdmin navigation flag from Admin Login
   useEffect(() => {
@@ -75,74 +72,6 @@ function AppContent() {
       navigate(location.pathname, { replace: true, state: {} });
     }
   }, [location.state, navigate, location.pathname]);
-
-  // Isolate and synchronize cart items when user authentication state changes
-  useEffect(() => {
-    if (prevUserIdRef.current !== user?.id) {
-      // Save current items to previous user's storage before switching
-      try {
-        localStorage.setItem(getCartKey(prevUserIdRef.current), JSON.stringify(cartItems));
-      } catch {
-        /* storage unavailable */
-      }
-
-      // Load new user's (or guest's) isolated cart
-      const userCart = loadCartForUser(user?.id);
-      setCartItems(userCart);
-      prevUserIdRef.current = user?.id;
-    }
-  }, [user?.id]);
-
-  // Keep the active cart saved under the appropriate scoped storage key
-  useEffect(() => {
-    try {
-      localStorage.setItem(getCartKey(user?.id), JSON.stringify(cartItems));
-    } catch {
-      /* storage unavailable - cart won't persist */
-    }
-  }, [cartItems, user?.id]);
-
-  // Cart count is calculated from the items, so it can never get out of sync
-  const cartItemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-
-  // Add an item, or increase its quantity if it's already in the cart
-  const addToCart = (item) => {
-    setCartItems((prev) => {
-      const existing = prev.find((c) => c.id === item.id);
-      if (existing) {
-        return prev.map((c) =>
-          c.id === item.id ? { ...c, quantity: c.quantity + 1 } : c
-        );
-      }
-      return [
-        ...prev,
-        {
-          id: item.id,
-          name: item.name,
-          price: item.price,
-          quantity: 1,
-          emoji: item.emoji || '',
-        },
-      ];
-    });
-  };
-
-  const increaseQuantity = (id) =>
-    setCartItems((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, quantity: c.quantity + 1 } : c))
-    );
-
-  const decreaseQuantity = (id) =>
-    setCartItems((prev) =>
-      prev
-        .map((c) => (c.id === id ? { ...c, quantity: c.quantity - 1 } : c))
-        .filter((c) => c.quantity > 0)
-    );
-
-  const removeItem = (id) =>
-    setCartItems((prev) => prev.filter((c) => c.id !== id));
-
-  const clearCart = () => setCartItems([]);
 
   // Switch customer page and start at the top of the new page
   const navigateTo = (page) => {
@@ -153,6 +82,10 @@ function AppContent() {
     }
     if (page === 'login') {
       navigate('/login');
+      return;
+    }
+    if (page === 'my-orders') {
+      navigate('/my-orders');
       return;
     }
     if (page === 'signup') {
@@ -177,9 +110,27 @@ function AppContent() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route
+        path="/my-orders"
+        element={
+          <MyOrdersPage
+            onNavigateToMenu={() => navigateTo('menu')}
+            onBackHome={() => navigateTo('home')}
+          />
+        }
+      />
+      <Route
+        path="/my-orders/:orderId"
+        element={
+          <MyOrdersPage
+            onNavigateToMenu={() => navigateTo('menu')}
+            onBackHome={() => navigateTo('home')}
+          />
+        }
+      />
+      <Route
         path="/track-order/:orderId"
         element={
-          <TrackOrderPage
+          <MyOrdersPage
             onNavigateToMenu={() => navigateTo('menu')}
             onBackHome={() => navigateTo('home')}
           />
@@ -243,10 +194,7 @@ function AppContent() {
           ) : (
             <div className="app">
               <Navbar
-                onCartClick={() => {
-                  setCartInitialStep('cart');
-                  setIsCartOpen(true);
-                }}
+                onCartClick={() => openCart('cart')}
                 cartItemCount={cartItemCount}
                 onNavigate={navigateTo}
                 currentPage={customerPage}
@@ -278,10 +226,7 @@ function AppContent() {
 
               <Cart
                 isOpen={isCartOpen}
-                onClose={() => {
-                  setIsCartOpen(false);
-                  setCartInitialStep('cart');
-                }}
+                onClose={closeCart}
                 items={cartItems}
                 increaseQuantity={increaseQuantity}
                 decreaseQuantity={decreaseQuantity}
@@ -290,16 +235,16 @@ function AppContent() {
                 defaultTable={qrTable}
                 initialStep={cartInitialStep}
                 onRequireLogin={() => {
-                  setIsCartOpen(false);
+                  closeCart();
                   navigate('/login', { state: { returnToCheckout: true } });
                 }}
                 onExplore={() => {
-                  setIsCartOpen(false);
+                  closeCart();
                   navigateTo('menu');
                 }}
-                onTrackOrder={(orderId) => {
-                  setIsCartOpen(false);
-                  navigate(`/track-order/${orderId}`);
+                onTrackOrder={(orderId, orderObj) => {
+                  closeCart();
+                  navigate(`/my-orders/${orderId}`, { state: { initialOrder: orderObj } });
                 }}
               />
             </div>
@@ -313,7 +258,9 @@ function AppContent() {
 export default function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <CartProvider>
+        <AppContent />
+      </CartProvider>
     </AuthProvider>
   );
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
   CheckCircle2,
   Clock,
@@ -45,11 +45,39 @@ function getActiveStageIndex(orderStatus) {
 export default function TrackOrderPage({ onNavigateToMenu, onBackHome }) {
   const { orderId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const cafeSettings = getCafeSettings();
 
-  const [order, setOrder] = useState(null);
-  const [loading, setLoading] = useState(true);
+  // Try to pre-fill from navigation state or localStorage for INSTANT 0ms rendering
+  const getInitialCachedOrder = () => {
+    if (location.state?.initialOrder) {
+      return location.state.initialOrder;
+    }
+    try {
+      const savedStr = localStorage.getItem('yaarana_last_order');
+      if (savedStr) {
+        const saved = JSON.parse(savedStr);
+        const raw = String(orderId || '').trim();
+        const stripped = raw.replace(/^#/, '').replace(/^YRN-/i, '').trim();
+        const savedId = String(saved.id || saved.orderId || '').trim();
+        if (
+          savedId === raw ||
+          savedId === stripped ||
+          (stripped && savedId.endsWith(stripped))
+        ) {
+          return saved;
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+    return null;
+  };
+
+  const cachedOrder = getInitialCachedOrder();
+  const [order, setOrder] = useState(cachedOrder);
+  const [loading, setLoading] = useState(!cachedOrder);
   const [error, setError] = useState(null);
   const [isBillOpen, setIsBillOpen] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
@@ -58,11 +86,9 @@ export default function TrackOrderPage({ onNavigateToMenu, onBackHome }) {
   const [utrInput, setUtrInput] = useState('');
   const [utrSuccess, setUtrSuccess] = useState(false);
   const [lastRefreshed, setLastRefreshed] = useState(new Date());
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const cleanId = String(orderId || '').replace(/^[^\d]*/, '');
-  const queryId = cleanId ? parseInt(cleanId, 10) : orderId;
-
-  // Fetch order details by ID
+  // Fetch order details by ID (handles alphanumeric IDs like YAA-1016, ORD-001, and numbers)
   const fetchOrderDetails = async (isSilent = false) => {
     if (!orderId) {
       setError('No order ID provided.');
@@ -70,9 +96,15 @@ export default function TrackOrderPage({ onNavigateToMenu, onBackHome }) {
       return;
     }
 
-    if (!isSilent) setLoading(true);
+    if (!isSilent && !order) setLoading(true);
+    if (isSilent) setIsRefreshing(true);
+
     try {
-      const { data, error: fetchErr } = await supabase
+      const raw = String(orderId || '').trim();
+      const stripped = raw.replace(/^#/, '').replace(/^YRN-/i, '').trim();
+
+      // 1. Direct query with raw or stripped ID
+      let { data, error: fetchErr } = await supabase
         .from('orders')
         .select(`
           *,
@@ -85,14 +117,40 @@ export default function TrackOrderPage({ onNavigateToMenu, onBackHome }) {
             )
           )
         `)
-        .eq('id', queryId)
+        .or(`id.eq."${raw}",id.eq."${stripped}"`)
         .maybeSingle();
 
-      if (fetchErr) throw fetchErr;
+      // 2. If not found and input contains digits, match suffix (e.g. 1016 -> YAA-1016)
+      if (!data && /^\d+$/.test(stripped)) {
+        const { data: suffixMatches, error: suffixErr } = await supabase
+          .from('orders')
+          .select(`
+            *,
+            order_items (
+              quantity,
+              unit_price,
+              menu_items (
+                name,
+                price
+              )
+            )
+          `)
+          .ilike('id', `%${stripped}`)
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (!suffixErr && suffixMatches && suffixMatches.length > 0) {
+          data = suffixMatches[0];
+        }
+      }
+
+      if (fetchErr && !data) throw fetchErr;
 
       if (!data) {
-        setError('Order not found. Please verify your order link or contact cafe staff.');
-        setOrder(null);
+        if (!order) {
+          setError('Order not found. Please verify your order link or contact cafe staff.');
+          setOrder(null);
+        }
       } else {
         // Play gentle chime if status advanced to ready
         if (order && order.order_status !== data.order_status) {
@@ -103,6 +161,12 @@ export default function TrackOrderPage({ onNavigateToMenu, onBackHome }) {
         setOrder(data);
         setError(null);
         setLastRefreshed(new Date());
+        try {
+          localStorage.setItem('yaarana_last_order', JSON.stringify(data));
+          localStorage.setItem('yaarana_last_order_id', String(data.id));
+        } catch {
+          /* ignore */
+        }
       }
     } catch (err) {
       console.error('Error fetching order for tracking:', err);
@@ -111,46 +175,70 @@ export default function TrackOrderPage({ onNavigateToMenu, onBackHome }) {
       }
     } finally {
       setLoading(false);
+      setIsRefreshing(false);
     }
   };
 
   useEffect(() => {
-    fetchOrderDetails();
+    fetchOrderDetails(!!cachedOrder);
 
-    // 1. Subscribe to Supabase Realtime for this order
+    const raw = String(orderId || '').trim();
+    const stripped = raw.replace(/^#/, '').replace(/^YRN-/i, '').trim();
+
+    // 1. Subscribe to Supabase Realtime for this order and its items
+    const channelId = `order-track-${order?.id || stripped || raw}`;
     const channel = supabase
-      .channel(`order-track-${queryId}`)
+      .channel(channelId)
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
           table: 'orders',
-          filter: `id=eq.${queryId}`,
         },
         (payload) => {
           if (payload.new) {
-            setOrder((prev) => (prev ? { ...prev, ...payload.new } : payload.new));
-            if ((payload.new.order_status || '').toLowerCase() === 'ready') {
-              playOrderChimeSound();
+            const newId = String(payload.new.id || '');
+            if (
+              newId === raw ||
+              newId === stripped ||
+              (order?.id && newId === order.id) ||
+              (/^\d+$/.test(stripped) && newId.endsWith(stripped))
+            ) {
+              setOrder((prev) => (prev ? { ...prev, ...payload.new } : payload.new));
+              fetchOrderDetails(true);
+              if ((payload.new.order_status || '').toLowerCase() === 'ready') {
+                playOrderChimeSound();
+              }
             }
           } else {
             fetchOrderDetails(true);
           }
         }
       )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'order_items',
+        },
+        () => {
+          fetchOrderDetails(true);
+        }
+      )
       .subscribe();
 
-    // 2. Fallback polling every 10s to ensure resilience against connection drops
+    // 2. High-speed fallback polling every 3.5s to ensure immediate responsiveness
     const interval = setInterval(() => {
       fetchOrderDetails(true);
-    }, 10000);
+    }, 3500);
 
     return () => {
       supabase.removeChannel(channel);
       clearInterval(interval);
     };
-  }, [orderId]);
+  }, [orderId, order?.id]);
 
   const handleCopyUpi = () => {
     if (cafeSettings.upiId) {
@@ -166,12 +254,19 @@ export default function TrackOrderPage({ onNavigateToMenu, onBackHome }) {
 
     setSubmittingUtr(true);
     try {
+      const targetId = order?.id || orderId;
       const { error: updateErr } = await supabase
         .from('orders')
         .update({ payment_reference: utrInput.trim() })
-        .eq('id', orderId);
+        .eq('id', targetId);
 
-      if (updateErr) throw updateErr;
+      if (updateErr) {
+        if (updateErr.code === 'PGRST204') {
+          console.warn('payment_reference column not found in orders schema, stored locally.');
+        } else {
+          throw updateErr;
+        }
+      }
 
       setOrder((prev) => (prev ? { ...prev, payment_reference: utrInput.trim() } : prev));
       setUtrSuccess(true);
@@ -220,8 +315,9 @@ export default function TrackOrderPage({ onNavigateToMenu, onBackHome }) {
             className="track-refresh-btn"
             onClick={() => fetchOrderDetails(false)}
             title="Refresh order status"
+            disabled={isRefreshing}
           >
-            <RefreshCw size={16} />
+            <RefreshCw size={16} className={isRefreshing ? 'spin-icon' : ''} />
           </button>
         </div>
       </header>
@@ -359,9 +455,19 @@ export default function TrackOrderPage({ onNavigateToMenu, onBackHome }) {
                 <button
                   type="button"
                   className="track-action-btn primary"
-                  onClick={() => (onNavigateToMenu ? onNavigateToMenu() : navigate('/'))}
+                  onClick={() => {
+                    if (order?.order_type === 'dine-in' && order?.table_no) {
+                      localStorage.setItem('yaarana_preselected_table', String(order.table_no));
+                    }
+                    if (onNavigateToMenu) {
+                      onNavigateToMenu();
+                    } else {
+                      navigate(order?.table_no ? `/?table=${encodeURIComponent(order.table_no)}` : '/');
+                    }
+                  }}
                 >
-                  <ShoppingBag size={17} /> Continue Exploring Menu
+                  <ShoppingBag size={17} />{' '}
+                  {order?.order_type === 'dine-in' ? '+ Add More Items to Table' : 'Continue Exploring Menu'}
                 </button>
               </div>
             </section>

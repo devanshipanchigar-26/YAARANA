@@ -672,3 +672,17 @@
   color: #8c756b;
   margin: 0;
 }
+
+.spin-icon {
+  animation: trackSpin 0.8s linear infinite;
+}
+
+@keyframes trackSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+

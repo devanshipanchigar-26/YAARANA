@@ -10,11 +10,43 @@ const AuthContext = createContext({
   refreshProfile: async () => {},
 });
 
+const getInitialStoredAuth = () => {
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('sb-') && key.endsWith('-auth-token')) {
+        const raw = localStorage.getItem(key);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          const u = parsed?.user || parsed?.currentSession?.user;
+          if (u?.id) {
+            return {
+              session: parsed,
+              user: u,
+              profile: {
+                id: u.id,
+                name: u.user_metadata?.name || u.user_metadata?.full_name || 'Customer',
+                phone: u.user_metadata?.phone || '',
+                email: u.email || '',
+                role: u.user_metadata?.role || 'customer',
+              },
+            };
+          }
+        }
+      }
+    }
+  } catch (e) {
+    console.error('Error reading initial auth token:', e);
+  }
+  return { session: null, user: null, profile: null };
+};
+
 export function AuthProvider({ children }) {
-  const [session, setSession] = useState(null);
-  const [user, setUser] = useState(null);
-  const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const initial = getInitialStoredAuth();
+  const [session, setSession] = useState(initial.session);
+  const [user, setUser] = useState(initial.user);
+  const [profile, setProfile] = useState(initial.profile);
+  const [loading, setLoading] = useState(!initial.user);
 
   const fetchProfile = async (userId, userMetadata = {}, userEmail = '') => {
     try {
