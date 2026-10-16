@@ -247,21 +247,35 @@ export function checkStoreOpenStatus(settings = getCafeSettings()) {
 export function playOrderChimeSound() {
   try {
     const audioPaths = [
-      encodeURI('/sounds/freesound_community-service-bell-ring-14610 (1).mp3'),
       '/sounds/bell.mp3',
       '/bell.mp3',
+      '/sounds/freesound_community-service-bell-ring-14610 (1).mp3',
+      encodeURI('/sounds/freesound_community-service-bell-ring-14610 (1).mp3'),
     ];
 
+    let played = false;
     const tryPlay = (index = 0) => {
       if (index >= audioPaths.length) {
-        playSynthesizedServiceBell();
+        if (!played) {
+          playSynthesizedServiceBell();
+        }
         return;
       }
       const audio = new Audio(audioPaths[index]);
+      audio.volume = 1.0;
       audio.currentTime = 0;
-      audio.play().catch(() => {
+      const promise = audio.play();
+      if (promise !== undefined) {
+        promise
+          .then(() => {
+            played = true;
+          })
+          .catch(() => {
+            tryPlay(index + 1);
+          });
+      } else {
         tryPlay(index + 1);
-      });
+      }
     };
 
     tryPlay(0);
@@ -278,66 +292,93 @@ export function playSynthesizedServiceBell() {
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     if (!AudioCtx) return;
     const ctx = new AudioCtx();
+
+    const triggerTones = () => {
+      const now = ctx.currentTime;
+
+      // Master volume control
+      const master = ctx.createGain();
+      master.gain.setValueAtTime(0.85, now);
+      master.connect(ctx.destination);
+
+      // 1. Initial metallic tap / plunger strike transient ("clink" attack ~5.8 kHz)
+      const oscStrike = ctx.createOscillator();
+      const gainStrike = ctx.createGain();
+      oscStrike.type = 'triangle';
+      oscStrike.frequency.setValueAtTime(5873, now);
+      gainStrike.gain.setValueAtTime(0.35, now);
+      gainStrike.gain.exponentialRampToValueAtTime(0.0001, now + 0.05);
+      oscStrike.connect(gainStrike);
+      gainStrike.connect(master);
+      oscStrike.start(now);
+      oscStrike.stop(now + 0.05);
+
+      // 2. Fundamental high-pitched bell dome ring (D7: 2349.3 Hz)
+      const oscDome = ctx.createOscillator();
+      const gainDome = ctx.createGain();
+      oscDome.type = 'sine';
+      oscDome.frequency.setValueAtTime(2349.3, now);
+      gainDome.gain.setValueAtTime(0.85, now);
+      gainDome.gain.exponentialRampToValueAtTime(0.0001, now + 1.4);
+      oscDome.connect(gainDome);
+      gainDome.connect(master);
+      oscDome.start(now);
+      oscDome.stop(now + 1.4);
+
+      // 3. Shimmer overtone (slight 5 Hz detune creates natural metallic acoustic beating)
+      const oscShimmer = ctx.createOscillator();
+      const gainShimmer = ctx.createGain();
+      oscShimmer.type = 'sine';
+      oscShimmer.frequency.setValueAtTime(2354.5, now);
+      gainShimmer.gain.setValueAtTime(0.55, now);
+      gainShimmer.gain.exponentialRampToValueAtTime(0.0001, now + 1.25);
+      oscShimmer.connect(gainShimmer);
+      gainShimmer.connect(master);
+      oscShimmer.start(now);
+      oscShimmer.stop(now + 1.25);
+
+      // 4. Harmonic overtone (metallic ping resonance ~4.7 kHz)
+      const oscHarmonic = ctx.createOscillator();
+      const gainHarmonic = ctx.createGain();
+      oscHarmonic.type = 'sine';
+      oscHarmonic.frequency.setValueAtTime(4720, now);
+      gainHarmonic.gain.setValueAtTime(0.3, now);
+      gainHarmonic.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
+      oscHarmonic.connect(gainHarmonic);
+      gainHarmonic.connect(master);
+      oscHarmonic.start(now);
+      oscHarmonic.stop(now + 0.6);
+    };
+
     if (ctx.state === 'suspended') {
-      ctx.resume();
+      ctx.resume().then(triggerTones).catch(triggerTones);
+    } else {
+      triggerTones();
     }
-    const now = ctx.currentTime;
-
-    // Master volume control
-    const master = ctx.createGain();
-    master.gain.setValueAtTime(0.55, now);
-    master.connect(ctx.destination);
-
-    // 1. Initial metallic tap / plunger strike transient ("clink" attack ~5.8 kHz)
-    const oscStrike = ctx.createOscillator();
-    const gainStrike = ctx.createGain();
-    oscStrike.type = 'triangle';
-    oscStrike.frequency.setValueAtTime(5873, now);
-    gainStrike.gain.setValueAtTime(0.28, now);
-    gainStrike.gain.exponentialRampToValueAtTime(0.0001, now + 0.04);
-    oscStrike.connect(gainStrike);
-    gainStrike.connect(master);
-    oscStrike.start(now);
-    oscStrike.stop(now + 0.04);
-
-    // 2. Fundamental high-pitched bell dome ring (D7: 2349.3 Hz)
-    const oscDome = ctx.createOscillator();
-    const gainDome = ctx.createGain();
-    oscDome.type = 'sine';
-    oscDome.frequency.setValueAtTime(2349.3, now);
-    gainDome.gain.setValueAtTime(0.75, now);
-    gainDome.gain.exponentialRampToValueAtTime(0.0001, now + 1.35);
-    oscDome.connect(gainDome);
-    gainDome.connect(master);
-    oscDome.start(now);
-    oscDome.stop(now + 1.35);
-
-    // 3. Shimmer overtone (slight 5 Hz detune creates natural metallic acoustic beating)
-    const oscShimmer = ctx.createOscillator();
-    const gainShimmer = ctx.createGain();
-    oscShimmer.type = 'sine';
-    oscShimmer.frequency.setValueAtTime(2354.5, now);
-    gainShimmer.gain.setValueAtTime(0.45, now);
-    gainShimmer.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
-    oscShimmer.connect(gainShimmer);
-    gainShimmer.connect(master);
-    oscShimmer.start(now);
-    oscShimmer.stop(now + 1.2);
-
-    // 4. Harmonic overtone (metallic ping resonance ~4.7 kHz)
-    const oscHarmonic = ctx.createOscillator();
-    const gainHarmonic = ctx.createGain();
-    oscHarmonic.type = 'sine';
-    oscHarmonic.frequency.setValueAtTime(4720, now);
-    gainHarmonic.gain.setValueAtTime(0.2, now);
-    gainHarmonic.gain.exponentialRampToValueAtTime(0.0001, now + 0.55);
-    oscHarmonic.connect(gainHarmonic);
-    gainHarmonic.connect(master);
-    oscHarmonic.start(now);
-    oscHarmonic.stop(now + 0.55);
   } catch (err) {
     console.warn('Service bell audio could not play:', err);
   }
+}
+
+// Pre-warm audio capability on first user interaction so browser autoplay policy allows sound
+if (typeof window !== 'undefined') {
+  const unlockAudioContext = () => {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) {
+        const dummy = new AudioCtx();
+        if (dummy.state === 'suspended') {
+          dummy.resume();
+        }
+      }
+    } catch {}
+    window.removeEventListener('click', unlockAudioContext);
+    window.removeEventListener('keydown', unlockAudioContext);
+    window.removeEventListener('touchstart', unlockAudioContext);
+  };
+  window.addEventListener('click', unlockAudioContext, { once: true });
+  window.addEventListener('keydown', unlockAudioContext, { once: true });
+  window.addEventListener('touchstart', unlockAudioContext, { once: true });
 }
 
 

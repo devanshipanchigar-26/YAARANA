@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { X, Trash2, ShoppingCart, ArrowLeft, CheckCircle2, Lock, AlertCircle, Receipt, ExternalLink } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
-import { useCafeSettings, checkStoreOpenStatus } from '../utils/cafeSettings';
+import { useCafeSettings, checkStoreOpenStatus, playOrderChimeSound } from '../utils/cafeSettings';
 import { fetchActiveTableOrder, addItemsToExistingOrder, normalizeTableNo, formatTableLabel } from '../utils/billingUtils';
 import OrderBillModal from '../Components/OrderBillModal';
 import './Cart.css';
@@ -62,8 +62,10 @@ export default function Cart({
       ''
     );
   });
-  const [orderType, setOrderType] = useState(defaultTable ? 'dine-in' : 'dine-in');
-  const [tableNo, setTableNo] = useState(defaultTable);
+  const [orderType, setOrderType] = useState('dine-in');
+  const [tableNo, setTableNo] = useState(() => {
+    return defaultTable || localStorage.getItem('yaarana_last_table') || '';
+  });
   const [pickupTime, setPickupTime] = useState(PICKUP_OPTIONS[0]);
   const [paymentMode, setPaymentMode] = useState(cashEnabled ? 'cash' : 'upi');
 
@@ -141,7 +143,7 @@ export default function Cart({
     return () => {
       isCancelled = true;
     };
-  }, [orderType, tableNo]);
+  }, [orderType, tableNo, step, isOpen]);
 
   // Table number from the QR link
   useEffect(() => {
@@ -224,8 +226,18 @@ export default function Cart({
               JSON.stringify({ name: customerName.trim(), phone: customerPhone.trim() })
             );
             localStorage.setItem('yaarana_last_order_id', String(activeOrder.id));
+            localStorage.setItem('yaarana_last_table', tableNo.trim());
             window.dispatchEvent(new Event('storage'));
           } catch {}
+
+          const existingItemsNormalized = (activeOrder.order_items || []).map((it) => ({
+            name: it.menu_items?.name || it.item_name || it.name || 'Item',
+            item_name: it.menu_items?.name || it.item_name || it.name || 'Item',
+            price: Number(it.unit_price || it.price || it.menu_items?.price || 0),
+            unit_price: Number(it.unit_price || it.price || it.menu_items?.price || 0),
+            quantity: Number(it.quantity || 1),
+          }));
+          const combinedItems = [...existingItemsNormalized, ...snapshotItems];
 
           const orderData = {
             orderId: activeOrder.id,
@@ -246,7 +258,8 @@ export default function Cart({
             payment_status: 'Pending',
             customerName: customerName.trim(),
             customerPhone: customerPhone.trim(),
-            items: [...(activeOrder.order_items || []), ...snapshotItems],
+            items: combinedItems,
+            order_items: combinedItems,
             created_at: activeOrder.created_at,
           };
 
@@ -259,6 +272,7 @@ export default function Cart({
           setStep('success');
           setPlacing(false);
           submittingRef.current = false;
+          playOrderChimeSound();
           return;
         } catch (addErr) {
           console.error('Error adding items to existing bill:', addErr);
@@ -310,6 +324,9 @@ export default function Cart({
       if (createdOrderId) {
         localStorage.setItem('yaarana_last_order_id', String(createdOrderId));
       }
+      if (orderType === 'dine-in' && tableNo.trim()) {
+        localStorage.setItem('yaarana_last_table', tableNo.trim());
+      }
       window.dispatchEvent(new Event('storage'));
     } catch {
       /* ignore */
@@ -349,6 +366,7 @@ export default function Cart({
     setStep('success');
     setPlacing(false);
     submittingRef.current = false;
+    playOrderChimeSound();
   };
 
   const handleProceedToCheckout = () => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   CheckCircle,
   Clock,
@@ -43,6 +43,19 @@ export default function LiveOrdersPage() {
   // State for Viewing/Printing Customer Bill
   const [viewingBillOrder, setViewingBillOrder] = useState(null);
 
+  const knownOrderIdsRef = useRef(null);
+  const lastChimeTimeRef = useRef(0);
+
+  const triggerOrderChime = () => {
+    const now = Date.now();
+    if (now - lastChimeTimeRef.current < 2000) return;
+    lastChimeTimeRef.current = now;
+    const currentSettings = getCafeSettings();
+    if (currentSettings.newOrderAlerts !== false) {
+      playOrderChimeSound();
+    }
+  };
+
   useEffect(() => {
     fetchLiveOrders();
     // Pre-fetch menu items in background so edit modal opens instantly
@@ -57,10 +70,7 @@ export default function LiveOrdersPage() {
         (payload) => {
           fetchLiveOrders(true);
           if (payload.eventType === 'INSERT') {
-            const currentSettings = getCafeSettings();
-            if (currentSettings.newOrderAlerts !== false) {
-              playOrderChimeSound();
-            }
+            triggerOrderChime();
           }
         }
       )
@@ -150,6 +160,14 @@ export default function LiveOrdersPage() {
           rawOrder: order,
         };
       });
+
+      if (knownOrderIdsRef.current !== null) {
+        const hasNewOrder = formattedOrders.some((o) => !knownOrderIdsRef.current.has(o.rawId));
+        if (hasNewOrder) {
+          triggerOrderChime();
+        }
+      }
+      knownOrderIdsRef.current = new Set(formattedOrders.map((o) => o.rawId));
 
       setOrders(formattedOrders);
     } catch (error) {

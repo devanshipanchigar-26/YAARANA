@@ -9,12 +9,16 @@
 .login-page {
   width: 100%;
   min-height: 100vh;
-
+  min-height: 100dvh;
   display: flex;
   justify-content: center;
   align-items: center;
-
+  padding: 40px 16px;
+  overflow-y: auto;
+  overflow-x: hidden;
   background: url('/background.svg') center center/cover no-repeat;
+  box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
 }
 
 .login-card {
@@ -22,7 +26,7 @@
   background: rgba(255, 255, 255, 0.75);
   border-radius: 35px;
   padding: clamp(24px, 5vw, 45px);
-  margin: 24px auto;
+  margin: auto;
   box-shadow: 0 20px 60px rgba(74, 48, 44, 0.12);
   box-sizing: border-box;
 }

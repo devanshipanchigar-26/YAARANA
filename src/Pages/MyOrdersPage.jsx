@@ -238,28 +238,43 @@ export default function MyOrdersPage({ onNavigateToMenu, onBackHome }) {
     };
   }, [user?.id, orderId]);
 
-  // Active orders: any unpaid, non-cancelled order (the meal is active until paid!)
+  // Helper to determine if an order is active/in-progress
+  const isOrderActive = (o) => {
+    if (!o) return false;
+    const st = (o.order_status || '').toLowerCase().trim();
+    return st !== 'completed' && st !== 'delivered' && st !== 'cancelled';
+  };
+
+  // Active orders: only currently active / in-kitchen orders (Pending, Preparing, Ready, etc.)
   const activeOrders = useMemo(() => {
-    return orders.filter((o) => {
-      const st = (o.order_status || '').toLowerCase().trim();
-      const p = (o.payment_status || '').toLowerCase().trim();
-      return p !== 'paid' && st !== 'cancelled';
-    });
+    return orders.filter(isOrderActive);
   }, [orders]);
 
-  // History orders: paid orders or cancelled orders
+  // History orders: past / completed / delivered / cancelled orders
   const historyOrders = useMemo(() => {
-    return orders.filter((o) => {
-      const st = (o.order_status || '').toLowerCase().trim();
-      const p = (o.payment_status || '').toLowerCase().trim();
-      return p === 'paid' || st === 'cancelled';
-    });
+    return orders.filter((o) => !isOrderActive(o));
   }, [orders]);
 
   const totalActiveCount = activeOrders.length;
   const totalHistoryCount = historyOrders.length;
 
-  const displayedTrackOrder = selectedOrder || activeOrders[0] || historyOrders[0] || initialCached;
+  // The live status tracker is ONLY shown if there is a current active order
+  const displayedTrackOrder = useMemo(() => {
+    if (selectedOrder && isOrderActive(selectedOrder)) {
+      return selectedOrder;
+    }
+    if (activeOrders.length > 0) {
+      return activeOrders[0];
+    }
+    return null;
+  }, [selectedOrder, activeOrders]);
+
+  // If no active orders, default to the history tab
+  useEffect(() => {
+    if (!loading && activeOrders.length === 0 && historyOrders.length > 0) {
+      setActiveTab((prev) => (prev === 'active' ? 'history' : prev));
+    }
+  }, [loading, activeOrders.length, historyOrders.length]);
 
   const handleOpenBillModal = (order) => {
     setViewingBillOrder(order);
@@ -570,30 +585,7 @@ export default function MyOrdersPage({ onNavigateToMenu, onBackHome }) {
                         </span>
                         <strong className="pbox-amount">₹{totalAmount.toFixed(2)}</strong>
                       </div>
-                      {cafeSettings.upiPaymentEnabled !== false && (
-                        <button
-                          type="button"
-                          className="btn-toggle-qr"
-                          onClick={() => setShowUpiQr(!showUpiQr)}
-                        >
-                          <QrCode size={14} /> {showUpiQr ? 'Hide QR' : 'Pay via UPI QR'}
-                        </button>
-                      )}
                     </div>
-
-                    {showUpiQr && (
-                      <div className="upi-qr-preview">
-                        <img src={qrCodeImageUrl} alt="UPI QR Code" className="qr-img" />
-                        <div className="upi-vpa-copy-row">
-                          <span className="vpa-text">{upiId}</span>
-                          <button type="button" className="btn-copy-vpa" onClick={handleCopyUpi}>
-                            {isCopied ? <Check size={14} /> : <Copy size={14} />}
-                            <span>{isCopied ? 'Copied' : 'Copy'}</span>
-                          </button>
-                        </div>
-                        <p className="qr-hint">Scan with GPay, PhonePe, Paytm, or BHIM</p>
-                      </div>
-                    )}
                   </div>
                 )}
               </section>
@@ -749,8 +741,8 @@ export default function MyOrdersPage({ onNavigateToMenu, onBackHome }) {
                             </div>
                             <p className="card-items-snippet">{itemsSummary || 'Delicious food order'}</p>
                             <div className="card-tags-row">
-                              <span className="tag-completed">
-                                {ord.order_status === 'Cancelled' ? '❌ Cancelled' : '✓ Completed'}
+                              <span className={(ord.order_status || '').toLowerCase() === 'cancelled' ? 'tag-cancelled' : 'tag-completed'}>
+                                {(ord.order_status || '').toLowerCase() === 'cancelled' ? '❌ Cancelled' : '✓ Completed'}
                               </span>
                               <span className={`tag-pay ${isOrdPaid ? 'tag-paid' : 'tag-pending'}`}>
                                 {isOrdPaid ? 'Paid' : 'Unpaid'}

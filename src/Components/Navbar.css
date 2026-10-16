@@ -73,7 +73,8 @@
   transition: color 0.2s ease;
 }
 
-.nav-link:hover {
+.nav-link:hover,
+.nav-link.active {
   color: #0086FF;
 }
 
@@ -91,7 +92,8 @@
   transition: transform 0.25s ease;
 }
 
-.nav-link:hover::after {
+.nav-link:hover::after,
+.nav-link.active::after {
   transform: scaleX(1);
 }
 

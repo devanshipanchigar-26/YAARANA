@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Heart, ShoppingCart, User, LogOut, Menu, X, Clock, Package } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
@@ -11,11 +11,14 @@ export default function Navbar({
   currentPage = 'home',
 }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, profile, signOut } = useAuth();
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [lastOrderId, setLastOrderId] = useState(() => localStorage.getItem('yaarana_last_order_id'));
   const profileMenuRef = useRef(null);
+
+  const isOrdersActive = location.pathname.startsWith('/my-orders') || location.pathname.startsWith('/track-order');
 
   useEffect(() => {
     // Keep lastOrderId synced with storage
@@ -126,15 +129,14 @@ export default function Navbar({
           <li>
             <a
               href="/my-orders"
-              className="nav-link"
-              style={{ color: '#D35400', fontWeight: 'bold' }}
+              className={`nav-link ${isOrdersActive ? 'active' : ''}`}
               onClick={(e) => {
                 e.preventDefault();
                 setMobileMenuOpen(false);
                 navigate(lastOrderId ? `/my-orders/${lastOrderId}` : '/my-orders');
               }}
             >
-              📦 My Orders
+              My Orders
             </a>
           </li>
         )}
@@ -193,7 +195,6 @@ export default function Navbar({
                 <button
                   type="button"
                   className="profile-logout-btn"
-                  style={{ color: '#D35400', fontWeight: 'bold' }}
                   onClick={() => {
                     setProfileMenuOpen(false);
                     navigate(lastOrderId ? `/my-orders/${lastOrderId}` : '/my-orders');

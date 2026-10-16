@@ -256,8 +256,15 @@
 }
 
 .btn-cancel {
-  background-color: #FFEBEE;
-  color: #C62828;
+  background-color: #FEE2E2;
+  color: #DC2626;
+  border: 1px solid #FECACA;
+  font-weight: 700;
+}
+
+.btn-cancel:hover {
+  background-color: #DC2626;
+  color: #FFFFFF;
 }
 
 .btn-edit {

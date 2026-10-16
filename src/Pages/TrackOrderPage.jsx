@@ -516,39 +516,8 @@ export default function TrackOrderPage({ onNavigateToMenu, onBackHome }) {
                   {cafeSettings.upiPaymentEnabled !== false && (
                     <div className="track-upi-box">
                       <div className="track-upi-header">
-                        <span>Pay directly via UPI</span>
-                        <button
-                          type="button"
-                          className="toggle-qr-btn"
-                          onClick={() => setShowUpiQr(!showUpiQr)}
-                        >
-                          <QrCode size={14} /> {showUpiQr ? 'Hide QR' : 'Show UPI QR'}
-                        </button>
+                        <span>Counter & Online Payment</span>
                       </div>
-
-                      <div className="track-vpa-row">
-                        <span className="vpa-text">{upiId}</span>
-                        <button
-                          type="button"
-                          className="copy-vpa-btn"
-                          onClick={handleCopyUpi}
-                          title="Copy UPI ID"
-                        >
-                          {isCopied ? <Check size={14} /> : <Copy size={14} />}
-                          <span>{isCopied ? 'Copied' : 'Copy'}</span>
-                        </button>
-                      </div>
-
-                      {showUpiQr && (
-                        <div className="track-qr-preview">
-                          <img
-                            src={qrCodeImageUrl}
-                            alt="Scan & Pay YAARANA Cafe"
-                            className="track-qr-img"
-                          />
-                          <p className="track-qr-note">Scan with GPay, PhonePe, Paytm, or BHIM</p>
-                        </div>
-                      )}
 
                       {/* Optional Transaction Reference / UTR Submission */}
                       <form className="track-utr-form" onSubmit={handleSaveUtr}>
