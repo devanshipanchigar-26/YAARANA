@@ -3,7 +3,7 @@ import { X, Printer, CheckCircle, Clock, Coffee, ShieldCheck } from 'lucide-reac
 import { getCafeSettings } from '../utils/cafeSettings';
 import './OrderBillModal.css';
 
-export default function OrderBillModal({ isOpen, onClose, order }) {
+export default function OrderBillModal({ isOpen, onClose, order, onLeaveReview }) {
   const billPrintRef = useRef(null);
   const cafeSettings = getCafeSettings();
 
@@ -81,6 +81,19 @@ export default function OrderBillModal({ isOpen, onClose, order }) {
         <div className="bill-actions-header no-print">
           <div className="bill-actions-title">Customer Bill & Receipt</div>
           <div className="bill-actions-buttons">
+            {isPaid && onLeaveReview && (
+              <button
+                type="button"
+                className="bill-btn"
+                style={{ backgroundColor: '#FFD000', color: '#311E18', border: 'none', fontWeight: 'bold' }}
+                onClick={() => {
+                  onClose();
+                  onLeaveReview(order);
+                }}
+              >
+                ⭐ Leave Review
+              </button>
+            )}
             <button
               type="button"
               className="bill-btn bill-btn-print"

@@ -1,0 +1,649 @@
+/* =========================================
+   MY BOOKINGS PAGE STYLES
+   YAARANA Cafe Customer Portal
+   Matching My Orders Page Design
+   ========================================= */
+
+.my-bookings-page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background-color: #FDFBFA;
+  color: #311E18;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Top Header */
+.my-bookings-page .my-orders-header {
+  background-color: #311E18;
+  color: #FFFDF9;
+  padding: 14px 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 4px 16px rgba(49, 30, 24, 0.15);
+}
+
+.my-bookings-page .header-inner {
+  max-width: 1050px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.my-bookings-page .btn-header-back,
+.my-bookings-page .btn-header-refresh {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #FFFDF9;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.my-bookings-page .btn-header-back:hover,
+.my-bookings-page .btn-header-refresh:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.my-bookings-page .header-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.my-bookings-page .brand-title {
+  font-family: 'Luckiest Guy', cursive, sans-serif;
+  font-size: 1.35rem;
+  color: #FFD000;
+  letter-spacing: 1px;
+}
+
+.my-bookings-page .brand-sub {
+  font-size: 0.72rem;
+  color: rgba(255, 253, 249, 0.85);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.my-bookings-page .pulse-dot {
+  width: 6px;
+  height: 6px;
+  background-color: #22C55E;
+  border-radius: 50%;
+  animation: pulseDotGreen 1.5s infinite;
+}
+
+@keyframes pulseDotGreen {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0.4; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.my-bookings-page .spin-icon {
+  animation: orderSpin 0.8s linear infinite;
+}
+
+@keyframes orderSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Main Container */
+.myb-container {
+  max-width: 1050px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 24px 20px 60px;
+  box-sizing: border-box;
+}
+
+.myb-loading-screen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background-color: #FDFBFA;
+  color: #311E18;
+  font-weight: 700;
+}
+
+/* Toolbar Row: Tabs + Reserve button */
+.myb-toolbar-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+/* Tabs Bar (matching My Orders style) */
+.myb-tabs-bar {
+  display: flex;
+  gap: 10px;
+  border-bottom: 2px solid #EFE8DC;
+  flex: 1;
+  min-width: 260px;
+}
+
+.myb-tab-btn {
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #8C756B;
+  padding: 10px 18px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.myb-tab-btn:hover {
+  color: #311E18;
+}
+
+.myb-tab-btn.active {
+  color: #311E18;
+}
+
+.myb-tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: #311E18;
+  border-radius: 3px 3px 0 0;
+}
+
+.myb-book-new-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: #311E18;
+  color: #FFD000;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 0.88rem;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(49, 30, 24, 0.15);
+  transition: transform 0.12s, background 0.15s;
+}
+
+.myb-book-new-btn:hover {
+  background: #4A3026;
+  transform: translateY(-1px);
+}
+
+/* Alert Banners */
+.myb-alert-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  margin-bottom: 18px;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.myb-alert-banner.success {
+  background: #E8F5E9;
+  border: 1.5px solid #A5D6A7;
+  color: #1B5E20;
+}
+
+.myb-alert-banner.error {
+  background: #FFEBEE;
+  border: 1.5px solid #FFCDD2;
+  color: #B71C1C;
+}
+
+.myb-tab-btn.active .myb-tab-count {
+  background: #FFF;
+  color: #311E18;
+}
+
+/* Empty State */
+.myb-empty-box {
+  background: #FFF;
+  border: 2px dashed #D5C9BD;
+  border-radius: 18px;
+  padding: 45px 24px;
+  text-align: center;
+  color: #6B554B;
+}
+
+.myb-empty-box h3 {
+  font-family: 'Luckiest Guy', cursive;
+  font-size: 1.5rem;
+  color: #311E18;
+  margin: 0 0 8px;
+}
+
+.myb-empty-box p {
+  font-size: 0.92rem;
+  color: #8C756B;
+  margin: 0 0 20px;
+  max-width: 440px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.4;
+}
+
+.myb-empty-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: #311E18;
+  color: #FFD000;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(49, 30, 24, 0.15);
+  transition: transform 0.12s;
+}
+
+.myb-empty-action-btn:hover {
+  transform: translateY(-2px);
+}
+
+/* Cards Grid */
+.myb-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.myb-card {
+  background: #FFF;
+  border: 1.5px solid #EFE9E1;
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: 0 4px 14px rgba(49, 30, 24, 0.05);
+  transition: transform 0.12s, box-shadow 0.12s, border-color 0.12s;
+}
+
+.myb-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(49, 30, 24, 0.08);
+}
+
+.myb-card.is-today {
+  border-color: #FFD000;
+  box-shadow: 0 4px 16px rgba(255, 208, 0, 0.2);
+}
+
+.myb-card.status-cancelled {
+  opacity: 0.72;
+  border-style: dashed;
+  background: #FAF7F5;
+}
+
+.myb-card.status-completed {
+  opacity: 0.88;
+  background: #FCFBF9;
+}
+
+/* Card Header */
+.myb-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.myb-card-meta-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.myb-id-pill {
+  font-family: 'Luckiest Guy', cursive;
+  background: #311E18;
+  color: #FFD000;
+  padding: 4px 12px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+}
+
+.myb-table-pill {
+  background: #F4EDE5;
+  color: #311E18;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.myb-today-tag {
+  background: #FFF3CD;
+  color: #856404;
+  border: 1px solid #FFEBAA;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.myb-status-pill {
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 12px;
+  letter-spacing: 0.3px;
+}
+
+.myb-status-pill.status-confirmed {
+  background: #E8F5E9;
+  color: #2E7D32;
+  border: 1px solid #C8E6C9;
+}
+
+.myb-status-pill.status-completed {
+  background: #E8F4FD;
+  color: #1976D2;
+  border: 1px solid #BBDEFB;
+}
+
+.myb-status-pill.status-cancelled {
+  background: #FEE2E2;
+  color: #DC2626;
+  border: 1px solid #FECACA;
+}
+
+/* Card Body Details */
+.myb-details-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px 16px;
+  background: #FDFBFA;
+  border: 1px solid #F3EAE1;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+}
+
+.myb-detail-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.myb-icon {
+  color: #8C756B;
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+
+.myb-label {
+  display: block;
+  font-size: 0.72rem;
+  color: #8C756B;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.myb-detail-item strong {
+  display: block;
+  font-size: 0.9rem;
+  color: #311E18;
+}
+
+.myb-date-iso {
+  font-size: 0.75rem;
+  color: #8C756B;
+  font-weight: normal;
+}
+
+/* Special Note */
+.myb-special-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: #FFF9EE;
+  border: 1px solid #F6E2BC;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+}
+
+.myb-note-icon {
+  color: #D35400;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.myb-note-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #A04000;
+}
+
+.myb-note-text {
+  font-size: 0.85rem;
+  color: #5A4238;
+  margin: 2px 0 0;
+  font-style: italic;
+}
+
+/* Footer & Actions */
+.myb-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #EFE9E1;
+  padding-top: 14px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.myb-booked-time {
+  font-size: 0.82rem;
+  color: #6B554B;
+}
+
+.myb-cancel-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #FFF5F5;
+  color: #DC2626;
+  border: 1px solid #FECACA;
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.myb-cancel-btn:hover {
+  background: #DC2626;
+  color: #FFF;
+}
+
+/* Modal Overlay */
+.myb-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(49, 30, 24, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 16px;
+  animation: mybFadeIn 0.2s;
+}
+
+.myb-modal-card {
+  background: #FFFDF9;
+  border-radius: 20px;
+  max-width: 440px;
+  width: 100%;
+  padding: 24px;
+  border: 1px solid #EFE9E1;
+  box-shadow: 0 16px 40px rgba(49, 30, 24, 0.3);
+}
+
+.myb-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  position: relative;
+}
+
+.myb-warning-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #FFF3CD;
+  color: #856404;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.myb-modal-header h3 {
+  font-family: 'Luckiest Guy', cursive;
+  font-size: 1.3rem;
+  color: #311E18;
+  margin: 0;
+}
+
+.myb-close-modal-btn {
+  position: absolute;
+  right: 0;
+  top: 0;
+  background: none;
+  border: none;
+  color: #8C756B;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.myb-modal-body p {
+  color: #5A4238;
+  font-size: 0.88rem;
+  margin: 0 0 12px;
+}
+
+.myb-cancel-summary-box {
+  background: #FDFBFA;
+  border: 1px solid #EFE9E1;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+}
+
+.myb-cancel-summary-box p {
+  display: flex;
+  justify-content: space-between;
+  margin: 4px 0;
+  font-size: 0.85rem;
+}
+
+.myb-cancel-summary-box span {
+  color: #8C756B;
+}
+
+.myb-cancel-notice {
+  font-size: 0.78rem !important;
+  color: #C0392B !important;
+  background: #FDEDEC;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+.myb-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.myb-btn-secondary {
+  background: #EFE9E1;
+  color: #5A4238;
+  border: none;
+  border-radius: 10px;
+  padding: 9px 16px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.myb-btn-danger {
+  background: #DC2626;
+  color: #FFF;
+  border: none;
+  border-radius: 10px;
+  padding: 9px 18px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.myb-btn-danger:hover:not(:disabled) {
+  background: #B91C1C;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .my-bookings-page {
+    padding: 85px 12px 40px;
+  }
+
+  .myb-title {
+    font-size: 1.8rem;
+  }
+
+  .myb-tabs-bar {
+    flex-wrap: wrap;
+  }
+
+  .myb-tab-btn {
+    flex: 1 1 100%;
+    text-align: center;
+  }
+
+  .myb-details-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}

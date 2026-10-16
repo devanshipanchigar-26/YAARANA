@@ -19,6 +19,7 @@ export default function AdminLayout({ children, activeTab, setActiveTab, onBackT
   const tabLabels = {
     'live-orders': 'Live Orders',
     'order-history': 'Order History',
+    'table-bookings': 'Table Bookings',
     'menu-management': 'Menu Management',
     'customers': 'Customers',
     'sales': 'Sales Statistics',

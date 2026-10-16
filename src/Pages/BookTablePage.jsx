@@ -1,5 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Lock, LogIn, UserCheck } from 'lucide-react';
 import { supabase } from '../supabaseClient';
+import { useAuth } from '../context/AuthContext';
 
 const TIME_SLOTS = ['11:00 AM', '01:00 PM', '04:00 PM', '06:00 PM', '08:00 PM', '09:30 PM'];
 
@@ -39,6 +42,8 @@ const prettyDate = (dateString) =>
   });
 
 export default function BookTablePage() {
+  const navigate = useNavigate();
+  const { user, profile } = useAuth();
   const today = toDateString(new Date());
 
   const [tables, setTables] = useState([]);
@@ -59,6 +64,17 @@ export default function BookTablePage() {
   const [pageError, setPageError] = useState('');
   const [bookError, setBookError] = useState('');
   const [confirmation, setConfirmation] = useState(null);
+  const submittingRef = useRef(false);
+
+  // Pre-fill customer details from logged-in account
+  useEffect(() => {
+    if (user) {
+      const authName = profile?.name || user?.user_metadata?.name || user?.user_metadata?.full_name || '';
+      const authPhone = profile?.phone || user?.user_metadata?.phone || user?.phone || '';
+      if (authName && !customerName) setCustomerName(authName);
+      if (authPhone && !customerPhone) setCustomerPhone(authPhone);
+    }
+  }, [user, profile]);
 
   // Load the list of tables once
   useEffect(() => {
@@ -130,24 +146,49 @@ export default function BookTablePage() {
 
   const handleBooking = async (e) => {
     e.preventDefault();
-    if (!selectedTable) return;
+    if (!user) {
+      navigate('/login', { state: { returnToBookTable: true } });
+      return;
+    }
+    if (!selectedTable || submittingRef.current) return;
+    submittingRef.current = true;
     setSaving(true);
     setBookError('');
 
-    const { error } = await supabase.from('table_reservations').insert([
-      {
-        customer_name: customerName,
-        customer_phone: customerPhone,
-        guest_count: guests,
-        booking_date: date,
-        booking_time: time,
-        special_request: specialRequest,
-        table_no: selectedTable.table_no,
-      },
-    ]);
+    const payload = {
+      customer_name: customerName.trim(),
+      customer_phone: customerPhone.trim(),
+      guest_count: Number(guests),
+      booking_date: date,
+      booking_time: time,
+      special_request: specialRequest.trim(),
+      table_no: String(selectedTable.table_no),
+      status: 'Confirmed',
+    };
+
+    if (user?.id) {
+      payload.user_id = user.id;
+    }
+
+    let insertRes = await supabase
+      .from('table_reservations')
+      .insert([payload])
+      .select();
+
+    // Fallback if user_id column is not yet migrated in database
+    if (insertRes.error && insertRes.error.message && insertRes.error.message.includes('user_id')) {
+      delete payload.user_id;
+      insertRes = await supabase
+        .from('table_reservations')
+        .insert([payload])
+        .select();
+    }
+
+    const { data, error } = insertRes;
 
     if (error) {
       console.error('Error reserving table:', error.message);
+      submittingRef.current = false;
       if (error.code === '23505') {
         setBookError('Someone just booked that table for this time. Please pick another one.');
         setSelectedTable(null);
@@ -159,14 +200,22 @@ export default function BookTablePage() {
       return;
     }
 
+    const savedRow = data && data[0] ? data[0] : null;
+    const bookingId = savedRow?.id ? `#RES-${savedRow.id}` : `#TB-${selectedTable.table_no}`;
+
     setConfirmation({
-      name: customerName,
+      bookingId,
+      id: savedRow?.id,
+      name: customerName.trim(),
+      phone: customerPhone.trim(),
       tableNo: selectedTable.table_no,
       seats: selectedTable.seats,
       date,
       time,
       guests,
+      specialRequest: specialRequest.trim(),
     });
+    submittingRef.current = false;
     setSaving(false);
   };
 
@@ -289,6 +338,22 @@ export default function BookTablePage() {
         .bt-success { text-align: center; }
         .bt-success h3 { font-family: 'Luckiest Guy', cursive; font-weight: 400; color: ${COLORS.blue}; font-size: 1.8rem; margin: 0 0 10px; }
 
+        .bt-booking-id-pill { display: inline-block; background: ${COLORS.brown}; color: ${COLORS.yellow}; padding: 6px 16px; border-radius: 20px; font-size: 0.95rem; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 12px; }
+
+        .bt-login-prompt-box { text-align: center; padding: 28px 18px; background: #FFFDF9; border: 2px dashed #E5DCD2; border-radius: 16px; margin-top: 8px; }
+        .bt-login-lock-badge { display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 50%; background: #FFF3CD; color: #856404; margin-bottom: 12px; }
+        .bt-login-prompt-box h4 { font-family: 'Luckiest Guy', cursive; font-size: 1.35rem; color: #311E18; margin: 0 0 8px; letter-spacing: 0.5px; }
+        .bt-login-prompt-box p { font-size: 0.88rem; color: #6B554B; margin: 0 0 16px; line-height: 1.4; }
+        .bt-table-reserved-note { display: block; margin-top: 4px; color: #27AE60; font-weight: 700; }
+        .bt-login-action-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 13px 28px; background: #311E18; color: #FFD000; border: none; border-radius: 12px; font-size: 1rem; font-weight: 800; font-family: inherit; cursor: pointer; box-shadow: 0 4px 14px rgba(49, 30, 24, 0.15); transition: transform 0.12s, background 0.15s; }
+        .bt-login-action-btn:hover { background: #4A3026; transform: translateY(-2px); }
+        .bt-signup-prompt-line { margin-top: 14px !important; font-size: 0.85rem !important; color: #8C756B !important; }
+        .bt-link-btn { background: none; border: none; color: #0A84FF; font-weight: 700; text-decoration: underline; cursor: pointer; padding: 0; font-size: inherit; font-family: inherit; }
+
+        .bt-logged-user-banner { display: flex; align-items: center; gap: 8px; background: #E8F5E9; border: 1px solid #C8E6C9; color: #2E7D32; border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; font-size: 0.88rem; flex-wrap: wrap; }
+        .bt-logged-icon { flex-shrink: 0; color: #2E7D32; }
+        .bt-user-email { color: #6B554B; font-size: 0.8rem; font-weight: normal; }
+
         @media (max-width: 520px) {
           .bt-page { padding: 85px 12px 40px; }
           .bt-card { padding: 16px; }
@@ -304,15 +369,34 @@ export default function BookTablePage() {
 
         {confirmation ? (
           <div className="bt-card bt-success">
-            <h3>Table reserved!</h3>
+            <div className="bt-booking-id-pill">{confirmation.bookingId}</div>
+            <h3>Table Reserved Successfully!</h3>
             <p>
-              See you soon, {confirmation.name}. Table {confirmation.tableNo} ({confirmation.seats} seats) is yours for{' '}
-              {confirmation.guests} {confirmation.guests === 1 ? 'guest' : 'guests'} on {prettyDate(confirmation.date)} at{' '}
-              {confirmation.time}.
+              See you soon, <strong>{confirmation.name}</strong>! Table <strong>{confirmation.tableNo}</strong> ({confirmation.seats} seats) is confirmed for{' '}
+              <strong>{confirmation.guests} {confirmation.guests === 1 ? 'guest' : 'guests'}</strong> on <strong>{prettyDate(confirmation.date)}</strong> at{' '}
+              <strong>{confirmation.time}</strong>.
             </p>
-            <button type="button" className="bt-button" style={{ maxWidth: 260 }} onClick={startAgain}>
-              Book another table
-            </button>
+            <p className="bt-hint" style={{ marginTop: '-4px', marginBottom: '20px' }}>
+              Please show your booking reference <strong>{confirmation.bookingId}</strong> when you arrive at the cafe.
+            </p>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                className="bt-button"
+                style={{ maxWidth: 220, background: '#FFD000', color: '#311E18' }}
+                onClick={() => navigate('/my-bookings')}
+              >
+                View My Bookings
+              </button>
+              <button
+                type="button"
+                className="bt-button"
+                style={{ maxWidth: 220, background: '#311E18', color: '#FFF' }}
+                onClick={startAgain}
+              >
+                Book another table
+              </button>
+            </div>
           </div>
         ) : (
           <>
@@ -399,8 +483,8 @@ export default function BookTablePage() {
               )}
             </div>
 
-            {/* Details */}
-            <form className="bt-card" onSubmit={handleBooking}>
+            {/* Details or Login Requirement */}
+            <div className="bt-card">
               <h3 className="bt-step">
                 <span className="bt-step-no">3</span> Your details
               </h3>
@@ -417,48 +501,92 @@ export default function BookTablePage() {
 
               {bookError && <p className="bt-error">{bookError}</p>}
 
-              <div className="bt-row">
-                <div className="bt-field">
-                  <label className="bt-label" htmlFor="bt-name">Full name</label>
-                  <input
-                    id="bt-name"
-                    className="bt-input"
-                    type="text"
-                    value={customerName}
-                    onChange={(e) => setCustomerName(e.target.value)}
-                    required
-                  />
+              {!user ? (
+                <div className="bt-login-prompt-box">
+                  <div className="bt-login-lock-badge">
+                    <Lock size={24} />
+                  </div>
+                  <h4>Login Required to Book</h4>
+                  <p>
+                    Please log in with your YAARANA account to complete your table reservation.
+                    {selectedTable && (
+                      <span className="bt-table-reserved-note">
+                        Your selection of <strong>Table {selectedTable.table_no}</strong> will be remembered!
+                      </span>
+                    )}
+                  </p>
+                  <button
+                    type="button"
+                    className="bt-login-action-btn"
+                    onClick={() => navigate('/login', { state: { returnToBookTable: true } })}
+                  >
+                    <LogIn size={18} /> Log In to Book Table
+                  </button>
+                  <p className="bt-signup-prompt-line">
+                    Don't have an account?{' '}
+                    <button
+                      type="button"
+                      className="bt-link-btn"
+                      onClick={() => navigate('/signup')}
+                    >
+                      Sign up for free
+                    </button>
+                  </p>
                 </div>
-                <div className="bt-field">
-                  <label className="bt-label" htmlFor="bt-phone">Phone number</label>
-                  <input
-                    id="bt-phone"
-                    className="bt-input"
-                    type="tel"
-                    value={customerPhone}
-                    onChange={(e) => setCustomerPhone(e.target.value)}
-                    pattern="[0-9+ ]{10,15}"
-                    title="Enter a valid phone number"
-                    required
-                  />
-                </div>
-              </div>
+              ) : (
+                <form onSubmit={handleBooking}>
+                  <div className="bt-logged-user-banner">
+                    <UserCheck size={16} className="bt-logged-icon" />
+                    <span>
+                      Booking as <strong>{customerName || profile?.name || user?.email}</strong>{' '}
+                      <span className="bt-user-email">({user?.email})</span>
+                    </span>
+                  </div>
 
-              <div className="bt-field" style={{ marginBottom: 18 }}>
-                <label className="bt-label" htmlFor="bt-request">Special requests / occasion</label>
-                <textarea
-                  id="bt-request"
-                  className="bt-input"
-                  value={specialRequest}
-                  onChange={(e) => setSpecialRequest(e.target.value)}
-                  placeholder="Birthday, high chair, cake arriving..."
-                />
-              </div>
+                  <div className="bt-row">
+                    <div className="bt-field">
+                      <label className="bt-label" htmlFor="bt-name">Full name</label>
+                      <input
+                        id="bt-name"
+                        className="bt-input"
+                        type="text"
+                        value={customerName}
+                        onChange={(e) => setCustomerName(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="bt-field">
+                      <label className="bt-label" htmlFor="bt-phone">Phone number</label>
+                      <input
+                        id="bt-phone"
+                        className="bt-input"
+                        type="tel"
+                        value={customerPhone}
+                        onChange={(e) => setCustomerPhone(e.target.value)}
+                        pattern="[0-9+ ]{10,15}"
+                        title="Enter a valid phone number"
+                        required
+                      />
+                    </div>
+                  </div>
 
-              <button type="submit" className="bt-button" disabled={saving || !selectedTable}>
-                {saving ? 'Booking...' : selectedTable ? `Book table ${selectedTable.table_no}` : 'Select a table first'}
-              </button>
-            </form>
+                  <div className="bt-field" style={{ marginBottom: 18 }}>
+                    <label className="bt-label" htmlFor="bt-request">Special requests / occasion</label>
+                    <textarea
+                      id="bt-request"
+                      className="bt-input"
+                      value={specialRequest}
+                      onChange={(e) => setSpecialRequest(e.target.value)}
+                      placeholder="Birthday, high chair, cake arriving..."
+                    />
+                  </div>
+
+                  <button type="submit" className="bt-button" disabled={saving || !selectedTable}>
+                    {saving ? 'Booking...' : selectedTable ? `Book table ${selectedTable.table_no}` : 'Select a table first'}
+                  </button>
+                </form>
+              )}
+            </div>
           </>
         )}
       </div>

@@ -13,6 +13,7 @@ export default function AdminSidebar({
   const navItems = [
     { id: 'live-orders', label: 'Live Orders', icon: '🔥' },
     { id: 'order-history', label: 'Order History', icon: '📦' },
+    { id: 'table-bookings', label: 'Table Bookings', icon: '🪑' },
     { id: 'menu-management', label: 'Menu Management', icon: '🍔' },
     { id: 'customers', label: 'Customers', icon: '👥' },
     { id: 'sales', label: 'Sales Statistics', icon: '📊' },

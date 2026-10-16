@@ -1,0 +1,217 @@
+/* ==============================================================================
+   YAARANA Cafe: Admin Customers Page Styles
+   Theme: Warm Brown (#311E18), Golden Yellow (#FFD000), Emerald Green (#27AE60)
+   ============================================================================== */
+
+.customers-admin-page {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 20px;
+}
+
+/* Stat Cards Grid */
+.customers-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+}
+
+.customer-stat-card {
+  background: #FDFBFA;
+  border: 1px solid #EFE9E1;
+  border-radius: 16px;
+  padding: 16px 18px;
+  box-shadow: 0 4px 14px rgba(61, 39, 29, 0.03);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.customer-stat-card p {
+  margin: 0 0 6px 0;
+  font-size: 0.76rem;
+  color: #7D6B62;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.customer-stat-card h3 {
+  margin: 0;
+  font-size: 1.65rem;
+  color: #3D271D;
+  font-family: 'Luckiest Guy', cursive, sans-serif;
+  letter-spacing: 0.5px;
+}
+
+.customer-stat-card .stat-desc {
+  margin: 4px 0 0 0;
+  font-size: 0.72rem;
+  color: #9A877E;
+  font-weight: 600;
+}
+
+/* Customer Type Filter Tabs */
+.customer-type-tabs-container {
+  background: #FDFBFA;
+  border: 1px solid #EFE9E1;
+  border-radius: 16px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.customer-type-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: 1.5px solid transparent;
+  color: #6B554B;
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.customer-type-tab-btn:hover {
+  background: #F5EFE6;
+  color: #311E18;
+}
+
+.customer-type-tab-btn.active {
+  background: #311E18;
+  color: #FFD000;
+  box-shadow: 0 4px 12px rgba(49, 30, 24, 0.15);
+}
+
+.customer-type-badge-count {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  background: #EFE9E1;
+  color: #4A3026;
+  transition: all 0.2s ease;
+}
+
+.customer-type-tab-btn.active .customer-type-badge-count {
+  background: #FFD000;
+  color: #311E18;
+}
+
+/* Search and Role Filter Bar */
+.customer-filter-toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: #FDFBFA;
+  padding: 14px 18px;
+  border-radius: 16px;
+  border: 1px solid #EFE9E1;
+  flex-wrap: wrap;
+}
+
+.customer-search-input {
+  flex: 1;
+  min-width: 220px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1.5px solid #EFE9E1;
+  background: #FFFFFF;
+  font-size: 0.9rem;
+  color: #3D271D;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+
+.customer-search-input:focus {
+  border-color: #311E18;
+  box-shadow: 0 0 0 3px rgba(49, 30, 24, 0.08);
+}
+
+.customer-role-select {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1.5px solid #EFE9E1;
+  background: #FFFFFF;
+  font-size: 0.9rem;
+  color: #3D271D;
+  outline: none;
+  min-width: 140px;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.customer-role-select:focus {
+  border-color: #311E18;
+}
+
+/* Customer Type Badges (Table & Modal) */
+.customer-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.76rem;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+}
+
+.customer-type-badge.regular {
+  background: #FFF8E1;
+  color: #8D5B00;
+  border: 1.5px solid #FFD000;
+}
+
+.customer-type-badge.new {
+  background: #E8F5E9;
+  color: #1B5E20;
+  border: 1.5px solid #A5D6A7;
+}
+
+/* Modal details */
+.customer-type-modal-highlight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #FDF9EE;
+  border: 1px dashed #E5D5BC;
+  padding: 10px 14px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #311E18;
+}
+
+@media (max-width: 768px) {
+  .customer-type-tabs-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .customer-type-tab-btn {
+    justify-content: space-between;
+  }
+
+  .customer-filter-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .customer-role-select {
+    width: 100%;
+  }
+}

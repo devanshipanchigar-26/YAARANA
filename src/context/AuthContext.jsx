@@ -98,8 +98,25 @@ export function AuthProvider({ children }) {
       setLoading(false);
     });
 
+    // 3. Cross-tab storage synchronization listener
+    const handleStorageChange = (e) => {
+      if (e.key && e.key.startsWith('sb-') && e.key.endsWith('-auth-token')) {
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          setSession(session);
+          setUser(session?.user ?? null);
+          if (session?.user) {
+            fetchProfile(session.user.id, session.user.user_metadata, session.user.email);
+          } else {
+            setProfile(null);
+          }
+        });
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+
     return () => {
       subscription.unsubscribe();
+      window.removeEventListener('storage', handleStorageChange);
     };
   }, []);
 

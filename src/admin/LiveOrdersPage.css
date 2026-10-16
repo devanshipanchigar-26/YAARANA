@@ -504,6 +504,47 @@
   background: #219653;
 }
 
+.btn-complete-pending {
+  background-color: #2E7D32;
+  box-shadow: 0 0 0 2px #E67E22;
+  position: relative;
+}
+
+.text-amber {
+  color: #E67E22;
+}
+
+.confirm-unpaid-alert {
+  background: #FFF8E6;
+  border: 1.5px solid #F39C12;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+}
+
+.confirm-unpaid-alert p {
+  margin: 0 !important;
+  color: #8A4B08 !important;
+  font-size: 0.84rem !important;
+  line-height: 1.4;
+}
+
+.btn-modal-force-unpaid {
+  background: none;
+  border: none;
+  color: #9C8276;
+  font-size: 0.78rem;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 6px 4px;
+  border-radius: 6px;
+  transition: color 0.15s;
+}
+
+.btn-modal-force-unpaid:hover {
+  color: #DC2626;
+}
+
 /* =========================================
    TABLET & MOBILE RESPONSIVENESS
    ========================================= */

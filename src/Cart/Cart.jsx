@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { X, Trash2, ShoppingCart, ArrowLeft, CheckCircle2, Lock, AlertCircle, Receipt, ExternalLink } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
-import { useCafeSettings, checkStoreOpenStatus, playOrderChimeSound } from '../utils/cafeSettings';
+import { useCafeSettings, checkStoreOpenStatus } from '../utils/cafeSettings';
 import { fetchActiveTableOrder, addItemsToExistingOrder, normalizeTableNo, formatTableLabel } from '../utils/billingUtils';
 import OrderBillModal from '../Components/OrderBillModal';
 import './Cart.css';
@@ -272,7 +272,6 @@ export default function Cart({
           setStep('success');
           setPlacing(false);
           submittingRef.current = false;
-          playOrderChimeSound();
           return;
         } catch (addErr) {
           console.error('Error adding items to existing bill:', addErr);
@@ -366,7 +365,6 @@ export default function Cart({
     setStep('success');
     setPlacing(false);
     submittingRef.current = false;
-    playOrderChimeSound();
   };
 
   const handleProceedToCheckout = () => {

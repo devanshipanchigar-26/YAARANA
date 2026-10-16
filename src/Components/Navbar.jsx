@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Heart, ShoppingCart, User, LogOut, Menu, X, Clock, Package } from 'lucide-react';
+import { ShoppingCart, User, Menu, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
 
@@ -12,32 +12,8 @@ export default function Navbar({
 }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, profile, signOut } = useAuth();
-  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const { user } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [lastOrderId, setLastOrderId] = useState(() => localStorage.getItem('yaarana_last_order_id'));
-  const profileMenuRef = useRef(null);
-
-  const isOrdersActive = location.pathname.startsWith('/my-orders') || location.pathname.startsWith('/track-order');
-
-  useEffect(() => {
-    // Keep lastOrderId synced with storage
-    const syncOrderId = () => {
-      setLastOrderId(localStorage.getItem('yaarana_last_order_id'));
-    };
-    window.addEventListener('storage', syncOrderId);
-    return () => window.removeEventListener('storage', syncOrderId);
-  }, []);
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
-        setProfileMenuOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   // Close mobile drawer on escape key or resize to desktop
   useEffect(() => {
@@ -125,28 +101,10 @@ export default function Navbar({
             Book a Table
           </a>
         </li>
-        {(user || lastOrderId) && (
-          <li>
-            <a
-              href="/my-orders"
-              className={`nav-link ${isOrdersActive ? 'active' : ''}`}
-              onClick={(e) => {
-                e.preventDefault();
-                setMobileMenuOpen(false);
-                navigate(lastOrderId ? `/my-orders/${lastOrderId}` : '/my-orders');
-              }}
-            >
-              My Orders
-            </a>
-          </li>
-        )}
       </ul>
 
       {/* Action Buttons */}
       <div className="navbar-buttons">
-        <button className="icon-button" type="button" aria-label="Wishlist">
-          <Heart size={22} />
-        </button>
         <button
           className="icon-button cart-icon-btn"
           type="button"
@@ -160,73 +118,22 @@ export default function Navbar({
           {cartItemCount > 0 && <span className="cart-badge">{cartItemCount}</span>}
         </button>
 
-        {user ? (
-          <div className="profile-menu-wrapper" ref={profileMenuRef}>
-            <button
-              className="icon-button profile-icon-btn"
-              type="button"
-              aria-label="User profile"
-              onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-            >
-              <User size={22} />
-            </button>
-            {profileMenuOpen && (
-              <div className="profile-dropdown">
-                <div className="profile-info">
-                  <p className="profile-name">{profile?.name || user.email?.split('@')[0] || 'Member'}</p>
-                  <p className="profile-email">{user.email}</p>
-                </div>
-                {profile?.role === 'admin' && (
-                  <>
-                    <button
-                      type="button"
-                      className="profile-logout-btn"
-                      style={{ color: '#0086FF' }}
-                      onClick={() => {
-                        setProfileMenuOpen(false);
-                        onNavigate('admin');
-                      }}
-                    >
-                      🚀 Admin Panel
-                    </button>
-                    <div className="profile-divider" />
-                  </>
-                )}
-                <button
-                  type="button"
-                  className="profile-logout-btn"
-                  onClick={() => {
-                    setProfileMenuOpen(false);
-                    navigate(lastOrderId ? `/my-orders/${lastOrderId}` : '/my-orders');
-                  }}
-                >
-                  <Package size={16} /> My Orders
-                </button>
-                <button
-                  type="button"
-                  className="profile-logout-btn"
-                  onClick={() => {
-                    setProfileMenuOpen(false);
-                    signOut();
-                  }}
-                >
-                  <LogOut size={16} /> Log Out
-                </button>
-              </div>
-            )}
-          </div>
-        ) : (
-          <button
-            type="button"
-            className="nav-login-btn"
-            onClick={() => {
-              setMobileMenuOpen(false);
-              onNavigate('login');
-            }}
-          >
-            LOGIN
-          </button>
-        )}
+        <button
+          className="icon-button profile-icon-btn"
+          type="button"
+          aria-label="User profile"
+          title={user ? 'My Profile' : 'Log In'}
+          onClick={() => {
+            setMobileMenuOpen(false);
+            if (user) {
+              navigate('/profile');
+            } else {
+              navigate('/login', { state: { returnUrl: '/profile' } });
+            }
+          }}
+        >
+          <User size={22} />
+        </button>
 
         {/* Mobile Hamburger Toggle Button */}
         <button

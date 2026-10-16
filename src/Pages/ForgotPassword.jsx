@@ -1,13 +1,24 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
+import { useAuth } from '../context/AuthContext';
 import '../Components/ForgotPassword.css';
 
 function ForgotPassword() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+
+  // Auto-redirect if user logs in from another tab
+  useEffect(() => {
+    if (user) {
+      navigate('/', { replace: true });
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -53,8 +64,8 @@ function ForgotPassword() {
 
         {success ? (
           <div style={{ textAlign: 'center', padding: '10px 0' }}>
-            <div style={{ background: '#DCFCE7', color: '#15803D', padding: '14px', borderRadius: '12px', marginBottom: '20px', fontSize: '14px' }}>
-              ✓ Password reset link sent! Check your inbox to set a new password.
+            <div style={{ background: '#DCFCE7', color: '#15803D', padding: '14px', borderRadius: '12px', marginBottom: '20px', fontSize: '14px', lineHeight: '1.5' }}>
+              ✓ Password reset link sent! Check your inbox to set a new password. You can safely close this tab.
             </div>
             <Link to="/login" style={{ color: '#0086FF', fontWeight: 'bold', textDecoration: 'none' }}>
               ← Return to Login

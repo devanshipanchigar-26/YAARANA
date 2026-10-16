@@ -1,0 +1,699 @@
+/* =========================================
+   TABLE BOOKINGS & RESERVATIONS STYLES
+   YAARANA Cafe Admin Panel
+   ========================================= */
+
+.table-bookings-page {
+  animation: fadeIn 0.25s ease-in-out;
+  padding-bottom: 40px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Page Header */
+.tb-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.tb-header-titles .admin-page-title {
+  font-family: 'Luckiest Guy', cursive, sans-serif;
+  color: #311E18;
+  font-size: 2.2rem;
+  letter-spacing: 1px;
+  margin: 0 0 4px;
+}
+
+.tb-header-sub {
+  color: #6B554B;
+  font-size: 0.92rem;
+  margin: 0;
+  font-weight: 500;
+}
+
+.tb-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.live-indicator-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: #E8F5E9;
+  color: #2E7D32;
+  border: 1px solid #C8E6C9;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #2E7D32;
+  box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.25);
+  animation: pulseDot 2s infinite;
+}
+
+@keyframes pulseDot {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+
+.tb-btn-refresh {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #311E18;
+  color: #FFD000;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tb-btn-refresh:hover:not(:disabled) {
+  background-color: #4A3026;
+  transform: translateY(-1px);
+}
+
+.tb-btn-refresh:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.spin-icon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* =========================================
+   METRICS SUMMARY KPI CARDS
+   ========================================= */
+.tb-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.tb-metric-card {
+  background: #FFFDF9;
+  border: 1px solid #EFE9E1;
+  border-radius: 16px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: 0 4px 14px rgba(49, 30, 24, 0.05);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.tb-metric-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+}
+
+.tb-metric-card.highlight-amber::before { background: #FFD000; }
+.tb-metric-card.highlight-green::before { background: #27AE60; }
+.tb-metric-card.highlight-blue::before { background: #1976D2; }
+.tb-metric-card.highlight-brown::before { background: #6B554B; }
+
+.tb-metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(49, 30, 24, 0.08);
+}
+
+.metric-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #8C756B;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.metric-value {
+  font-family: 'Luckiest Guy', cursive, sans-serif;
+  font-size: 2.2rem;
+  color: #311E18;
+  line-height: 1.1;
+}
+
+.metric-hint {
+  font-size: 0.76rem;
+  color: #9C8276;
+}
+
+/* =========================================
+   SEARCH & FILTERS BAR
+   ========================================= */
+.tb-filters-bar {
+  background: #FFFDF9;
+  border: 1px solid #EFE9E1;
+  border-radius: 16px;
+  padding: 14px 18px;
+  margin-bottom: 22px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 4px 12px rgba(49, 30, 24, 0.04);
+}
+
+.tb-search-wrap {
+  position: relative;
+  flex: 1 1 280px;
+  min-width: 240px;
+}
+
+.tb-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #8C756B;
+}
+
+.tb-search-input {
+  width: 100%;
+  padding: 9px 34px 9px 34px;
+  border-radius: 10px;
+  border: 1.5px solid #E5DCD2;
+  background: #FFFFFF;
+  color: #311E18;
+  font-size: 0.88rem;
+  outline: none;
+  box-sizing: border-box;
+  font-family: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.tb-search-input:focus {
+  border-color: #311E18;
+  box-shadow: 0 0 0 2px rgba(49, 30, 24, 0.1);
+}
+
+.tb-search-clear-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #8C756B;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+}
+
+.tb-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tb-filter-group-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #6B554B;
+}
+
+.tb-filter-tabs {
+  display: inline-flex;
+  background: #F4EDE5;
+  border-radius: 10px;
+  padding: 3px;
+  gap: 3px;
+}
+
+.tb-tab-btn {
+  background: none;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #5A4238;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.tb-tab-btn:hover {
+  color: #311E18;
+}
+
+.tb-tab-btn.active {
+  background: #311E18;
+  color: #FFD000;
+  box-shadow: 0 2px 6px rgba(49, 30, 24, 0.2);
+}
+
+/* =========================================
+   EMPTY STATE
+   ========================================= */
+.tb-empty-state {
+  text-align: center;
+  padding: 50px 20px;
+  background: #FFFDF9;
+  border: 1.5px dashed #E5DCD2;
+  border-radius: 18px;
+  color: #6B554B;
+}
+
+.tb-empty-state h4 {
+  font-family: 'Luckiest Guy', cursive;
+  font-size: 1.4rem;
+  color: #311E18;
+  margin: 0 0 8px;
+}
+
+.tb-empty-state p {
+  font-size: 0.9rem;
+  color: #8C756B;
+  margin: 0;
+  max-width: 420px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.tb-btn-reset-filters {
+  margin-top: 16px;
+  background: #311E18;
+  color: #FFD000;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 18px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* =========================================
+   BOOKINGS LIST & CARDS
+   ========================================= */
+.tb-cards-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 18px;
+}
+
+.tb-booking-card {
+  background: #FFFDF9;
+  border: 1.5px solid #EFE9E1;
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: 0 4px 14px rgba(49, 30, 24, 0.05);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+}
+
+.tb-booking-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(49, 30, 24, 0.08);
+}
+
+.tb-booking-card.is-today-booking {
+  border-color: #FFD000;
+  box-shadow: 0 4px 16px rgba(255, 208, 0, 0.18);
+}
+
+.tb-booking-card.status-card-completed {
+  opacity: 0.88;
+  background: #FCFBF9;
+}
+
+.tb-booking-card.status-card-cancelled {
+  opacity: 0.72;
+  background: #FAF7F5;
+  border-style: dashed;
+}
+
+/* Card Header */
+.tb-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.tb-card-id-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.tb-badge-id {
+  font-family: 'Luckiest Guy', cursive, sans-serif;
+  background-color: #311E18;
+  color: #FFD000;
+  padding: 3px 10px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  letter-spacing: 0.5px;
+}
+
+.tb-badge-table {
+  background-color: #F4EDE5;
+  color: #4A3026;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 8px;
+}
+
+.tb-badge-today {
+  background-color: #FFF3CD;
+  color: #856404;
+  border: 1px solid #FFEBAA;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 6px;
+  letter-spacing: 0.3px;
+}
+
+/* Status Pills */
+.tb-status-pill {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 11px;
+  border-radius: 12px;
+  letter-spacing: 0.3px;
+  display: inline-block;
+}
+
+.pill-confirmed {
+  background-color: #E8F5E9;
+  color: #2E7D32;
+  border: 1px solid #C8E6C9;
+}
+
+.pill-completed {
+  background-color: #E8F4FD;
+  color: #1976D2;
+  border: 1px solid #BBDEFB;
+}
+
+.pill-cancelled {
+  background-color: #FEE2E2;
+  color: #DC2626;
+  border: 1px solid #FECACA;
+}
+
+/* Customer Section */
+.tb-customer-section {
+  border-bottom: 1px dashed #EFE9E1;
+  padding-bottom: 12px;
+  margin-bottom: 14px;
+}
+
+.tb-cust-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  color: #311E18;
+  margin-bottom: 4px;
+}
+
+.tb-cust-phone-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+}
+
+.tb-meta-icon {
+  color: #8C756B;
+}
+
+.tb-phone-link {
+  color: #1A73E8;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.tb-phone-link:hover {
+  text-decoration: underline;
+}
+
+/* Reservation Details Grid */
+.tb-booking-details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 14px;
+  margin-bottom: 14px;
+}
+
+.tb-detail-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.tb-detail-icon {
+  color: #8C756B;
+  margin-top: 3px;
+}
+
+.tb-detail-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #8C756B;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.tb-detail-val {
+  display: block;
+  font-size: 0.88rem;
+  color: #311E18;
+}
+
+.tb-date-sub {
+  font-size: 0.74rem;
+  color: #8C756B;
+  font-weight: normal;
+}
+
+/* Special Request Box */
+.tb-special-request-box {
+  background: #FFF9EE;
+  border: 1px solid #F6E2BC;
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.tb-request-icon {
+  color: #D35400;
+  margin-top: 2px;
+}
+
+.tb-request-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #A04000;
+}
+
+.tb-request-text {
+  font-size: 0.82rem;
+  color: #5A4238;
+  margin: 2px 0 0;
+  font-style: italic;
+  line-height: 1.35;
+}
+
+/* Card Meta Footer */
+.tb-card-meta-footer {
+  font-size: 0.74rem;
+  color: #A08C82;
+  margin-top: 4px;
+  margin-bottom: 16px;
+}
+
+/* Action Buttons */
+.tb-card-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  border-top: 1px solid #EFE9E1;
+  padding-top: 14px;
+}
+
+.tb-btn-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 9px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  transition: transform 0.1s, opacity 0.15s;
+}
+
+.tb-btn-action:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.tb-btn-action:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn-tb-complete {
+  background-color: #27AE60;
+  color: #FFFFFF;
+  flex: 1 1 120px;
+}
+
+.btn-tb-complete:hover:not(:disabled) {
+  background-color: #219653;
+}
+
+.btn-tb-reassign {
+  background-color: #F4EDE5;
+  color: #311E18;
+  border: 1px solid #E5DCD2;
+}
+
+.btn-tb-reassign:hover:not(:disabled) {
+  background-color: #EFE9E1;
+}
+
+.btn-tb-cancel {
+  background-color: #FEE2E2;
+  color: #DC2626;
+  border: 1px solid #FECACA;
+}
+
+.btn-tb-cancel:hover:not(:disabled) {
+  background-color: #DC2626;
+  color: #FFFFFF;
+}
+
+.btn-tb-reconfirm {
+  background-color: #311E18;
+  color: #FFD000;
+  width: 100%;
+}
+
+.btn-tb-reconfirm:hover:not(:disabled) {
+  background-color: #4A3026;
+}
+
+/* Reassign Select in Modal */
+.tb-select-input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1.5px solid #D5C9BD;
+  background: #FFFDF9;
+  color: #311E18;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: inherit;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.tb-select-input:focus {
+  border-color: #311E18;
+  box-shadow: 0 0 0 2px rgba(49, 30, 24, 0.1);
+}
+
+/* =========================================
+   TABLET & MOBILE RESPONSIVENESS
+   ========================================= */
+@media (max-width: 850px) {
+  .tb-header-titles .admin-page-title {
+    font-size: 1.8rem;
+  }
+
+  .tb-cards-list {
+    grid-template-columns: 1fr;
+  }
+
+  .tb-filters-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .tb-filter-group {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .tb-filter-tabs {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .tb-tab-btn {
+    flex: 1;
+    text-align: center;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 520px) {
+  .tb-page-header {
+    flex-direction: column;
+  }
+
+  .tb-metrics-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .tb-metric-card {
+    padding: 14px;
+  }
+
+  .metric-value {
+    font-size: 1.8rem;
+  }
+
+  .tb-card-actions .tb-btn-action {
+    flex: 1 1 100%;
+  }
+}

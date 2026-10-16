@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
+import { useAuth } from '../context/AuthContext';
 import '../Components/Signup.css';
 
 function Signup() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
 
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -16,6 +18,13 @@ function Signup() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+
+  // Auto-redirect if user confirms and logs in from another tab
+  useEffect(() => {
+    if (user) {
+      navigate('/', { replace: true });
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -97,7 +106,7 @@ function Signup() {
             <div style={{ background: '#DCFCE7', color: '#15803D', padding: '16px', borderRadius: '16px', marginBottom: '20px', fontSize: '14px', lineHeight: '1.5' }}>
               🎉 <strong>Almost there!</strong><br />
               We sent a verification link to <strong>{email}</strong>.<br />
-              Please check your inbox and click the link to verify your account.
+              Please check your inbox and click the link to verify your account. You can safely close this tab.
             </div>
             <button
               type="button"

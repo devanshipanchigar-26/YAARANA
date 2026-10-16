@@ -8,6 +8,7 @@ import Cart from './Cart/Cart';
 import AdminLayout from './admin/AdminLayout';
 import LiveOrdersPage from './admin/LiveOrdersPage';
 import OrderHistoryPage from './admin/OrderHistoryPage';
+import TableBookingsPage from './admin/TableBookingsPage';
 import MenuManagementPage from './admin/MenuManagementPage';
 import CustomersPage from './admin/CustomersPage';
 import SalesStatisticsPage from './admin/SalesStatisticsPage';
@@ -19,6 +20,8 @@ import ForgotPassword from './Pages/ForgotPassword';
 import ResetPassword from './Pages/ResetPassword';
 import TrackOrderPage from './Pages/TrackOrderPage';
 import MyOrdersPage from './Pages/MyOrdersPage';
+import MyBookingsPage from './Pages/MyBookingsPage';
+import ProfilePage from './Pages/ProfilePage';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { CartProvider, useCart } from './context/CartContext';
 import './App.css';
@@ -56,11 +59,14 @@ function AppContent() {
     () => new URLSearchParams(window.location.search).get('table') || ''
   );
 
-  // Resume checkout if user was redirected back from successful login
+  // Resume checkout or book table if user was redirected back from successful login
   useEffect(() => {
     if (location.state?.resumeCheckout) {
       openCart('checkout');
       // Clear navigation state so it doesn't re-trigger unexpectedly
+      navigate(location.pathname, { replace: true, state: {} });
+    } else if (location.state?.openBookTable) {
+      setCustomerPage('book-table');
       navigate(location.pathname, { replace: true, state: {} });
     }
   }, [location.state, navigate, location.pathname, openCart]);
@@ -86,6 +92,14 @@ function AppContent() {
     }
     if (page === 'my-orders') {
       navigate('/my-orders');
+      return;
+    }
+    if (page === 'my-bookings') {
+      navigate('/my-bookings');
+      return;
+    }
+    if (page === 'profile') {
+      navigate('/profile');
       return;
     }
     if (page === 'signup') {
@@ -137,6 +151,26 @@ function AppContent() {
         }
       />
       <Route
+        path="/my-bookings"
+        element={
+          <MyBookingsPage
+            onNavigateToMenu={() => navigateTo('menu')}
+            onNavigateToBookTable={() => navigateTo('book-table')}
+            onBackHome={() => navigateTo('home')}
+          />
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProfilePage
+            onBackHome={() => navigateTo('home')}
+            onNavigateToOrders={() => navigateTo('my-orders')}
+            onNavigateToBookings={() => navigateTo('my-bookings')}
+          />
+        }
+      />
+      <Route
         path="*"
         element={
           currentView === 'admin' ? (
@@ -148,6 +182,7 @@ function AppContent() {
               >
                   {activeAdminTab === 'live-orders' && <LiveOrdersPage />}
                   {activeAdminTab === 'order-history' && <OrderHistoryPage />}
+                  {activeAdminTab === 'table-bookings' && <TableBookingsPage />}
                   {activeAdminTab === 'menu-management' && <MenuManagementPage />}
                   {activeAdminTab === 'customers' && <CustomersPage />}
                   {activeAdminTab === 'reviews' && <ReviewsPage />}
@@ -156,6 +191,7 @@ function AppContent() {
 
                   {activeAdminTab !== 'live-orders' &&
                   activeAdminTab !== 'order-history' &&
+                  activeAdminTab !== 'table-bookings' &&
                   activeAdminTab !== 'menu-management' &&
                   activeAdminTab !== 'customers' &&
                   activeAdminTab !== 'sales-statistics' &&

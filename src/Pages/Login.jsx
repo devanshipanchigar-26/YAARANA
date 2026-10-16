@@ -1,19 +1,84 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
+import { useAuth } from '../context/AuthContext';
 import '../Components/Login.css';
 
 function Login({ onLoginSuccess }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, profile } = useAuth();
 
   const [loginType, setLoginType] = useState(() => (location.state?.adminMode ? 'admin' : 'user'));
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   const returnToCheckout = location.state?.returnToCheckout;
+  const returnToBookTable = location.state?.returnToBookTable;
+  const returnUrl = location.state?.returnUrl;
+
+  // Auto-redirect if user is or becomes logged in (e.g. from another tab or verification link)
+  useEffect(() => {
+    if (user) {
+      if (loginType === 'admin') {
+        const role = profile?.role || user.user_metadata?.role;
+        if (role === 'admin') {
+          navigate('/', { state: { openAdmin: true }, replace: true });
+        }
+      } else {
+        if (returnToCheckout) {
+          navigate('/', { state: { resumeCheckout: true }, replace: true });
+        } else if (returnToBookTable) {
+          navigate('/', { state: { openBookTable: true }, replace: true });
+        } else if (returnUrl) {
+          navigate(returnUrl, { replace: true });
+        } else {
+          navigate('/', { replace: true });
+        }
+      }
+    }
+  }, [user, profile, loginType, navigate, returnToCheckout, returnToBookTable, returnUrl]);
+
+  // Detect email confirmation status or errors in URL hash/query params
+  useEffect(() => {
+    try {
+      const hash = window.location.hash.startsWith('#')
+        ? window.location.hash.substring(1)
+        : window.location.hash;
+      const hashParams = new URLSearchParams(hash);
+      const searchParams = new URLSearchParams(window.location.search);
+
+      const errorParam = hashParams.get('error') || searchParams.get('error');
+      const errorCode = hashParams.get('error_code') || searchParams.get('error_code');
+      const errorDescription = hashParams.get('error_description') || searchParams.get('error_description');
+
+      if (errorParam) {
+        if (errorCode === 'otp_expired' || errorParam === 'access_denied') {
+          setError(
+            errorDescription?.replace(/\+/g, ' ') ||
+              'This confirmation link is invalid or has expired. Please sign in or request a new confirmation.'
+          );
+        } else {
+          setError(errorDescription?.replace(/\+/g, ' ') || 'Authentication link error. Please try again.');
+        }
+        window.history.replaceState(null, '', window.location.pathname);
+        return;
+      }
+
+      const typeParam = hashParams.get('type') || searchParams.get('type');
+      const accessToken = hashParams.get('access_token');
+
+      if (typeParam === 'signup' || (accessToken && typeParam === 'signup')) {
+        setSuccessMessage('✓ Email confirmed successfully! Please sign in to your account.');
+        window.history.replaceState(null, '', window.location.pathname);
+      }
+    } catch {
+      // In case URL parsing encounters abnormal characters
+    }
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -67,6 +132,10 @@ function Login({ onLoginSuccess }) {
 
       if (returnToCheckout) {
         navigate('/', { state: { resumeCheckout: true }, replace: true });
+      } else if (returnToBookTable) {
+        navigate('/', { state: { openBookTable: true }, replace: true });
+      } else if (returnUrl) {
+        navigate(returnUrl, { replace: true });
       } else {
         navigate('/', { replace: true });
       }
@@ -121,6 +190,12 @@ function Login({ onLoginSuccess }) {
         {error && (
           <div style={{ background: '#FEE2E2', color: '#B91C1C', padding: '10px 14px', borderRadius: '12px', marginBottom: '16px', fontSize: '13px', textAlign: 'center' }}>
             {error}
+          </div>
+        )}
+
+        {successMessage && (
+          <div style={{ background: '#DCFCE7', color: '#15803D', padding: '10px 14px', borderRadius: '12px', marginBottom: '16px', fontSize: '13px', textAlign: 'center' }}>
+            {successMessage}
           </div>
         )}
 

@@ -21,12 +21,14 @@ import {
   ChevronRight,
   User,
   LogIn,
+  Star,
 } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
-import { getCafeSettings, playOrderChimeSound } from '../utils/cafeSettings';
+import { getCafeSettings } from '../utils/cafeSettings';
 import { formatTableLabel, normalizeTableNo } from '../utils/billingUtils';
 import OrderBillModal from '../Components/OrderBillModal';
+import ReviewModal from '../Components/ReviewModal';
 import './MyOrdersPage.css';
 
 // 4 progress stages mapped to database order_status
@@ -61,6 +63,7 @@ export default function MyOrdersPage({ onNavigateToMenu, onBackHome }) {
 
   // Bill modal
   const [viewingBillOrder, setViewingBillOrder] = useState(null);
+  const [reviewingOrder, setReviewingOrder] = useState(null);
   const [isCopied, setIsCopied] = useState(false);
   const [showUpiQr, setShowUpiQr] = useState(false);
   const [utrInput, setUtrInput] = useState('');
@@ -170,18 +173,6 @@ export default function MyOrdersPage({ onNavigateToMenu, onBackHome }) {
         setSelectedOrder(activeOne || fetchedOrders[0]);
       }
 
-      // Check if status advanced to ready to play chime
-      if (selectedOrder) {
-        const updatedSelf = fetchedOrders.find((o) => o.id === selectedOrder.id);
-        if (
-          updatedSelf &&
-          updatedSelf.order_status !== selectedOrder.order_status &&
-          (updatedSelf.order_status || '').toLowerCase() === 'ready'
-        ) {
-          playOrderChimeSound();
-        }
-      }
-
       setOrders(fetchedOrders);
       setError(null);
     } catch (err) {
@@ -216,9 +207,6 @@ export default function MyOrdersPage({ onNavigateToMenu, onBackHome }) {
 
             if (matchesUser || matchesSelected) {
               fetchOrders(true);
-              if ((payload.new.order_status || '').toLowerCase() === 'ready') {
-                playOrderChimeSound();
-              }
             }
           } else {
             fetchOrders(true);
@@ -352,9 +340,10 @@ export default function MyOrdersPage({ onNavigateToMenu, onBackHome }) {
           <button
             type="button"
             className="btn-header-back"
-            onClick={() => (onNavigateToMenu ? onNavigateToMenu() : navigate('/'))}
+            onClick={() => navigate('/profile')}
+            title="Back to Profile"
           >
-            <ArrowLeft size={18} /> Menu
+            <ArrowLeft size={18} /> Profile
           </button>
           <div className="header-brand">
             <span className="brand-title">YAARANA</span>
@@ -563,6 +552,16 @@ export default function MyOrdersPage({ onNavigateToMenu, onBackHome }) {
                   >
                     <Receipt size={16} /> View Bill / Receipt
                   </button>
+                  {isPaid && (
+                    <button
+                      type="button"
+                      className="tracker-btn"
+                      style={{ backgroundColor: '#FFD000', color: '#311E18', border: 'none', fontWeight: 'bold' }}
+                      onClick={() => setReviewingOrder(displayedTrackOrder)}
+                    >
+                      <Star size={16} /> Rate & Review
+                    </button>
+                  )}
                   <button
                     type="button"
                     className="tracker-btn primary"
@@ -752,13 +751,25 @@ export default function MyOrdersPage({ onNavigateToMenu, onBackHome }) {
 
                           <div className="card-right">
                             <span className="card-price">₹{Number(ord.total_amount || 0).toFixed(2)}</span>
-                            <button
-                              type="button"
-                              className="btn-card-bill"
-                              onClick={() => handleOpenBillModal(ord)}
-                            >
-                              <Receipt size={14} /> View Receipt
-                            </button>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                              <button
+                                type="button"
+                                className="btn-card-bill"
+                                onClick={() => handleOpenBillModal(ord)}
+                              >
+                                <Receipt size={14} /> View Receipt
+                              </button>
+                              {isOrdPaid && (
+                                <button
+                                  type="button"
+                                  className="btn-card-bill"
+                                  style={{ backgroundColor: '#FFD000', color: '#311E18', borderColor: '#FFD000', fontWeight: 'bold' }}
+                                  onClick={() => setReviewingOrder(ord)}
+                                >
+                                  ⭐ Rate Order
+                                </button>
+                              )}
+                            </div>
                           </div>
                         </div>
                       );
@@ -777,6 +788,16 @@ export default function MyOrdersPage({ onNavigateToMenu, onBackHome }) {
           isOpen={!!viewingBillOrder}
           onClose={() => setViewingBillOrder(null)}
           order={viewingBillOrder}
+          onLeaveReview={(ord) => setReviewingOrder(ord)}
+        />
+      )}
+
+      {/* Customer Review & Photo Modal */}
+      {reviewingOrder && (
+        <ReviewModal
+          isOpen={!!reviewingOrder}
+          onClose={() => setReviewingOrder(null)}
+          order={reviewingOrder}
         />
       )}
     </div>

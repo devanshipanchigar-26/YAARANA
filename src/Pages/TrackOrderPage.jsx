@@ -18,8 +18,9 @@ import {
 } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
-import { getCafeSettings, playOrderChimeSound } from '../utils/cafeSettings';
+import { getCafeSettings } from '../utils/cafeSettings';
 import OrderBillModal from '../Components/OrderBillModal';
+import ReviewModal from '../Components/ReviewModal';
 import './TrackOrderPage.css';
 
 // 4 progress stages mapped to database order_status
@@ -80,6 +81,7 @@ export default function TrackOrderPage({ onNavigateToMenu, onBackHome }) {
   const [loading, setLoading] = useState(!cachedOrder);
   const [error, setError] = useState(null);
   const [isBillOpen, setIsBillOpen] = useState(false);
+  const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const [showUpiQr, setShowUpiQr] = useState(false);
   const [submittingUtr, setSubmittingUtr] = useState(false);
@@ -151,13 +153,6 @@ export default function TrackOrderPage({ onNavigateToMenu, onBackHome }) {
           setError('Order not found. Please verify your order link or contact cafe staff.');
           setOrder(null);
         }
-      } else {
-        // Play gentle chime if status advanced to ready
-        if (order && order.order_status !== data.order_status) {
-          if ((data.order_status || '').toLowerCase() === 'ready') {
-            playOrderChimeSound();
-          }
-        }
         setOrder(data);
         setError(null);
         setLastRefreshed(new Date());
@@ -207,9 +202,6 @@ export default function TrackOrderPage({ onNavigateToMenu, onBackHome }) {
             ) {
               setOrder((prev) => (prev ? { ...prev, ...payload.new } : payload.new));
               fetchOrderDetails(true);
-              if ((payload.new.order_status || '').toLowerCase() === 'ready') {
-                playOrderChimeSound();
-              }
             }
           } else {
             fetchOrderDetails(true);
@@ -496,6 +488,36 @@ export default function TrackOrderPage({ onNavigateToMenu, onBackHome }) {
                       Ref / UTR: <code>{order.payment_reference}</code>
                     </p>
                   )}
+
+                  {/* Customer Review & Photo Gallery Trigger */}
+                  <div style={{ marginTop: '16px', background: '#FFF8E7', border: '1.5px dashed #FFB800', borderRadius: '16px', padding: '16px', textAlign: 'center' }}>
+                    <h4 style={{ margin: '0 0 4px 0', fontFamily: "'Luckiest Guy', cursive", color: '#3D271D', fontSize: '1.15rem' }}>
+                      ⭐ HOW WAS YOUR EXPERIENCE?
+                    </h4>
+                    <p style={{ margin: '0 0 12px 0', fontSize: '0.85rem', color: '#6E5B51', lineHeight: '1.4' }}>
+                      Rate your food & upload a photo to be featured in our homepage gallery!
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setIsReviewOpen(true)}
+                      style={{
+                        backgroundColor: '#311E18',
+                        color: '#FFD000',
+                        fontFamily: "'Luckiest Guy', cursive",
+                        border: 'none',
+                        padding: '10px 18px',
+                        borderRadius: '12px',
+                        cursor: 'pointer',
+                        fontSize: '0.92rem',
+                        boxShadow: '0 4px 12px rgba(49, 30, 24, 0.2)',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}
+                    >
+                      ⭐ Leave Review & Share Photo
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div className="track-payment-unsettled">
@@ -591,6 +613,16 @@ export default function TrackOrderPage({ onNavigateToMenu, onBackHome }) {
         <OrderBillModal
           isOpen={isBillOpen}
           onClose={() => setIsBillOpen(false)}
+          order={order}
+          onLeaveReview={() => setIsReviewOpen(true)}
+        />
+      )}
+
+      {/* Customer Review & Photo Modal */}
+      {order && (
+        <ReviewModal
+          isOpen={isReviewOpen}
+          onClose={() => setIsReviewOpen(false)}
           order={order}
         />
       )}

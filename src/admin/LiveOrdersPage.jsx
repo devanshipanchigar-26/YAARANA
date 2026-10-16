@@ -40,6 +40,10 @@ export default function LiveOrdersPage() {
   const [confirmingPaymentOrder, setConfirmingPaymentOrder] = useState(null);
   const [markingPaid, setMarkingPaid] = useState(false);
 
+  // State for Unpaid Order Complete Confirmation Modal
+  const [unpaidOrderToComplete, setUnpaidOrderToComplete] = useState(null);
+  const [completingWithPay, setCompletingWithPay] = useState(false);
+
   // State for Viewing/Printing Customer Bill
   const [viewingBillOrder, setViewingBillOrder] = useState(null);
 
@@ -226,6 +230,66 @@ export default function LiveOrdersPage() {
     } catch (error) {
       console.error('Error cancelling order:', error.message);
       alert('Failed to cancel order: ' + error.message);
+    }
+  };
+
+  // Handler for Complete & Clear button click - prevents clearing unpaid orders
+  const handleCompleteOrderClick = (order) => {
+    const isPending = (order.paymentStatus || '').toUpperCase() === 'PENDING';
+    if (isPending) {
+      // Intercept unpaid order to prevent clearing without payment
+      setUnpaidOrderToComplete(order);
+      return;
+    }
+    handleUpdateOrderStatus(order.rawId, 'Completed');
+  };
+
+  // 1-Click: Confirm payment collected & Complete order simultaneously
+  const handleConfirmPaymentAndComplete = async (order) => {
+    if (!order) return;
+    setCompletingWithPay(true);
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({
+          payment_status: 'Paid',
+          order_status: 'Completed',
+        })
+        .eq('id', order.rawId);
+
+      if (error) throw error;
+
+      setOrders((prev) => prev.filter((o) => o.rawId !== order.rawId));
+      setUnpaidOrderToComplete(null);
+    } catch (error) {
+      console.error('Error completing and marking order paid:', error.message);
+      alert('Failed to complete order: ' + error.message);
+    } finally {
+      setCompletingWithPay(false);
+    }
+  };
+
+  // Manager emergency override (explicit confirmation)
+  const handleForceCompleteUnpaid = async (order) => {
+    if (!order) return;
+    const confirmed = window.confirm(
+      `⚠️ WARNING: Are you sure you want to clear Order ${order.id} WITHOUT collecting payment of ₹${order.totalAmount.toFixed(2)}?\n\nThis will record the order as completed but UNPAID in sales and history.`
+    );
+    if (!confirmed) return;
+
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ order_status: 'Completed' })
+        .eq('id', order.rawId);
+
+      if (error) throw error;
+
+      setOrders((prev) => prev.filter((o) => o.rawId !== order.rawId));
+      setUnpaidOrderToComplete(null);
+    } catch (error) {
+      console.error('Error completing order unpaid:', error.message);
+      alert('Failed to update order: ' + error.message);
     }
   };
 
@@ -482,10 +546,15 @@ export default function LiveOrdersPage() {
                     )}
                     {normStatus === 'ready' && (
                       <button
-                        className="btn-action btn-complete"
-                        onClick={() => handleUpdateOrderStatus(order.rawId, 'Completed')}
+                        className={`btn-action btn-complete ${isPendingPayment ? 'btn-complete-pending' : ''}`}
+                        onClick={() => handleCompleteOrderClick(order)}
+                        title={
+                          isPendingPayment
+                            ? 'Payment pending: Confirm payment before completing'
+                            : 'Complete and clear order'
+                        }
                       >
-                        ✓ Complete & Clear
+                        {isPendingPayment ? '⚠️ Complete & Clear' : '✓ Complete & Clear'}
                       </button>
                     )}
 
@@ -575,6 +644,76 @@ export default function LiveOrdersPage() {
               >
                 {markingPaid ? 'Saving...' : 'Yes, Payment Received'}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* UNPAID ORDER COMPLETE CONFIRMATION MODAL */}
+      {unpaidOrderToComplete && (
+        <div className="admin-confirm-overlay">
+          <div className="admin-confirm-modal">
+            <div className="admin-confirm-header">
+              <AlertCircle size={26} className="text-amber" />
+              <h3>Payment Collection Required</h3>
+            </div>
+            <div className="admin-confirm-body">
+              <div className="confirm-unpaid-alert">
+                <p>
+                  <strong>⚠️ This order has not been marked as paid!</strong>
+                  <br />
+                  Clearing without collecting payment will record this order as unpaid.
+                </p>
+              </div>
+
+              <div className="confirm-amount-callout">
+                <span>Amount to Collect:</span>
+                <strong>₹{unpaidOrderToComplete.totalAmount.toFixed(2)}</strong>
+              </div>
+
+              <p className="confirm-cust-meta">
+                Order: <strong>{unpaidOrderToComplete.id}</strong>
+              </p>
+              <p className="confirm-cust-meta">
+                Customer: <strong>{unpaidOrderToComplete.customerName}</strong>
+                {unpaidOrderToComplete.customerPhone && ` (${unpaidOrderToComplete.customerPhone})`}
+              </p>
+              <p className="confirm-cust-meta">
+                Location: <strong>{unpaidOrderToComplete.tableNo}</strong> • Mode:{' '}
+                <strong>{unpaidOrderToComplete.paymentMode}</strong>
+              </p>
+
+              <p className="confirm-warning">
+                Have you collected <strong>₹{unpaidOrderToComplete.totalAmount.toFixed(2)}</strong> in Cash or UPI from the customer?
+              </p>
+            </div>
+            <div className="admin-confirm-actions" style={{ alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+              <button
+                type="button"
+                className="btn-modal-force-unpaid"
+                onClick={() => handleForceCompleteUnpaid(unpaidOrderToComplete)}
+                title="Override and complete order without recording payment"
+              >
+                Clear without paying
+              </button>
+              <div style={{ display: 'flex', gap: '8px', marginLeft: 'auto' }}>
+                <button
+                  type="button"
+                  className="btn-modal-cancel"
+                  onClick={() => setUnpaidOrderToComplete(null)}
+                  disabled={completingWithPay}
+                >
+                  Cancel (Keep in Queue)
+                </button>
+                <button
+                  type="button"
+                  className="btn-modal-confirm"
+                  onClick={() => handleConfirmPaymentAndComplete(unpaidOrderToComplete)}
+                  disabled={completingWithPay}
+                >
+                  {completingWithPay ? 'Saving...' : '✓ Mark Paid & Complete'}
+                </button>
+              </div>
             </div>
           </div>
         </div>

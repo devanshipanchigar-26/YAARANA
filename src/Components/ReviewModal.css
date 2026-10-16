@@ -1,0 +1,414 @@
+/* ==============================================================================
+   YAARANA Cafe: Customer Review Modal Styles
+   ============================================================================== */
+
+.review-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(30, 18, 14, 0.75);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+  animation: rmFadeIn 0.22s ease-out;
+}
+
+@keyframes rmFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.review-modal-card {
+  background: #FFFDF9;
+  border: 2px solid #EFE9E1;
+  border-radius: 24px;
+  max-width: 520px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 60px rgba(49, 30, 24, 0.35);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  animation: rmSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes rmSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.review-modal-header {
+  padding: 24px 24px 16px;
+  border-bottom: 1px solid #F0EAE1;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  position: relative;
+}
+
+.review-header-badge {
+  display: inline-block;
+  background: #FFF3D6;
+  color: #B25E00;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 20px;
+  margin-bottom: 6px;
+}
+
+.review-modal-title {
+  font-family: 'Luckiest Guy', cursive;
+  color: #3D271D;
+  font-size: 1.7rem;
+  margin: 0;
+  line-height: 1.15;
+  letter-spacing: 0.02em;
+}
+
+.review-order-subtitle {
+  color: #7D6B62;
+  font-size: 0.85rem;
+  margin: 4px 0 0 0;
+}
+
+.review-close-btn {
+  background: #F5EFEB;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #5D473C;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  flex-shrink: 0;
+}
+
+.review-close-btn:hover {
+  background: #E8DED6;
+  color: #21130D;
+  transform: rotate(90deg);
+}
+
+.review-modal-body {
+  padding: 20px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Star Rating Section */
+.rating-selector-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #FAF6F0;
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px dashed #DFCFC2;
+}
+
+.rating-label-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #4A3328;
+  margin-bottom: 8px;
+}
+
+.stars-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.star-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease;
+}
+
+.star-btn:hover {
+  transform: scale(1.22);
+}
+
+.star-icon {
+  width: 38px;
+  height: 38px;
+  transition: fill 0.15s ease, stroke 0.15s ease;
+}
+
+.star-icon.filled {
+  fill: #FFB800;
+  stroke: #E09E00;
+}
+
+.star-icon.empty {
+  fill: #EAE3D9;
+  stroke: #D0C3B4;
+}
+
+.rating-feedback-badge {
+  margin-top: 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #B25E00;
+  background: #FFF8E7;
+  padding: 4px 14px;
+  border-radius: 14px;
+}
+
+/* Form Fields */
+.review-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.review-field-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #452F24;
+}
+
+.review-field-input,
+.review-field-textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1.5px solid #E8DFD5;
+  background: #FFFFFF;
+  color: #2F1E16;
+  font-size: 0.95rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+  box-sizing: border-box;
+}
+
+.review-field-input:focus,
+.review-field-textarea:focus {
+  border-color: #FFB800;
+  box-shadow: 0 0 0 3px rgba(255, 184, 0, 0.22);
+}
+
+.review-field-textarea {
+  min-height: 110px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.char-counter {
+  align-self: flex-end;
+  font-size: 0.75rem;
+  color: #948278;
+}
+
+/* Photo Upload Box */
+.photo-upload-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.photo-dropzone {
+  border: 2px dashed #DFCFC2;
+  border-radius: 16px;
+  padding: 16px;
+  text-align: center;
+  background: #FAF6F0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.photo-dropzone:hover {
+  border-color: #FFB800;
+  background: #FFFDF9;
+}
+
+.photo-dropzone-icon {
+  font-size: 1.8rem;
+}
+
+.photo-dropzone-title {
+  font-size: 0.9rem;
+  font-weight: 750;
+  color: #3D271D;
+  margin: 0;
+}
+
+.photo-dropzone-hint {
+  font-size: 0.75rem;
+  color: #8C786E;
+  margin: 0;
+}
+
+/* Photo Preview Box */
+.photo-preview-wrap {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  max-height: 220px;
+  border: 2px solid #E8DFD5;
+  background: #111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.photo-preview-img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  display: block;
+}
+
+.photo-remove-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.65);
+  color: white;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.18s ease;
+}
+
+.photo-remove-btn:hover {
+  background: #D32F2F;
+}
+
+/* Banners */
+.review-alert-box {
+  padding: 12px 16px;
+  border-radius: 14px;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.review-alert-error {
+  background: #FEE2E2;
+  color: #991B1B;
+  border: 1px solid #FCA5A5;
+}
+
+.review-alert-success {
+  background: #DCFCE7;
+  color: #15803D;
+  border: 1px solid #86EFAC;
+}
+
+.review-existing-badge {
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  color: #1E40AF;
+  font-size: 0.8rem;
+  padding: 8px 12px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Submit Button */
+.review-submit-btn {
+  background: #311E18;
+  color: #FFD000;
+  font-family: 'Luckiest Guy', cursive;
+  font-size: 1.15rem;
+  letter-spacing: 0.03em;
+  padding: 14px 24px;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(49, 30, 24, 0.25);
+  transition: all 0.18s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.review-submit-btn:hover:not(:disabled) {
+  background: #472B23;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px rgba(49, 30, 24, 0.32);
+}
+
+.review-submit-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Success View */
+.review-success-view {
+  padding: 36px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.review-success-icon {
+  font-size: 3.5rem;
+  line-height: 1;
+}
+
+.review-success-title {
+  font-family: 'Luckiest Guy', cursive;
+  font-size: 2rem;
+  color: #3D271D;
+  margin: 0;
+}
+
+.review-success-desc {
+  color: #6E5B51;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  max-width: 400px;
+  margin: 0;
+}
+
+.review-gallery-note {
+  background: #FFF8E7;
+  border: 1px dashed #FFB800;
+  color: #8C5300;
+  padding: 10px 16px;
+  border-radius: 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
