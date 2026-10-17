@@ -1,9 +1,9 @@
 import React, { useRef } from 'react';
-import { X, Printer, CheckCircle, Clock, Coffee, ShieldCheck } from 'lucide-react';
+import { X, Printer, CheckCircle, Clock, Coffee, ShieldCheck, CreditCard } from 'lucide-react';
 import { getCafeSettings } from '../utils/cafeSettings';
 import './OrderBillModal.css';
 
-export default function OrderBillModal({ isOpen, onClose, order, onLeaveReview }) {
+export default function OrderBillModal({ isOpen, onClose, order, onLeaveReview, onPayBill }) {
   const billPrintRef = useRef(null);
   const cafeSettings = getCafeSettings();
 
@@ -81,6 +81,18 @@ export default function OrderBillModal({ isOpen, onClose, order, onLeaveReview }
         <div className="bill-actions-header no-print">
           <div className="bill-actions-title">Customer Bill & Receipt</div>
           <div className="bill-actions-buttons">
+            {!isPaid && onPayBill && (
+              <button
+                type="button"
+                className="bill-btn bill-btn-pay"
+                onClick={() => {
+                  onClose();
+                  onPayBill(order);
+                }}
+              >
+                <CreditCard size={15} /> Pay Bill Online (₹{total.toFixed(2)})
+              </button>
+            )}
             {isPaid && onLeaveReview && (
               <button
                 type="button"
@@ -277,6 +289,20 @@ export default function OrderBillModal({ isOpen, onClose, order, onLeaveReview }
                     timeStyle: 'short',
                   })}
                 </span>
+              </div>
+            )}
+            {!isPaid && onPayBill && (
+              <div className="bill-pay-cta-row no-print" style={{ marginTop: 12, paddingTop: 10, borderTop: '1px dashed #E5DCD2' }}>
+                <button
+                  type="button"
+                  className="bill-pay-cta-btn"
+                  onClick={() => {
+                    onClose();
+                    onPayBill(order);
+                  }}
+                >
+                  <CreditCard size={15} /> Pay the Bill · ₹{total.toFixed(2)} Online →
+                </button>
               </div>
             )}
           </div>

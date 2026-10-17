@@ -22,11 +22,13 @@ import {
   User,
   LogIn,
   Star,
+  CreditCard,
 } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
 import { getCafeSettings } from '../utils/cafeSettings';
 import { formatTableLabel, normalizeTableNo } from '../utils/billingUtils';
+import { openRazorpayCheckout } from '../utils/razorpayClient';
 import OrderBillModal from '../Components/OrderBillModal';
 import ReviewModal from '../Components/ReviewModal';
 import './MyOrdersPage.css';
@@ -61,14 +63,12 @@ export default function MyOrdersPage({ onNavigateToMenu, onBackHome }) {
   const [error, setError] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Bill modal
+  // Bill modal & payment state
   const [viewingBillOrder, setViewingBillOrder] = useState(null);
   const [reviewingOrder, setReviewingOrder] = useState(null);
-  const [isCopied, setIsCopied] = useState(false);
-  const [showUpiQr, setShowUpiQr] = useState(false);
-  const [utrInput, setUtrInput] = useState('');
-  const [submittingUtr, setSubmittingUtr] = useState(false);
-  const [utrSuccess, setUtrSuccess] = useState(false);
+  const [payingOrderId, setPayingOrderId] = useState(null);
+  const [payError, setPayError] = useState(null);
+  const [paySuccessMessage, setPaySuccessMessage] = useState(null);
 
   // Cached order from route state or local storage
   const initialCached = useMemo(() => {
@@ -281,43 +281,61 @@ export default function MyOrdersPage({ onNavigateToMenu, onBackHome }) {
     }
   };
 
-  const handleCopyUpi = () => {
-    if (cafeSettings.upiId) {
-      navigator.clipboard.writeText(cafeSettings.upiId);
-      setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2000);
-    }
-  };
+  // Pay Table Bill Online via Razorpay
+  const handlePayBill = (orderToPay) => {
+    if (!orderToPay) return;
+    setPayingOrderId(orderToPay.id);
+    setPayError(null);
+    setPaySuccessMessage(null);
 
-  const handleSaveUtr = async (e) => {
-    e.preventDefault();
-    if (!utrInput.trim() || !displayedTrackOrder?.id) return;
+    openRazorpayCheckout({
+      orderId: orderToPay.id,
+      customerName: orderToPay.customer_name || user?.user_metadata?.name || '',
+      customerPhone: orderToPay.customer_phone || '',
+      customerEmail: user?.email || '',
+      paymentToken: orderToPay.payment_token || '',
+      onSuccess: (verifyData) => {
+        setPayingOrderId(null);
+        setPaySuccessMessage(
+          `✓ Payment verified! Order #${orderToPay.order_number || orderToPay.id} is now Paid in Full.`
+        );
+        setTimeout(() => setPaySuccessMessage(null), 5000);
 
-    setSubmittingUtr(true);
-    try {
-      const { error: updateErr } = await supabase
-        .from('orders')
-        .update({ payment_reference: utrInput.trim() })
-        .eq('id', displayedTrackOrder.id);
+        const updatedStatus = verifyData.payment_status || 'Paid';
+        const updatedPaid = verifyData.paid_amount || orderToPay.total_amount;
 
-      if (updateErr && updateErr.code !== 'PGRST204') {
-        throw updateErr;
-      }
-
-      setOrders((prev) =>
-        prev.map((o) => (o.id === displayedTrackOrder.id ? { ...o, payment_reference: utrInput.trim() } : o))
-      );
-      if (selectedOrder?.id === displayedTrackOrder.id) {
-        setSelectedOrder((prev) => (prev ? { ...prev, payment_reference: utrInput.trim() } : prev));
-      }
-      setUtrSuccess(true);
-      setTimeout(() => setUtrSuccess(false), 4000);
-    } catch (err) {
-      console.error('Error saving reference:', err);
-      alert('Could not submit reference: ' + err.message);
-    } finally {
-      setSubmittingUtr(false);
-    }
+        setOrders((prev) =>
+          prev.map((o) =>
+            o.id === orderToPay.id
+              ? {
+                  ...o,
+                  payment_status: updatedStatus,
+                  paid_amount: updatedPaid,
+                }
+              : o
+          )
+        );
+        if (selectedOrder?.id === orderToPay.id) {
+          setSelectedOrder((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  payment_status: updatedStatus,
+                  paid_amount: updatedPaid,
+                }
+              : prev
+          );
+        }
+        fetchOrders(true);
+      },
+      onDismiss: () => {
+        setPayingOrderId(null);
+      },
+      onError: (err) => {
+        setPayingOrderId(null);
+        setPayError(err.message || 'Payment could not be completed. Please try again.');
+      },
+    });
   };
 
   const activeStageIndex = getActiveStageIndex(displayedTrackOrder?.order_status);
@@ -325,12 +343,7 @@ export default function MyOrdersPage({ onNavigateToMenu, onBackHome }) {
   const isCompleted = (displayedTrackOrder?.order_status || '').toLowerCase() === 'completed';
   const isPaid = (displayedTrackOrder?.payment_status || '').toLowerCase() === 'paid';
   const totalAmount = Number(displayedTrackOrder?.total_amount || displayedTrackOrder?.total || 0);
-
-  const upiId = cafeSettings?.upiId || 'yaarana@upi';
-  const upiPayUrl = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=YAARANA%20Cafe&am=${totalAmount}&cu=INR&tn=Order%20${displayedTrackOrder?.id || ''}`;
-  const qrCodeImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
-    upiPayUrl
-  )}`;
+  const remainingPayable = parseFloat(Math.max(0, totalAmount - Number(displayedTrackOrder?.paid_amount || 0)).toFixed(2));
 
   return (
     <div className="my-orders-page">
@@ -427,6 +440,12 @@ export default function MyOrdersPage({ onNavigateToMenu, onBackHome }) {
             {/* 1. TOP SPOTLIGHT: Active Order Live Tracker */}
             {displayedTrackOrder && (
               <section className="tracker-spotlight-card">
+                {paySuccessMessage && (
+                  <div className="tracker-pay-success-toast">
+                    <CheckCircle2 size={16} /> {paySuccessMessage}
+                  </div>
+                )}
+
                 <div className="tracker-card-header">
                   <div>
                     <span className="card-kicker">LIVE ORDER STATUS</span>
@@ -552,6 +571,21 @@ export default function MyOrdersPage({ onNavigateToMenu, onBackHome }) {
                   >
                     <Receipt size={16} /> View Bill / Receipt
                   </button>
+
+                  {!isPaid && !isCancelled && (
+                    <button
+                      type="button"
+                      className="tracker-btn btn-pay-bill-gold"
+                      onClick={() => handlePayBill(displayedTrackOrder)}
+                      disabled={payingOrderId === displayedTrackOrder.id}
+                    >
+                      <CreditCard size={16} />
+                      {payingOrderId === displayedTrackOrder.id
+                        ? 'Opening Gateway...'
+                        : `Pay Bill (Online) · ₹${remainingPayable.toFixed(2)}`}
+                    </button>
+                  )}
+
                   {isPaid && (
                     <button
                       type="button"
@@ -580,11 +614,24 @@ export default function MyOrdersPage({ onNavigateToMenu, onBackHome }) {
                         <span className="pbox-label">
                           {displayedTrackOrder.order_type === 'dine-in'
                             ? `Total for Table ${displayedTrackOrder.table_no || ''}`
-                            : 'Total to Pay at Counter'}
+                            : 'Total to Pay'}
                         </span>
-                        <strong className="pbox-amount">₹{totalAmount.toFixed(2)}</strong>
+                        <strong className="pbox-amount">₹{remainingPayable.toFixed(2)}</strong>
                       </div>
+                      <button
+                        type="button"
+                        className="btn-pay-now-action"
+                        onClick={() => handlePayBill(displayedTrackOrder)}
+                        disabled={payingOrderId === displayedTrackOrder.id}
+                      >
+                        <CreditCard size={15} />
+                        {payingOrderId === displayedTrackOrder.id ? 'Connecting...' : 'Pay the Bill →'}
+                      </button>
                     </div>
+                    {payError && <div className="tracker-pay-error">{payError}</div>}
+                    <p className="payment-settle-hint">
+                      💡 Settle instantly with Razorpay (UPI, Cards, Netbanking) or pay cash at the counter before leaving.
+                    </p>
                   </div>
                 )}
               </section>
@@ -674,6 +721,20 @@ export default function MyOrdersPage({ onNavigateToMenu, onBackHome }) {
                                   title="Add more items to this table"
                                 >
                                   <ShoppingBag size={12} /> Add Items
+                                </button>
+                              )}
+                              {!isOrdPaid && (
+                                <button
+                                  type="button"
+                                  className="btn-card-pay"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handlePayBill(ord);
+                                  }}
+                                  disabled={payingOrderId === ord.id}
+                                  title="Pay Bill Online"
+                                >
+                                  <CreditCard size={12} /> {payingOrderId === ord.id ? 'Opening...' : 'Pay Bill'}
                                 </button>
                               )}
                               <button
@@ -789,6 +850,10 @@ export default function MyOrdersPage({ onNavigateToMenu, onBackHome }) {
           onClose={() => setViewingBillOrder(null)}
           order={viewingBillOrder}
           onLeaveReview={(ord) => setReviewingOrder(ord)}
+          onPayBill={(ord) => {
+            setViewingBillOrder(null);
+            handlePayBill(ord);
+          }}
         />
       )}
 

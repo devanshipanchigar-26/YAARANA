@@ -691,3 +691,77 @@
   }
 }
 
+/* Prominent Online Payment Button in Track Order */
+.track-razorpay-action-card {
+  margin-top: 14px;
+  background: #FFFDF9;
+  border: 1.5px solid #FFD000;
+  box-shadow: 0 4px 16px rgba(255, 208, 0, 0.15);
+  border-radius: 14px;
+  padding: 14px;
+  text-align: center;
+}
+
+.track-pay-online-btn {
+  width: 100%;
+  background: #311E18;
+  color: #FFD000;
+  border: 2px solid #311E18;
+  padding: 13px 18px;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(49, 30, 24, 0.2);
+}
+
+.track-pay-online-btn:hover:not(:disabled) {
+  background: #4A3026;
+  border-color: #4A3026;
+  color: #FFE66D;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(49, 30, 24, 0.28);
+}
+
+.track-pay-online-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.track-pay-subhint {
+  font-size: 0.75rem;
+  color: #6E5B51;
+  margin: 10px 0 0;
+  line-height: 1.4;
+}
+
+.track-pay-error {
+  font-size: 0.78rem;
+  color: #DC2626;
+  background: #FEE2E2;
+  border: 1px solid #FCA5A5;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 10px 0 0;
+  font-weight: 600;
+}
+
+.track-pay-success {
+  font-size: 0.8rem;
+  color: #15803D;
+  background: #DCFCE7;
+  border: 1px solid #86EFAC;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 10px 0 0;
+  font-weight: 700;
+}
+

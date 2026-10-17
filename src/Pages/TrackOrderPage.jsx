@@ -15,10 +15,12 @@ import {
   RefreshCw,
   ShoppingBag,
   ExternalLink,
+  CreditCard,
 } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
 import { getCafeSettings } from '../utils/cafeSettings';
+import { openRazorpayCheckout } from '../utils/razorpayClient';
 import OrderBillModal from '../Components/OrderBillModal';
 import ReviewModal from '../Components/ReviewModal';
 import './TrackOrderPage.css';
@@ -89,6 +91,46 @@ export default function TrackOrderPage({ onNavigateToMenu, onBackHome }) {
   const [utrSuccess, setUtrSuccess] = useState(false);
   const [lastRefreshed, setLastRefreshed] = useState(new Date());
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Razorpay Online Bill Settlement
+  const [payingOnline, setPayingOnline] = useState(false);
+  const [payError, setPayError] = useState(null);
+  const [paySuccess, setPaySuccess] = useState(false);
+
+  const handlePayBillOnline = () => {
+    if (!order) return;
+    setPayingOnline(true);
+    setPayError(null);
+
+    openRazorpayCheckout({
+      orderId: order.id,
+      customerName: order.customer_name || user?.user_metadata?.name || '',
+      customerPhone: order.customer_phone || '',
+      customerEmail: user?.email || '',
+      paymentToken: order.payment_token || '',
+      onSuccess: async (verifyData) => {
+        setPayingOnline(false);
+        setPaySuccess(true);
+        setTimeout(() => setPaySuccess(false), 6000);
+
+        setOrder((prev) => ({
+          ...prev,
+          payment_status: 'Paid',
+          paid_amount: Number(verifyData.paid_amount || totalAmount),
+          payment_reference: verifyData.payment_reference || prev?.payment_reference || '',
+        }));
+
+        await fetchOrderDetails(true);
+      },
+      onDismiss: () => {
+        setPayingOnline(false);
+      },
+      onError: (err) => {
+        setPayingOnline(false);
+        setPayError(err.message || 'Payment could not be completed. Please retry or pay at counter.');
+      },
+    });
+  };
 
   // Fetch order details by ID (handles alphanumeric IDs like YAA-1016, ORD-001, and numbers)
   const fetchOrderDetails = async (isSilent = false) => {
@@ -526,11 +568,48 @@ export default function TrackOrderPage({ onNavigateToMenu, onBackHome }) {
                     <strong className="unsettled-value">₹{totalAmount.toFixed(2)}</strong>
                   </div>
 
+                  {/* Prominent Online Payment Button via Razorpay */}
+                  {cafeSettings.razorpayPaymentEnabled !== false && (
+                    <div className="track-razorpay-action-card">
+                      <button
+                        type="button"
+                        className="track-pay-online-btn"
+                        onClick={handlePayBillOnline}
+                        disabled={payingOnline}
+                      >
+                        {payingOnline ? (
+                          <>
+                            <RefreshCw size={18} className="spin-icon" />
+                            <span>Connecting Secure Payment Gateway...</span>
+                          </>
+                        ) : (
+                          <>
+                            <CreditCard size={18} />
+                            <span>Pay the Bill · ₹{totalAmount.toFixed(2)}</span>
+                          </>
+                        )}
+                      </button>
+                      {payError && <p className="track-pay-error">{payError}</p>}
+                      {paySuccess && (
+                        <p className="track-pay-success">
+                          ✓ Payment verified! Order automatically marked as Paid in kitchen.
+                        </p>
+                      )}
+                      <p className="track-pay-subhint">
+                        Instant checkout with UPI, Cards & Netbanking.
+                        The cafe kitchen order automatically updates to <strong>PAID</strong>.
+                      </p>
+                    </div>
+                  )}
+
                   <div className="unsettled-instruction">
-                    <span className="inst-badge">Counter Payment Required</span>
+                    <span className="inst-badge">
+                      {order.order_type === 'dine-in' ? 'Dine-In Meal Tab' : 'Counter Payment'}
+                    </span>
                     <p>
-                      Please pay <strong>₹{totalAmount.toFixed(2)}</strong> at the cash counter.
-                      Our staff will verify your receipt and mark your order as paid.
+                      {order.order_type === 'dine-in'
+                        ? `Enjoy your meal at Table ${order.table_no || ''}! When ready, settle your bill online above or pay cash at the counter before you leave.`
+                        : `Please pay ₹${totalAmount.toFixed(2)} online above or at the cash counter when you collect your takeaway.`}
                     </p>
                   </div>
 
@@ -615,6 +694,7 @@ export default function TrackOrderPage({ onNavigateToMenu, onBackHome }) {
           onClose={() => setIsBillOpen(false)}
           order={order}
           onLeaveReview={() => setIsReviewOpen(true)}
+          onPayBill={handlePayBillOnline}
         />
       )}
 

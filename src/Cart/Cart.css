@@ -1091,6 +1091,31 @@
   line-height: 1.35;
 }
 
+.active-bill-payment-note {
+  background: linear-gradient(135deg, #FFFDF7 0%, #FFF8E7 100%);
+  border: 1.5px solid #F6D896;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-top: 10px;
+  margin-bottom: 6px;
+}
+
+.abpn-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.84rem;
+  color: #78350F;
+  margin-bottom: 4px;
+}
+
+.abpn-text {
+  margin: 0;
+  font-size: 0.78rem;
+  color: #92400E;
+  line-height: 1.4;
+}
+
 @media (max-width: 480px) {
   .cart-sidebar {
     width: 100%;

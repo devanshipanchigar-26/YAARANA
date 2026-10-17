@@ -20,6 +20,7 @@ export const DEFAULT_SETTINGS = {
   // 3. Payment Settings
   cashPaymentEnabled: true,
   upiPaymentEnabled: true,
+  razorpayPaymentEnabled: true,
   upiId: 'yaarana@upi',
 
   // 4. Notifications

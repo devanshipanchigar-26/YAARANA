@@ -4,6 +4,7 @@ import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
 import { useCafeSettings, checkStoreOpenStatus } from '../utils/cafeSettings';
 import { fetchActiveTableOrder, addItemsToExistingOrder, normalizeTableNo, formatTableLabel } from '../utils/billingUtils';
+import { openRazorpayCheckout } from '../utils/razorpayClient';
 import OrderBillModal from '../Components/OrderBillModal';
 import './Cart.css';
 
@@ -40,6 +41,7 @@ export default function Cart({
   const minOrderAmount = Number(cafeSettings?.minOrderAmount) || 0;
   const cashEnabled = cafeSettings?.cashPaymentEnabled !== false;
   const upiEnabled = cafeSettings?.upiPaymentEnabled !== false;
+  const razorpayEnabled = cafeSettings?.razorpayPaymentEnabled !== false;
 
   // 'cart' -> 'checkout' -> 'success'
   const [step, setStep] = useState(initialStep);
@@ -67,7 +69,12 @@ export default function Cart({
     return defaultTable || localStorage.getItem('yaarana_last_table') || '';
   });
   const [pickupTime, setPickupTime] = useState(PICKUP_OPTIONS[0]);
-  const [paymentMode, setPaymentMode] = useState(cashEnabled ? 'cash' : 'upi');
+  const [paymentMode, setPaymentMode] = useState(() => {
+    if (cashEnabled) return 'cash';
+    if (razorpayEnabled) return 'razorpay';
+    if (upiEnabled) return 'upi';
+    return 'cash';
+  });
 
   // Active open order for the selected table (if one already exists, new items attach to it)
   const [activeTableOrder, setActiveTableOrder] = useState(null);
@@ -86,12 +93,14 @@ export default function Cart({
 
   // Sync payment mode if active method is disabled
   useEffect(() => {
-    if (!cashEnabled && upiEnabled && paymentMode === 'cash') {
-      setPaymentMode('upi');
-    } else if (!upiEnabled && cashEnabled && paymentMode === 'upi') {
-      setPaymentMode('cash');
+    if (paymentMode === 'cash' && !cashEnabled) {
+      setPaymentMode(razorpayEnabled ? 'razorpay' : upiEnabled ? 'upi' : 'cash');
+    } else if (paymentMode === 'razorpay' && !razorpayEnabled) {
+      setPaymentMode(cashEnabled ? 'cash' : upiEnabled ? 'upi' : 'razorpay');
+    } else if (paymentMode === 'upi' && !upiEnabled) {
+      setPaymentMode(cashEnabled ? 'cash' : razorpayEnabled ? 'razorpay' : 'upi');
     }
-  }, [cashEnabled, upiEnabled, paymentMode]);
+  }, [cashEnabled, upiEnabled, razorpayEnabled, paymentMode]);
 
   // Sync step if initialStep changes externally
   useEffect(() => {
@@ -267,6 +276,8 @@ export default function Cart({
             localStorage.setItem('yaarana_last_order', JSON.stringify(orderData));
           } catch {}
 
+          // For ongoing table dine-in meals, additional rounds simply increment the running table tab.
+          // Customers pay the full consolidated bill when finished dining from Track Order / My Orders!
           clearCart();
           setResult(orderData);
           setStep('success');
@@ -303,15 +314,26 @@ export default function Cart({
 
     const createdOrderId = data?.order_id || data?.id;
 
-    // Associate order with logged-in user
-    if (user?.id && createdOrderId) {
+    // Associate order with logged-in user and retrieve authoritative payment_token
+    let orderPaymentToken = data?.payment_token || '';
+    if (createdOrderId) {
       try {
-        await supabase
+        if (user?.id) {
+          await supabase
+            .from('orders')
+            .update({ user_id: user.id })
+            .eq('id', createdOrderId);
+        }
+        const { data: orderMeta } = await supabase
           .from('orders')
-          .update({ user_id: user.id })
-          .eq('id', createdOrderId);
-      } catch (linkErr) {
-        console.warn('Could not update order user_id:', linkErr);
+          .select('payment_token')
+          .eq('id', createdOrderId)
+          .maybeSingle();
+        if (orderMeta?.payment_token) {
+          orderPaymentToken = orderMeta.payment_token;
+        }
+      } catch (metaErr) {
+        console.warn('Could not sync order user_id or payment_token:', metaErr);
       }
     }
 
@@ -347,6 +369,7 @@ export default function Cart({
       paymentMode,
       payment_mode: paymentMode,
       payment_status: 'Pending',
+      payment_token: orderPaymentToken,
       order_status: 'Pending',
       customer_name: customerName,
       customer_phone: customerPhone,
@@ -360,6 +383,8 @@ export default function Cart({
       /* ignore */
     }
 
+    // Orders are sent straight to the kitchen without opening any payment gateway at checkout.
+    // Customers settle their tab by clicking "Pay the Bill" in Track Order, My Orders, or the counter!
     setResult(orderData);
     clearCart();
     setStep('success');
@@ -677,7 +702,41 @@ export default function Cart({
                 />
               </div>
 
-              <span className="cf-label">Select Payment Method</span>
+              {orderType === 'dine-in' ? (
+                <div className="active-bill-payment-note">
+                  <div className="abpn-header">
+                    <Receipt size={16} />
+                    <strong>{activeTableOrder ? 'Running Meal Tab Active' : `Dine-In • Table ${tableNo || 'Table'}`}</strong>
+                  </div>
+                  <p className="abpn-text">
+                    {activeTableOrder ? (
+                      <>
+                        These items will be sent straight to the kitchen and added to your <strong>{formatTableLabel(activeTableOrder.table_no)}</strong> bill.
+                        You can click <strong>"Pay the Bill"</strong> from <strong>Track Order</strong> after having your meal, or pay at the counter.
+                      </>
+                    ) : (
+                      <>
+                        Your order will be sent directly to the kitchen so you can enjoy fresh food.
+                        When ready, you can settle your bill with <strong>"Pay the Bill"</strong> in <strong>Track Order</strong> or at the counter.
+                      </>
+                    )}
+                  </p>
+                </div>
+              ) : (
+                <div className="active-bill-payment-note">
+                  <div className="abpn-header">
+                    <Receipt size={16} />
+                    <strong>Takeaway Order • Pickup: {pickupTime}</strong>
+                  </div>
+                  <p className="abpn-text">
+                    Your takeaway order will be prepared fresh by our kitchen.
+                    You can settle your bill with <strong>"Pay the Bill"</strong> from <strong>Track Order</strong> or at the counter.
+                  </p>
+                </div>
+              )}
+
+              {/* Payment Method Selector */}
+              <span className="cf-label" style={{ marginTop: '12px' }}>Select Payment Method</span>
               <div className="cf-segment" role="group" aria-label="Payment mode">
                 {cashEnabled && (
                   <button
@@ -689,31 +748,25 @@ export default function Cart({
                     💵 Cash at counter
                   </button>
                 )}
-                {upiEnabled && (
+                {razorpayEnabled && (
                   <button
                     type="button"
-                    className={paymentMode === 'upi' ? 'active' : ''}
-                    aria-pressed={paymentMode === 'upi'}
-                    onClick={() => setPaymentMode('upi')}
+                    className={paymentMode === 'razorpay' ? 'active' : ''}
+                    aria-pressed={paymentMode === 'razorpay'}
+                    onClick={() => setPaymentMode('razorpay')}
                   >
-                    📱 UPI at counter
+                    💳 Pay Online
                   </button>
                 )}
               </div>
 
               <div className="payment-selected-hint">
-                {paymentMode === 'cash' ? (
-                  <span>💵 <strong>Cash selected:</strong> Pay physically at the cafe counter.</span>
+                {paymentMode === 'razorpay' ? (
+                  <span>💳 <strong>Pay Online selected:</strong> Settle online using Razorpay (UPI, Cards) via <strong>"Pay the Bill"</strong> after food is sent to kitchen.</span>
                 ) : (
-                  <span>📱 <strong>UPI selected:</strong> Scan & pay using UPI at the counter or tracker.</span>
+                  <span>💵 <strong>Cash selected:</strong> Pay cash physically at the cafe counter.</span>
                 )}
               </div>
-
-              {paymentMode === 'upi' && cafeSettings?.upiId && (
-                <div className="upi-vpa-pill">
-                  Cafe UPI VPA: <strong>{cafeSettings.upiId}</strong>
-                </div>
-              )}
 
               {error && <p className="cf-error">{error}</p>}
             </div>
@@ -730,13 +783,16 @@ export default function Cart({
                     : 'Ordering Paused'
                   : placing
                   ? 'Sending to Kitchen...'
-                  : activeTableOrder
-                  ? `Add to Table Bill · ₹${total}`
-                  : `Place order (${paymentMode === 'cash' ? 'Cash' : 'UPI'}) · ₹${total}`}
+                  : orderType === 'dine-in'
+                  ? activeTableOrder
+                    ? `Add to Table Bill · ₹${total}`
+                    : `Place Order (${paymentMode === 'razorpay' ? 'Pay Online' : 'Cash'}) · ₹${total}`
+                  : `Place Order (${paymentMode === 'razorpay' ? 'Pay Online' : 'Cash'}) · ₹${total}`}
                 <span>→</span>
               </button>
               <p className="secure-text">
-                <Lock size={11} style={{ verticalAlign: '-1px' }} /> Verified counter payment • You pay when you collect
+                <Lock size={11} style={{ verticalAlign: '-1px' }} />{' '}
+                Sent directly to kitchen • Settle with "Pay the Bill" in Track Order or Counter
               </p>
             </div>
           </form>
@@ -796,7 +852,13 @@ export default function Cart({
 
               <div className="summary-payment-mode-hint">
                 <span>
-                  {result.paymentMode === 'cash' ? '💵 Cash payment at counter' : '📱 UPI payment verified at counter'}
+                  {result.payment_status?.toLowerCase() === 'paid'
+                    ? '✓ Paid in Full'
+                    : result.isAddedToExistingBill
+                    ? '📋 Added to running table tab • Settle after meal in Track Order'
+                    : result.paymentMode === 'razorpay'
+                    ? '💳 Pay Online via Track Order'
+                    : '💵 Cash payment at counter'}
                 </span>
               </div>
             </div>
@@ -813,7 +875,7 @@ export default function Cart({
                 }}
               >
                 <ExternalLink size={18} />
-                <span>Track in My Orders</span>
+                <span>Track Order & Pay the Bill →</span>
               </button>
 
               <button
@@ -843,6 +905,23 @@ export default function Cart({
           isOpen={isBillOpen}
           onClose={() => setIsBillOpen(false)}
           order={result}
+          onPayBill={(ord) => {
+            openRazorpayCheckout({
+              orderId: ord.id || ord.orderId,
+              customerName: customerName.trim(),
+              customerPhone: customerPhone.trim(),
+              customerEmail: user?.email || '',
+              paymentToken: ord.payment_token || '',
+              onSuccess: (verifyData) => {
+                setResult((prev) => ({
+                  ...prev,
+                  payment_status: 'Paid',
+                  paid_amount: verifyData.paid_amount || ord.total || ord.total_amount,
+                  payment_reference: verifyData.payment_reference,
+                }));
+              },
+            });
+          }}
         />
       )}
     </>

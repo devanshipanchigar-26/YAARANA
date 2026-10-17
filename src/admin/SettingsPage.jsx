@@ -555,44 +555,28 @@ export default function SettingsPage() {
 
               <div className="settings-toggle-row">
                 <div className="toggle-info">
-                  <strong>UPI at Counter</strong>
-                  <p>Accept payments via Google Pay, PhonePe, Paytm QR scanner</p>
+                  <strong>Pay Online (Razorpay Test Mode)</strong>
+                  <p>Accept instant payments via Razorpay (UPI, Credit/Debit Cards, Netbanking)</p>
                 </div>
                 <button
                   type="button"
                   className={`toggle-switch-btn ${
-                    formData.upiPaymentEnabled ? 'on' : 'off'
+                    formData.razorpayPaymentEnabled !== false ? 'on' : 'off'
                   }`}
                   onClick={() =>
                     handleInputChange(
-                      'upiPaymentEnabled',
-                      !formData.upiPaymentEnabled
+                      'razorpayPaymentEnabled',
+                      formData.razorpayPaymentEnabled === false
                     )
                   }
                 >
-                  {formData.upiPaymentEnabled ? (
+                  {formData.razorpayPaymentEnabled !== false ? (
                     <ToggleRight size={34} />
                   ) : (
                     <ToggleLeft size={34} />
                   )}
                 </button>
               </div>
-
-              {formData.upiPaymentEnabled && (
-                <div className="form-group" style={{ marginTop: 16 }}>
-                  <label htmlFor="upiId">Cafe UPI ID (VPA)</label>
-                  <input
-                    id="upiId"
-                    type="text"
-                    value={formData.upiId || ''}
-                    onChange={(e) => handleInputChange('upiId', e.target.value)}
-                    placeholder="e.g. yaarana@upi or yaarana@okhdfcbank"
-                  />
-                  <small className="field-hint">
-                    Displayed to customers when choosing UPI payment at the counter.
-                  </small>
-                </div>
-              )}
 
               <div className="security-notice-box">
                 <Info size={16} />

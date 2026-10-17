@@ -155,8 +155,14 @@ export default function LiveOrdersPage() {
           }),
           items: itemsDescription,
           totalAmount: parseFloat(order.total_amount || 0),
-          paymentMode: order.payment_mode ? order.payment_mode.toUpperCase() : 'ONLINE',
-          paymentStatus: order.payment_status ? order.payment_status.toUpperCase() : 'PENDING',
+          paidAmount: parseFloat(order.paid_amount || 0),
+          paymentStatus:
+            (order.payment_status && order.payment_status.trim().toUpperCase() === 'PAID') ||
+            (parseFloat(order.total_amount || 0) > 0 && parseFloat(order.paid_amount || 0) >= parseFloat(order.total_amount || 0))
+              ? 'PAID'
+              : order.payment_status
+              ? order.payment_status.trim().toUpperCase()
+              : 'PENDING',
           orderStatus: order.order_status || 'Pending',
           paymentReference: order.payment_reference || '',
           paidAt: order.paid_at || null,
@@ -233,11 +239,11 @@ export default function LiveOrdersPage() {
     }
   };
 
-  // Handler for Complete & Clear button click - prevents clearing unpaid orders
+  // Handler for Complete & Clear button click - prevents clearing unpaid or partially paid orders
   const handleCompleteOrderClick = (order) => {
-    const isPending = (order.paymentStatus || '').toUpperCase() === 'PENDING';
-    if (isPending) {
-      // Intercept unpaid order to prevent clearing without payment
+    const isUnsettled = (order.paymentStatus || '').toUpperCase() !== 'PAID';
+    if (isUnsettled) {
+      // Intercept unpaid/partial order to prevent clearing without collecting full balance
       setUnpaidOrderToComplete(order);
       return;
     }
@@ -252,6 +258,7 @@ export default function LiveOrdersPage() {
       const { error } = await supabase
         .from('orders')
         .update({
+          paid_amount: order.totalAmount,
           payment_status: 'Paid',
           order_status: 'Completed',
         })
@@ -301,7 +308,10 @@ export default function LiveOrdersPage() {
     try {
       const { error } = await supabase
         .from('orders')
-        .update({ payment_status: 'Paid' })
+        .update({
+          paid_amount: confirmingPaymentOrder.totalAmount,
+          payment_status: 'Paid',
+        })
         .eq('id', confirmingPaymentOrder.rawId);
 
       if (error) throw error;
@@ -392,7 +402,7 @@ export default function LiveOrdersPage() {
   };
 
   const activeOrdersCount = orders.length;
-  const pendingPaymentsCount = orders.filter((o) => o.paymentStatus === 'PENDING').length;
+  const pendingPaymentsCount = orders.filter((o) => (o.paymentStatus || '').toUpperCase() !== 'PAID').length;
 
   return (
     <div className="live-orders-page">
@@ -445,8 +455,11 @@ export default function LiveOrdersPage() {
             </div>
           ) : (
             orders.map((order) => {
-              const isPendingPayment = order.paymentStatus === 'PENDING';
+              const pStatusUpper = (order.paymentStatus || 'PENDING').toUpperCase();
+              const isPendingPayment = pStatusUpper !== 'PAID';
+              const isPartiallyPaid = pStatusUpper === 'PARTIALLY_PAID';
               const normStatus = (order.orderStatus || 'Pending').toLowerCase();
+              const remainingBalance = Math.max(0, order.totalAmount - (order.paidAmount || 0));
 
               return (
                 <div
@@ -476,10 +489,15 @@ export default function LiveOrdersPage() {
                       {/* Payment Status Badge */}
                       <div
                         className={`order-status-badge ${
-                          isPendingPayment ? 'badge-cash-pending' : 'badge-online-paid'
+                          isPendingPayment
+                            ? isPartiallyPaid
+                              ? 'badge-cash-pending'
+                              : 'badge-cash-pending'
+                            : 'badge-online-paid'
                         }`}
+                        style={isPartiallyPaid ? { background: '#FEF3C7', color: '#92400E', border: '1px solid #FCD34D' } : {}}
                       >
-                        {order.paymentMode} • {order.paymentStatus}
+                        {order.paymentMode} • {isPartiallyPaid ? `PARTIAL (Paid ₹${order.paidAmount})` : order.paymentStatus}
                       </div>
                     </div>
                   </div>
@@ -499,7 +517,7 @@ export default function LiveOrdersPage() {
                       )}
                       {order.paymentReference && (
                         <span className="order-utr-tag">
-                          UTR: <code>{order.paymentReference}</code>
+                          Ref: <code>{order.paymentReference}</code>
                         </span>
                       )}
                     </div>
@@ -508,12 +526,15 @@ export default function LiveOrdersPage() {
 
                     <p className="order-total-text">
                       Total Amount: <strong>₹{order.totalAmount}</strong>
-                      {isPendingPayment && (
-                        <span className="payment-pending-note">
-                          {' '}
-                          (Payment pending counter collection)
+                      {isPartiallyPaid ? (
+                        <span className="payment-pending-note" style={{ color: '#D97706', fontWeight: 600 }}>
+                          {' '}(₹{order.paidAmount} paid online • ₹{remainingBalance.toFixed(2)} balance pending)
                         </span>
-                      )}
+                      ) : isPendingPayment ? (
+                        <span className="payment-pending-note">
+                          {' '}(Payment pending counter collection)
+                        </span>
+                      ) : null}
                     </p>
                   </div>
 
@@ -668,7 +689,14 @@ export default function LiveOrdersPage() {
 
               <div className="confirm-amount-callout">
                 <span>Amount to Collect:</span>
-                <strong>₹{unpaidOrderToComplete.totalAmount.toFixed(2)}</strong>
+                <strong>
+                  ₹{Math.max(0, unpaidOrderToComplete.totalAmount - (unpaidOrderToComplete.paidAmount || 0)).toFixed(2)}
+                </strong>
+                {unpaidOrderToComplete.paidAmount > 0 && (
+                  <div style={{ fontSize: '0.82rem', color: '#15803d', marginTop: '4px', fontWeight: 'bold' }}>
+                    ✓ ₹{unpaidOrderToComplete.paidAmount.toFixed(2)} already settled online (Total Bill: ₹{unpaidOrderToComplete.totalAmount.toFixed(2)})
+                  </div>
+                )}
               </div>
 
               <p className="confirm-cust-meta">
@@ -684,7 +712,7 @@ export default function LiveOrdersPage() {
               </p>
 
               <p className="confirm-warning">
-                Have you collected <strong>₹{unpaidOrderToComplete.totalAmount.toFixed(2)}</strong> in Cash or UPI from the customer?
+                Have you collected <strong>₹{Math.max(0, unpaidOrderToComplete.totalAmount - (unpaidOrderToComplete.paidAmount || 0)).toFixed(2)}</strong> from the customer?
               </p>
             </div>
             <div className="admin-confirm-actions" style={{ alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>

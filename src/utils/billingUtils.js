@@ -167,6 +167,7 @@ export async function addItemsToExistingOrder(existingOrder, newItems) {
     .from('orders')
     .update({
       total_amount: updatedTotal,
+      bill_version: Number(existingOrder.bill_version || 1) + 1,
       order_status: 'Preparing', // Put back in kitchen queue for new items
     })
     .eq('id', existingOrder.id)
