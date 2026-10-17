@@ -22,6 +22,8 @@ import TrackOrderPage from './Pages/TrackOrderPage';
 import MyOrdersPage from './Pages/MyOrdersPage';
 import MyBookingsPage from './Pages/MyBookingsPage';
 import ProfilePage from './Pages/ProfilePage';
+import About from './Pages/About';
+import Contact from './Pages/Contact';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { CartProvider, useCart } from './context/CartContext';
 import './App.css';
@@ -51,13 +53,37 @@ function AppContent() {
   const [currentView, setCurrentView] = useState('website');
   const [activeAdminTab, setActiveAdminTab] = useState('menu-management');
 
-  // Which customer page is showing: 'home' | 'menu' | 'book-table'
-  const [customerPage, setCustomerPage] = useState('home');
+  // Which customer page is showing: 'home' | 'menu' | 'book-table' | 'about' | 'contact'
+  const [customerPage, setCustomerPage] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const path = window.location.pathname;
+      if (path === '/about') return 'about';
+      if (path === '/contact') return 'contact';
+      if (path === '/menu') return 'menu';
+      if (path === '/book-table') return 'book-table';
+    }
+    return 'home';
+  });
 
   // Table number from the QR code link, e.g. yoursite.com/?table=5
   const [qrTable] = useState(
     () => new URLSearchParams(window.location.search).get('table') || ''
   );
+
+  // Sync customerPage when browser navigation (back/forward) occurs
+  useEffect(() => {
+    if (location.pathname === '/about') {
+      setCustomerPage('about');
+    } else if (location.pathname === '/contact') {
+      setCustomerPage('contact');
+    } else if (location.pathname === '/menu') {
+      setCustomerPage('menu');
+    } else if (location.pathname === '/book-table') {
+      setCustomerPage('book-table');
+    } else if (location.pathname === '/') {
+      setCustomerPage('home');
+    }
+  }, [location.pathname]);
 
   // Resume checkout or book table if user was redirected back from successful login
   useEffect(() => {
@@ -108,6 +134,36 @@ function AppContent() {
     }
     if (page === 'forgot-password') {
       navigate('/forgot-password');
+      return;
+    }
+    if (page === 'about') {
+      navigate('/about');
+      setCustomerPage('about');
+      window.scrollTo(0, 0);
+      return;
+    }
+    if (page === 'contact') {
+      navigate('/contact');
+      setCustomerPage('contact');
+      window.scrollTo(0, 0);
+      return;
+    }
+    if (page === 'menu') {
+      navigate('/menu');
+      setCustomerPage('menu');
+      window.scrollTo(0, 0);
+      return;
+    }
+    if (page === 'book-table') {
+      navigate('/book-table');
+      setCustomerPage('book-table');
+      window.scrollTo(0, 0);
+      return;
+    }
+    if (page === 'home') {
+      navigate('/');
+      setCustomerPage('home');
+      window.scrollTo(0, 0);
       return;
     }
     if (location.pathname !== '/') {
@@ -239,6 +295,8 @@ function AppContent() {
               {customerPage === 'home' && <HomePage onNavigate={navigateTo} />}
               {customerPage === 'menu' && <MenuPage addToCart={addToCart} />}
               {customerPage === 'book-table' && <BookTablePage />}
+              {customerPage === 'about' && <About onNavigate={navigateTo} />}
+              {customerPage === 'contact' && <Contact />}
 
               {/* Floating Button to open Admin Panel (always available access point) */}
               <div style={{ position: 'fixed', bottom: '20px', right: '20px', zIndex: 997 }}>

@@ -77,27 +77,47 @@ export default function Navbar({
       {/* Navigation Links */}
       <ul className={`navbar-links ${mobileMenuOpen ? 'open' : ''}`}>
         <li>
-          <a href="#home" className="nav-link" onClick={(e) => goToPage(e, 'home')}>
+          <a
+            href="#home"
+            className={`nav-link ${currentPage === 'home' ? 'active' : ''}`}
+            onClick={(e) => goToPage(e, 'home')}
+          >
             Home
           </a>
         </li>
         <li>
-          <a href="#contact" className="nav-link" onClick={(e) => goToSection(e, 'contact')}>
+          <a
+            href="#contact"
+            className={`nav-link ${currentPage === 'contact' ? 'active' : ''}`}
+            onClick={(e) => goToPage(e, 'contact')}
+          >
             Contact Us
           </a>
         </li>
         <li>
-          <a href="#story" className="nav-link" onClick={(e) => goToSection(e, 'story')}>
+          <a
+            href="#about"
+            className={`nav-link ${currentPage === 'about' ? 'active' : ''}`}
+            onClick={(e) => goToPage(e, 'about')}
+          >
             About Us
           </a>
         </li>
         <li>
-          <a href="#menu" className="nav-link" onClick={(e) => goToPage(e, 'menu')}>
+          <a
+            href="#menu"
+            className={`nav-link ${currentPage === 'menu' ? 'active' : ''}`}
+            onClick={(e) => goToPage(e, 'menu')}
+          >
             Menu
           </a>
         </li>
         <li>
-          <a href="#book-table" className="nav-link" onClick={(e) => goToPage(e, 'book-table')}>
+          <a
+            href="#book-table"
+            className={`nav-link ${currentPage === 'book-table' ? 'active' : ''}`}
+            onClick={(e) => goToPage(e, 'book-table')}
+          >
             Book a Table
           </a>
         </li>

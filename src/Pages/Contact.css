@@ -1,0 +1,229 @@
+.contact-page {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: calc(var(--navbar-height, 80px) + 35px) 20px 60px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* HERO */
+.contact-hero {
+  text-align: center;
+  padding: 20px 0 40px;
+}
+
+.contact-hero-content h1 {
+  font-family: var(--font-display, 'Luckiest Guy', cursive);
+  font-size: 64px;
+  color: #3C2317;
+  letter-spacing: 1.5px;
+  margin-bottom: 8px;
+}
+
+.contact-hero-content p {
+  color: #1294F6;
+  font-family: var(--font-display, 'Luckiest Guy', cursive);
+  font-size: 20px;
+  letter-spacing: 2px;
+}
+
+.contact-hero-decoration {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 18px;
+  color: #E15B35;
+}
+
+.contact-hero-decoration span {
+  width: 40px;
+  height: 2px;
+  background-color: #E15B35;
+}
+
+/* CARDS */
+.contact-info-card,
+.contact-form-card {
+  background-color: #FFFFFF;
+  border-radius: 28px;
+  padding: 40px;
+  margin-bottom: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+}
+
+.contact-card-badge {
+  display: inline-block;
+  background-color: #1294F6;
+  color: #FFFFFF;
+  font-family: var(--font-display, 'Luckiest Guy', cursive);
+  font-size: 13px;
+  padding: 6px 16px;
+  border-radius: 20px;
+  margin-bottom: 12px;
+}
+
+.contact-info-card h2,
+.contact-form-card h2 {
+  font-family: var(--font-display, 'Luckiest Guy', cursive);
+  font-size: 36px;
+  color: #3C2317;
+  margin-bottom: 12px;
+}
+
+.contact-blue-line {
+  width: 60px;
+  height: 4px;
+  background-color: #1294F6;
+  border-radius: 5px;
+  margin-bottom: 24px;
+}
+
+/* HOURS */
+.contact-hours-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 500px;
+}
+
+.contact-hours-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  font-size: 15px;
+  color: #5A4A42;
+  border-bottom: 1px dashed rgba(60, 35, 23, 0.15);
+  padding-bottom: 10px;
+}
+
+.contact-hours-row strong {
+  color: #3C2317;
+}
+
+/* FORM */
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.contact-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.contact-form-group label {
+  font-family: var(--font-display, 'Luckiest Guy', cursive);
+  font-size: 14px;
+  color: #3C2317;
+}
+
+.contact-form-group input,
+.contact-form-group textarea {
+  width: 100%;
+  background-color: #F3EFEA;
+  border: 2px solid transparent;
+  outline: none;
+  border-radius: 16px;
+  padding: 16px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 14px;
+  color: #3C2317;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.contact-form-group input:focus,
+.contact-form-group textarea:focus {
+  background-color: #FFFFFF;
+  border-color: #1294F6;
+}
+
+.contact-form-group textarea {
+  resize: vertical;
+  min-height: 130px;
+}
+
+.contact-form-group input::placeholder,
+.contact-form-group textarea::placeholder {
+  color: #9C8E87;
+}
+
+.contact-submit-button {
+  width: 100%;
+  background-color: #FFCD00;
+  color: #3C2317;
+  font-family: var(--font-display, 'Luckiest Guy', cursive);
+  font-size: 18px;
+  border: none;
+  border-radius: 28px;
+  padding: 16px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(255, 205, 0, 0.4);
+}
+
+/* BANNER */
+.contact-see-you-banner {
+  background-color: #FFFFFF;
+  border-radius: 28px;
+  padding: 35px 20px;
+  margin-top: 24px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+}
+
+.contact-see-you-banner h2 {
+  font-family: var(--font-display, 'Luckiest Guy', cursive);
+  color: #3E9268;
+  font-size: 26px;
+  margin-bottom: 8px;
+}
+
+.contact-see-you-banner p {
+  color: #3C2317;
+  font-size: 15px;
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+  .contact-page {
+    padding: calc(var(--navbar-height, 70px) + 20px) 16px 40px;
+  }
+
+  .contact-hero {
+    padding-bottom: 25px;
+  }
+
+  .contact-hero-content h1 {
+    font-size: 40px;
+  }
+
+  .contact-hero-content p {
+    font-size: 15px;
+  }
+
+  .contact-info-card,
+  .contact-form-card {
+    padding: 24px 20px;
+    border-radius: 24px;
+  }
+
+  .contact-info-card h2,
+  .contact-form-card h2 {
+    font-size: 28px;
+  }
+
+  .contact-hours-row {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .contact-see-you-banner {
+    padding: 24px 16px;
+  }
+
+  .contact-see-you-banner h2 {
+    font-size: 20px;
+  }
+}
