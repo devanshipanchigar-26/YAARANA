@@ -7,6 +7,7 @@ export const DEFAULT_SETTINGS = {
   logoUrl: '',
   address: '123 Yaarana Street, Foodie Hub, City',
   contactNumber: '+91 98765 43210',
+  aboutStory: '',
   openingTime: '10:00',
   closingTime: '23:00',
   weeklyClosingDays: [], // e.g. ['Tuesday'] or empty for 7 days open
@@ -29,7 +30,44 @@ export const DEFAULT_SETTINGS = {
   lowStockAlerts: false,
   emailNotificationsEnabled: false,
   notificationEmail: 'admin@yaarana.com',
+
+  // 5. Social Media Links
+  instagramUrl: '',
+  facebookUrl: '',
+  whatsappNumber: '',
 };
+
+/**
+ * Validates that an Instagram URL is a legitimate HTTPS profile link.
+ * Format: https://instagram.com/username or https://www.instagram.com/username
+ */
+export function isValidInstagramUrl(url) {
+  if (!url || typeof url !== 'string') return false;
+  const trimmed = url.trim();
+  if (!trimmed) return false;
+  try {
+    const parsed = new URL(trimmed);
+    if (parsed.protocol !== 'https:') return false;
+    const host = parsed.hostname.toLowerCase();
+    if (host !== 'instagram.com' && host !== 'www.instagram.com') return false;
+    const pathname = parsed.pathname.replace(/^\/|\/$/g, '');
+    if (!pathname) return false;
+    const username = pathname.split('/')[0];
+    return /^[a-zA-Z0-9._]{1,30}$/.test(username);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Formats WhatsApp contact to a valid wa.me link
+ */
+export function formatWhatsAppUrl(number) {
+  if (!number) return '';
+  const digits = String(number).replace(/[^0-9]/g, '');
+  if (!digits) return '';
+  return `https://wa.me/${digits}`;
+}
 
 const STORAGE_KEY = 'yaarana_cafe_settings';
 const EVENT_KEY = 'yaarana_settings_updated';

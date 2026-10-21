@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
+import MessagesPage from './MessagesPage';
 import './MenuManagementPage.css';
 import './CustomersPage.css';
 
-export default function CustomersPage() {
+export default function CustomersPage({ initialSubTab = 'directory' }) {
+  const [activeMainTab, setActiveMainTab] = useState(initialSubTab);
+  const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
+  const [totalMessagesCount, setTotalMessagesCount] = useState(0);
+
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -14,8 +19,42 @@ export default function CustomersPage() {
   const [customerOrders, setCustomerOrders] = useState([]);
 
   useEffect(() => {
+    setActiveMainTab(initialSubTab);
+  }, [initialSubTab]);
+
+  useEffect(() => {
     fetchCustomersWithStats();
+    fetchMessageStats();
   }, []);
+
+  const fetchMessageStats = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('contact_messages')
+        .select('id, status');
+
+      let list = data || [];
+      try {
+        const localRaw = localStorage.getItem('yaarana_pending_contact_messages');
+        if (localRaw) {
+          const localList = JSON.parse(localRaw);
+          if (Array.isArray(localList)) {
+            const existingIds = new Set(list.map((m) => m.id));
+            for (const item of localList) {
+              if (!existingIds.has(item.id)) list.push(item);
+            }
+          }
+        }
+      } catch (e) {
+        // ignore
+      }
+
+      setTotalMessagesCount(list.length);
+      setUnreadMessagesCount(list.filter((m) => m.status === 'unread').length);
+    } catch (err) {
+      console.warn('Error fetching message stats in CustomersPage:', err);
+    }
+  };
 
   const fetchCustomersWithStats = async () => {
     setLoading(true);
@@ -120,12 +159,41 @@ export default function CustomersPage() {
 
   return (
     <div className="customers-admin-page">
-      <div className="page-header-row">
-        <h2 className="admin-page-title">Customer Directory & Analytics</h2>
+      {/* Top Main Navigation Tabs */}
+      <div className="customers-main-tabs-bar">
+        <button
+          type="button"
+          className={`customers-main-tab-btn ${activeMainTab === 'directory' ? 'active' : ''}`}
+          onClick={() => setActiveMainTab('directory')}
+        >
+          <span>👥 Customer Directory & Profiles</span>
+          <span className="customer-tab-pill">{totalRegistered}</span>
+        </button>
+
+        <button
+          type="button"
+          className={`customers-main-tab-btn ${activeMainTab === 'messages' ? 'active' : ''}`}
+          onClick={() => setActiveMainTab('messages')}
+        >
+          <span>📬 Customer Inquiries & Messages</span>
+          {unreadMessagesCount > 0 ? (
+            <span className="customer-tab-pill unread">{unreadMessagesCount} New</span>
+          ) : (
+            <span className="customer-tab-pill">{totalMessagesCount}</span>
+          )}
+        </button>
       </div>
 
-      {/* Summary Stat Cards */}
-      <div className="customers-stats-grid">
+      {activeMainTab === 'messages' ? (
+        <MessagesPage onMessageUpdated={fetchMessageStats} />
+      ) : (
+        <>
+          <div className="page-header-row">
+            <h2 className="admin-page-title">Customer Directory & Analytics</h2>
+          </div>
+
+          {/* Summary Stat Cards */}
+          <div className="customers-stats-grid">
         <div className="customer-stat-card">
           <p>Total Customers</p>
           <h3>{totalRegistered}</h3>
@@ -370,6 +438,8 @@ export default function CustomersPage() {
             </button>
           </div>
         </div>
+      )}
+        </>
       )}
     </div>
   );

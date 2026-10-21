@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ShoppingCart, User, Menu, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useCafeSettings } from '../utils/cafeSettings';
+import { InstagramIcon } from './SocialIcons';
 import './Navbar.css';
 
 export default function Navbar({
@@ -13,6 +15,7 @@ export default function Navbar({
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
+  const [cafeSettings] = useCafeSettings();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Close mobile drawer on escape key or resize to desktop
@@ -121,6 +124,20 @@ export default function Navbar({
             Book a Table
           </a>
         </li>
+        {cafeSettings?.instagramUrl && (
+          <li className="mobile-only-link">
+            <a
+              href={cafeSettings.instagramUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="nav-link nav-social-link"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <InstagramIcon size={18} />
+              <span>Instagram</span>
+            </a>
+          </li>
+        )}
       </ul>
 
       {/* Action Buttons */}
@@ -154,6 +171,19 @@ export default function Navbar({
         >
           <User size={22} />
         </button>
+
+        {cafeSettings?.instagramUrl && (
+          <a
+            href={cafeSettings.instagramUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="icon-button instagram-nav-btn"
+            aria-label="Follow YAARANA Cafe on Instagram"
+            title="Follow us on Instagram"
+          >
+            <InstagramIcon size={20} />
+          </a>
+        )}
 
         {/* Mobile Hamburger Toggle Button */}
         <button

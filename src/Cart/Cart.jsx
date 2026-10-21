@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { X, Trash2, ShoppingCart, ArrowLeft, CheckCircle2, Lock, AlertCircle, Receipt, ExternalLink } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
+import { useTable } from '../context/TableContext';
 import { useCafeSettings, checkStoreOpenStatus } from '../utils/cafeSettings';
 import { fetchActiveTableOrder, addItemsToExistingOrder, normalizeTableNo, formatTableLabel } from '../utils/billingUtils';
 import { openRazorpayCheckout } from '../utils/razorpayClient';
@@ -35,6 +36,7 @@ export default function Cart({
   onTrackOrder,
 }) {
   const { user, profile } = useAuth();
+  const { activeTable, availableTables, setTableByNumber } = useTable();
   const [cafeSettings] = useCafeSettings();
   const storeStatus = checkStoreOpenStatus(cafeSettings);
   const acceptingOrders = storeStatus.isOpen;
@@ -66,7 +68,7 @@ export default function Cart({
   });
   const [orderType, setOrderType] = useState('dine-in');
   const [tableNo, setTableNo] = useState(() => {
-    return defaultTable || localStorage.getItem('yaarana_last_table') || '';
+    return activeTable?.table_no || defaultTable || localStorage.getItem('yaarana_last_table') || '';
   });
   const [pickupTime, setPickupTime] = useState(PICKUP_OPTIONS[0]);
   const [paymentMode, setPaymentMode] = useState(() => {
@@ -133,7 +135,7 @@ export default function Cart({
     }
   }, [user, profile]);
 
-  // Check if selected dine-in table already has an active unpaid order
+  // Check if selected dine-in table already has an active unpaid order (strictly authorized for this session)
   useEffect(() => {
     let isCancelled = false;
     const checkTableOrder = async () => {
@@ -142,7 +144,12 @@ export default function Cart({
         return;
       }
       setCheckingBill(true);
-      const openOrder = await fetchActiveTableOrder(tableNo);
+      const sessionAuth = {
+        userId: user?.id,
+        paymentToken: localStorage.getItem('yaarana_last_payment_token'),
+        orderId: localStorage.getItem('yaarana_last_order_id'),
+      };
+      const openOrder = await fetchActiveTableOrder(tableNo, sessionAuth);
       if (!isCancelled) {
         setActiveTableOrder(openOrder);
         setCheckingBill(false);
@@ -152,12 +159,17 @@ export default function Cart({
     return () => {
       isCancelled = true;
     };
-  }, [orderType, tableNo, step, isOpen]);
+  }, [orderType, tableNo, step, isOpen, user?.id]);
 
-  // Table number from the QR link
+  // Sync table from QR activeTable or defaultTable
   useEffect(() => {
-    if (defaultTable) setTableNo(defaultTable);
-  }, [defaultTable]);
+    if (activeTable?.table_no) {
+      setTableNo(activeTable.table_no);
+      setOrderType('dine-in');
+    } else if (defaultTable) {
+      setTableNo(defaultTable);
+    }
+  }, [activeTable, defaultTable]);
 
   // If the cart empties while checking out, go back to the cart
   useEffect(() => {
@@ -221,13 +233,18 @@ export default function Cart({
       quantity: item.quantity,
     }));
 
-    // If this is dine-in and an unpaid order already exists on this table:
+    // If this is dine-in and an authorized unpaid order already exists on this table:
     // ADD NEW ITEMS TO THE SAME BILL / ORDER (do not create a separate new order)
     if (orderType === 'dine-in' && tableNo.trim()) {
-      const activeOrder = activeTableOrder || (await fetchActiveTableOrder(tableNo));
+      const sessionAuth = {
+        userId: user?.id,
+        paymentToken: localStorage.getItem('yaarana_last_payment_token'),
+        orderId: localStorage.getItem('yaarana_last_order_id'),
+      };
+      const activeOrder = activeTableOrder || (await fetchActiveTableOrder(tableNo, sessionAuth));
       if (activeOrder && activeOrder.id) {
         try {
-          const { updatedTotal } = await addItemsToExistingOrder(activeOrder, snapshotItems);
+          const { updatedTotal } = await addItemsToExistingOrder(activeOrder, snapshotItems, sessionAuth);
 
           try {
             localStorage.setItem(
@@ -344,6 +361,9 @@ export default function Cart({
       );
       if (createdOrderId) {
         localStorage.setItem('yaarana_last_order_id', String(createdOrderId));
+      }
+      if (orderPaymentToken) {
+        localStorage.setItem('yaarana_last_payment_token', String(orderPaymentToken));
       }
       if (orderType === 'dine-in' && tableNo.trim()) {
         localStorage.setItem('yaarana_last_table', tableNo.trim());
@@ -632,16 +652,56 @@ export default function Cart({
               {orderType === 'dine-in' ? (
                 <div className="cf-field">
                   <label className="cf-label" htmlFor="cf-table">Table number</label>
-                  <input
-                    id="cf-table"
-                    className="cf-input"
-                    type="text"
-                    inputMode="numeric"
-                    value={tableNo}
-                    onChange={(e) => setTableNo(e.target.value)}
-                    placeholder="e.g. 5"
-                    required
-                  />
+                  {activeTable && String(activeTable.table_no) === String(tableNo) ? (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: '#FFF8E6', borderRadius: '12px', border: '1.5px solid #FFD000', marginBottom: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '1.2rem' }}>🍽️</span>
+                        <div>
+                          <strong style={{ color: '#3D271D', display: 'block', fontSize: '0.95rem' }}>Table {tableNo}</strong>
+                          <small style={{ color: '#B45309', fontWeight: 600 }}>QR Scanned • {activeTable.seats || 2} Seats</small>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setTableNo('')}
+                        style={{ background: 'none', border: 'none', color: '#6B554B', textDecoration: 'underline', fontSize: '0.8rem', cursor: 'pointer' }}
+                      >
+                        Change Table
+                      </button>
+                    </div>
+                  ) : availableTables && availableTables.length > 0 ? (
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <select
+                        id="cf-table"
+                        className="cf-input"
+                        value={tableNo}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setTableNo(val);
+                          setTableByNumber(val);
+                        }}
+                        required
+                      >
+                        <option value="">Select your table</option>
+                        {availableTables.filter(t => t.is_active !== false).map(t => (
+                          <option key={t.id} value={t.table_no}>
+                            Table {t.table_no} ({t.seats} seats)
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  ) : (
+                    <input
+                      id="cf-table"
+                      className="cf-input"
+                      type="text"
+                      inputMode="numeric"
+                      value={tableNo}
+                      onChange={(e) => setTableNo(e.target.value)}
+                      placeholder="e.g. 5"
+                      required
+                    />
+                  )}
 
                   {activeTableOrder && (
                     <div className="active-bill-checkout-card">

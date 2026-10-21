@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
-import { useCafeSettings, DEFAULT_SETTINGS, checkStoreOpenStatus, playOrderChimeSound } from '../utils/cafeSettings';
+import { useCafeSettings, DEFAULT_SETTINGS, checkStoreOpenStatus, playOrderChimeSound, isValidInstagramUrl } from '../utils/cafeSettings';
 import './SettingsPage.css';
 
 const DAYS_OF_WEEK = [
@@ -100,6 +100,12 @@ export default function SettingsPage() {
     if (Number(formData.minOrderAmount) < 0) {
       showToast('Minimum order amount cannot be negative', 'error');
       return false;
+    }
+    if (formData.instagramUrl && formData.instagramUrl.trim()) {
+      if (!isValidInstagramUrl(formData.instagramUrl)) {
+        showToast('Please enter a valid HTTPS Instagram profile link (e.g. https://instagram.com/yourhandle)', 'error');
+        return false;
+      }
     }
     return true;
   };
@@ -319,6 +325,20 @@ export default function SettingsPage() {
                 />
               </div>
 
+              <div className="form-group">
+                <label htmlFor="aboutStory">About Us Cafe Story / Mission</label>
+                <textarea
+                  id="aboutStory"
+                  rows={3}
+                  value={formData.aboutStory || ''}
+                  onChange={(e) => handleInputChange('aboutStory', e.target.value)}
+                  placeholder="Tell your cafe's story, friendship vibe, and mission (displayed on About Us page)..."
+                />
+                <small className="field-hint">
+                  Displayed on the customer-facing About Us page. Leave empty to use the default YAARANA story.
+                </small>
+              </div>
+
               <div className="form-row">
                 <div className="form-group flex-1">
                   <label htmlFor="openingTime">
@@ -370,6 +390,53 @@ export default function SettingsPage() {
                     ? '🟢 Currently open all 7 days a week.'
                     : `🔴 Closed on: ${formData.weeklyClosingDays.join(', ')}`}
                 </small>
+              </div>
+
+              {/* Social Media Profiles */}
+              <div style={{ borderTop: '1px solid #EFE9E1', margin: '24px 0 16px', paddingTop: '20px' }}>
+                <h3 style={{ fontSize: '1.05rem', color: '#3D271D', fontWeight: 800, margin: '0 0 4px 0' }}>
+                  📱 Social Media Profiles
+                </h3>
+                <p style={{ color: '#6B554B', fontSize: '0.85rem', margin: '0 0 16px 0' }}>
+                  Connect your cafe social channels. Displayed on the website footer, navbar, and Contact Us page.
+                </p>
+
+                <div className="form-group">
+                  <label htmlFor="instagramUrl">Instagram Profile URL</label>
+                  <input
+                    id="instagramUrl"
+                    type="url"
+                    value={formData.instagramUrl || ''}
+                    onChange={(e) => handleInputChange('instagramUrl', e.target.value)}
+                    placeholder="https://instagram.com/yourcafehandle"
+                  />
+                  {formData.instagramUrl?.trim() ? (
+                    isValidInstagramUrl(formData.instagramUrl) ? (
+                      <small style={{ color: '#059669', fontWeight: 700, display: 'block', marginTop: 4 }}>
+                        ✓ Valid Instagram profile link
+                      </small>
+                    ) : (
+                      <small style={{ color: '#DC2626', fontWeight: 700, display: 'block', marginTop: 4 }}>
+                        ⚠️ Must be a valid HTTPS link (e.g. https://instagram.com/yourhandle)
+                      </small>
+                    )
+                  ) : (
+                    <small style={{ color: '#8C786E', display: 'block', marginTop: 4 }}>
+                      Leave empty if you don't wish to display an Instagram link yet.
+                    </small>
+                  )}
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="facebookUrl">Facebook Page URL (Optional)</label>
+                  <input
+                    id="facebookUrl"
+                    type="url"
+                    value={formData.facebookUrl || ''}
+                    onChange={(e) => handleInputChange('facebookUrl', e.target.value)}
+                    placeholder="https://facebook.com/yourcafepage"
+                  />
+                </div>
               </div>
             </div>
           </section>

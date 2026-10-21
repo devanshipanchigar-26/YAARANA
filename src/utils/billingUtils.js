@@ -39,19 +39,29 @@ export function isOrderCancelled(order) {
 }
 
 /**
- * Fetches the active unpaid order for a specific table if one exists.
- * If found, new items in this meal session should be added to this exact same order/bill.
+ * Fetches the active unpaid order for a specific table ONLY if authorized for the current customer session.
+ * Security enforcement: Does NOT treat table number or URL alone as authorization.
+ * An active order is returned only if:
+ * 1. The authenticated user matches order.user_id, OR
+ * 2. The session payment_token matches the order's payment_token on this device.
  */
-export async function fetchActiveTableOrder(tableNo) {
+export async function fetchActiveTableOrder(tableNo, sessionAuth = {}) {
   const normTable = normalizeTableNo(tableNo);
   if (!normTable) return null;
 
+  const currentUserId = sessionAuth?.userId || null;
+  const sessionToken = sessionAuth?.paymentToken || null;
+  const sessionOrderId = sessionAuth?.orderId || null;
+
   try {
-    // 1. First, check if there is an active order in localStorage for this customer/device
-    const localOrderId = localStorage.getItem('yaarana_last_order_id');
+    // 1. Check for active order tracked in device storage
+    const localOrderId = sessionOrderId || localStorage.getItem('yaarana_last_order_id');
+    const localToken = sessionToken || localStorage.getItem('yaarana_last_payment_token');
+
     if (localOrderId) {
       const raw = String(localOrderId).trim();
       const stripped = raw.replace(/^#/, '').replace(/^YRN-/i, '').trim();
+
       try {
         const { data: localOrder, error: localErr } = await supabase
           .from('orders')
@@ -76,67 +86,78 @@ export async function fetchActiveTableOrder(tableNo) {
           !isOrderPaid(localOrder) &&
           normalizeTableNo(localOrder.table_no) === normTable
         ) {
-          return localOrder;
+          // Verify authorization: authenticated user or matching payment token
+          const isUserAuthorized = currentUserId && localOrder.user_id === currentUserId;
+          const isTokenAuthorized = localToken && localOrder.payment_token === localToken;
+
+          if (isUserAuthorized || isTokenAuthorized || (!localOrder.user_id && !currentUserId)) {
+            return localOrder;
+          }
         }
       } catch (localCatch) {
         console.warn('Error verifying local order:', localCatch);
       }
     }
 
-    // 2. Fetch active unpaid dine-in orders for this table from Supabase
-    const { data, error } = await supabase
-      .from('orders')
-      .select(`
-        *,
-        order_items (
-          quantity,
-          unit_price,
-          menu_items (
-            name,
-            price
+    // 2. If logged in, check if user has an open order on this table
+    if (currentUserId) {
+      const { data: userOrders, error: userErr } = await supabase
+        .from('orders')
+        .select(`
+          *,
+          order_items (
+            quantity,
+            unit_price,
+            menu_items (
+              name,
+              price
+            )
           )
-        )
-      `)
-      .order('created_at', { ascending: false })
-      .limit(30);
+        `)
+        .eq('user_id', currentUserId)
+        .order('created_at', { ascending: false })
+        .limit(5);
 
-    if (error) {
-      console.warn('fetchActiveTableOrder Supabase error:', error.message);
-      return null;
+      if (!userErr && userOrders && userOrders.length > 0) {
+        const matching = userOrders.find(
+          (o) =>
+            (o.order_type || '').toLowerCase().replace(/_/g, '-') === 'dine-in' &&
+            normalizeTableNo(o.table_no) === normTable &&
+            !isOrderCancelled(o) &&
+            !isOrderPaid(o)
+        );
+
+        if (matching) return matching;
+      }
     }
 
-    if (!data || data.length === 0) return null;
-
-    const now = Date.now();
-    // Filter unpaid, non-cancelled dine-in orders for this table (within last 12 hours)
-    const tableOrders = data.filter((o) => {
-      const type = (o.order_type || '').toLowerCase().replace(/_/g, '-');
-      if (type !== 'dine-in') return false;
-      if (normalizeTableNo(o.table_no) !== normTable) return false;
-      if (isOrderCancelled(o) || isOrderPaid(o)) return false;
-      const createdAt = o.created_at ? new Date(o.created_at).getTime() : 0;
-      if (createdAt > 0 && now - createdAt > 12 * 60 * 60 * 1000) return false;
-      return true;
-    });
-
-    if (tableOrders.length === 0) return null;
-
-    // Return the active open order for this table
-    return tableOrders[0];
+    // If no authorized session matches, do NOT expose or merge with another party's table bill
+    return null;
   } catch (err) {
-    console.error('Error fetching active table order:', err);
+    console.error('Error in fetchActiveTableOrder:', err);
     return null;
   }
 }
 
 /**
  * Adds new items directly to an existing open dine-in order.
- * This updates total_amount, sets order_status to 'Preparing' so the kitchen sees the new items,
- * and inserts the new line items into order_items without creating a new order/bill.
+ * Validates session authorization before modifying any existing bill.
  */
-export async function addItemsToExistingOrder(existingOrder, newItems) {
+export async function addItemsToExistingOrder(existingOrder, newItems, sessionAuth = {}) {
   if (!existingOrder?.id) throw new Error('Missing existing order ID');
   if (!newItems || newItems.length === 0) throw new Error('No items to add');
+
+  // Verify authorization
+  const currentUserId = sessionAuth?.userId;
+  const sessionToken = sessionAuth?.paymentToken || localStorage.getItem('yaarana_last_payment_token');
+
+  const isUserAuthorized = currentUserId && existingOrder.user_id === currentUserId;
+  const isTokenAuthorized = sessionToken && existingOrder.payment_token === sessionToken;
+  const isLocalIdMatch = sessionAuth?.orderId && String(existingOrder.id) === String(sessionAuth.orderId);
+
+  if (!isUserAuthorized && !isTokenAuthorized && !isLocalIdMatch) {
+    throw new Error('Unauthorized: You do not have permission to modify this table bill.');
+  }
 
   // 1. Calculate additional cost of newly added items
   const addedTotal = newItems.reduce((sum, item) => {

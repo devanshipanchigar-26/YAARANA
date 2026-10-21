@@ -1,0 +1,451 @@
+/* ==============================================================================
+   YAARANA Cafe: Tables & QR Code Management Styling
+   ============================================================================== */
+
+.tables-qr-page {
+  padding: 0 0 60px 0;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.tqr-header {
+  margin-bottom: 28px;
+}
+
+.tqr-title {
+  font-family: 'Luckiest Guy', cursive;
+  color: #3D271D;
+  font-size: 2.2rem;
+  letter-spacing: 0.5px;
+  margin: 0 0 8px 0;
+}
+
+.tqr-subtitle {
+  color: #6B554B;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+/* Stats Row */
+.tqr-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.tqr-stat-card {
+  background: #FFFFFF;
+  border: 1px solid #EFE9E1;
+  border-radius: 16px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 2px 8px rgba(61, 39, 29, 0.04);
+}
+
+.tqr-stat-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.tqr-stat-icon.total { background: #FFF6E5; color: #D97706; }
+.tqr-stat-icon.active { background: #ECFDF5; color: #059669; }
+.tqr-stat-icon.inactive { background: #FEF2F2; color: #DC2626; }
+.tqr-stat-icon.capacity { background: #EFF6FF; color: #2563EB; }
+
+.tqr-stat-content h4 {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  color: #8C786E;
+  margin: 0 0 4px 0;
+  letter-spacing: 0.5px;
+}
+
+.tqr-stat-content .stat-number {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #3D271D;
+  margin: 0;
+}
+
+/* Form Card */
+.tqr-form-card {
+  background: #FFFFFF;
+  border: 1px solid #EFE9E1;
+  border-radius: 20px;
+  padding: 24px;
+  margin-bottom: 32px;
+  box-shadow: 0 4px 16px rgba(61, 39, 29, 0.04);
+}
+
+.tqr-form-card h3 {
+  font-family: 'Luckiest Guy', cursive;
+  color: #3D271D;
+  font-size: 1.35rem;
+  margin: 0 0 20px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tqr-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+  margin-bottom: 20px;
+}
+
+.tqr-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tqr-form-group label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #3D271D;
+}
+
+.tqr-form-group input,
+.tqr-form-group select {
+  padding: 12px 14px;
+  border: 1.5px solid #EFE9E1;
+  border-radius: 12px;
+  background: #FDFBFA;
+  font-size: 0.95rem;
+  color: #3D271D;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.tqr-form-group input:focus,
+.tqr-form-group select:focus {
+  border-color: #FFD000;
+  box-shadow: 0 0 0 3px rgba(255, 208, 0, 0.25);
+}
+
+.tqr-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.btn-tqr-save {
+  background: #FFD000;
+  color: #311E18;
+  font-family: 'Luckiest Guy', cursive;
+  font-size: 1.05rem;
+  padding: 12px 28px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(255, 208, 0, 0.3);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.btn-tqr-save:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 208, 0, 0.4);
+}
+
+.btn-tqr-cancel {
+  background: #EFE9E1;
+  color: #6B554B;
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+/* Table Toolbar */
+.tqr-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.btn-bulk-print {
+  background: #311E18;
+  color: #FFD000;
+  font-family: 'Luckiest Guy', cursive;
+  padding: 10px 22px;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.15s;
+}
+
+.btn-bulk-print:hover {
+  transform: translateY(-2px);
+}
+
+/* Tables List */
+.tqr-table-container {
+  background: #FFFFFF;
+  border: 1px solid #EFE9E1;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(61, 39, 29, 0.04);
+}
+
+.tqr-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.tqr-table th {
+  background: #FDFBFA;
+  padding: 14px 18px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #8C786E;
+  border-bottom: 1px solid #EFE9E1;
+}
+
+.tqr-table td {
+  padding: 16px 18px;
+  border-bottom: 1px solid #F5F1EB;
+  color: #3D271D;
+  font-size: 0.9rem;
+  vertical-align: middle;
+}
+
+.tqr-table tr:last-child td {
+  border-bottom: none;
+}
+
+.tqr-table tr:hover {
+  background: #FDFBF8;
+}
+
+.table-badge-active {
+  background: #DCFCE7;
+  color: #166534;
+  border: none;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.78rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.table-badge-inactive {
+  background: #FEE2E2;
+  color: #991B1B;
+  border: none;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.78rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-preview-qr {
+  background: #FFF8E6;
+  color: #B45309;
+  border: 1px solid #FDE68A;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-preview-qr:hover {
+  background: #FEF3C7;
+}
+
+/* QR Stand Modal */
+.qr-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(30, 15, 10, 0.65);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.qr-modal-card {
+  background: #FFFFFF;
+  border-radius: 24px;
+  padding: 32px;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25);
+  position: relative;
+  text-align: center;
+}
+
+.qr-modal-close-btn {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: none;
+  border: none;
+  color: #8C786E;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+}
+
+.qr-modal-close-btn:hover {
+  background: #F5F1EB;
+  color: #3D271D;
+}
+
+/* Acrylic Stand Card */
+.qr-stand-card {
+  background: #FFFDF9;
+  border: 3px solid #311E18;
+  border-radius: 20px;
+  padding: 28px 24px;
+  margin: 16px 0 24px 0;
+  box-shadow: 0 10px 25px rgba(61, 39, 29, 0.12);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stand-brand {
+  font-family: 'Luckiest Guy', cursive;
+  font-size: 1.8rem;
+  color: #311E18;
+  letter-spacing: 1px;
+  margin-bottom: 2px;
+}
+
+.stand-tagline {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #FF7A2F;
+  letter-spacing: 1.5px;
+  margin-bottom: 16px;
+}
+
+.stand-table-title {
+  background: #FFD000;
+  color: #311E18;
+  font-family: 'Luckiest Guy', cursive;
+  font-size: 1.5rem;
+  padding: 6px 24px;
+  border-radius: 20px;
+  margin-bottom: 18px;
+  box-shadow: 0 4px 10px rgba(255, 208, 0, 0.3);
+}
+
+.stand-qr-box {
+  background: #FFFFFF;
+  padding: 16px;
+  border-radius: 16px;
+  border: 2px solid #EFE9E1;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: 16px;
+}
+
+.stand-instruction {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #3D271D;
+  margin: 0 0 4px 0;
+}
+
+.stand-subtext {
+  font-size: 0.78rem;
+  color: #8C786E;
+  margin: 0;
+}
+
+/* Modal Action Buttons */
+.qr-modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-qr-action {
+  border: none;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.15s, opacity 0.15s;
+}
+
+.btn-qr-action.print {
+  background: #311E18;
+  color: #FFD000;
+}
+
+.btn-qr-action.download {
+  background: #FFD000;
+  color: #311E18;
+}
+
+.btn-qr-action:hover {
+  transform: translateY(-2px);
+}
+
+/* Print Specific Rules */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  
+  .print-area, .print-area * {
+    visibility: visible;
+  }
+  
+  .print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  .qr-stand-card {
+    page-break-after: always;
+    border: 3px solid #000;
+    box-shadow: none;
+    margin: 40px auto;
+    max-width: 380px;
+  }
+}

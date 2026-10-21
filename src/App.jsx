@@ -9,10 +9,13 @@ import AdminLayout from './admin/AdminLayout';
 import LiveOrdersPage from './admin/LiveOrdersPage';
 import OrderHistoryPage from './admin/OrderHistoryPage';
 import TableBookingsPage from './admin/TableBookingsPage';
+import TablesQRManagementPage from './admin/TablesQRManagementPage';
 import MenuManagementPage from './admin/MenuManagementPage';
+import SpecialsManagementPage from './admin/SpecialsManagementPage';
 import CustomersPage from './admin/CustomersPage';
 import SalesStatisticsPage from './admin/SalesStatisticsPage';
 import ReviewsPage from './admin/ReviewsPage';
+import MessagesPage from './admin/MessagesPage';
 import SettingsPage from './admin/SettingsPage';
 import Login from './Pages/Login';
 import Signup from './Pages/Signup';
@@ -26,6 +29,7 @@ import About from './Pages/About';
 import Contact from './Pages/Contact';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { CartProvider, useCart } from './context/CartContext';
+import { TableProvider, useTable } from './context/TableContext';
 import './App.css';
 
 function AppContent() {
@@ -53,6 +57,9 @@ function AppContent() {
   const [currentView, setCurrentView] = useState('website');
   const [activeAdminTab, setActiveAdminTab] = useState('menu-management');
 
+  // Active table identity from TableContext
+  const { activeTable, tableNo: qrTable, tableError, clearTable } = useTable();
+
   // Which customer page is showing: 'home' | 'menu' | 'book-table' | 'about' | 'contact'
   const [customerPage, setCustomerPage] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -61,14 +68,11 @@ function AppContent() {
       if (path === '/contact') return 'contact';
       if (path === '/menu') return 'menu';
       if (path === '/book-table') return 'book-table';
+      // If table query parameter detected in URL, open Menu directly
+      if (new URLSearchParams(window.location.search).get('table')) return 'menu';
     }
     return 'home';
   });
-
-  // Table number from the QR code link, e.g. yoursite.com/?table=5
-  const [qrTable] = useState(
-    () => new URLSearchParams(window.location.search).get('table') || ''
-  );
 
   // Sync customerPage when browser navigation (back/forward) occurs
   useEffect(() => {
@@ -239,8 +243,11 @@ function AppContent() {
                   {activeAdminTab === 'live-orders' && <LiveOrdersPage />}
                   {activeAdminTab === 'order-history' && <OrderHistoryPage />}
                   {activeAdminTab === 'table-bookings' && <TableBookingsPage />}
+                  {activeAdminTab === 'tables-qr' && <TablesQRManagementPage />}
                   {activeAdminTab === 'menu-management' && <MenuManagementPage />}
-                  {activeAdminTab === 'customers' && <CustomersPage />}
+                  {activeAdminTab === 'specials' && <SpecialsManagementPage />}
+                  {activeAdminTab === 'customers' && <CustomersPage initialSubTab="directory" />}
+                  {activeAdminTab === 'messages' && <CustomersPage initialSubTab="messages" />}
                   {activeAdminTab === 'reviews' && <ReviewsPage />}
                   {(activeAdminTab === 'sales-statistics' || activeAdminTab === 'sales' || activeAdminTab === 'sales-stats') && <SalesStatisticsPage />}
                   {activeAdminTab === 'settings' && <SettingsPage />}
@@ -248,8 +255,11 @@ function AppContent() {
                   {activeAdminTab !== 'live-orders' &&
                   activeAdminTab !== 'order-history' &&
                   activeAdminTab !== 'table-bookings' &&
+                  activeAdminTab !== 'tables-qr' &&
                   activeAdminTab !== 'menu-management' &&
+                  activeAdminTab !== 'specials' &&
                   activeAdminTab !== 'customers' &&
+                  activeAdminTab !== 'messages' &&
                   activeAdminTab !== 'sales-statistics' &&
                   activeAdminTab !== 'sales' &&
                   activeAdminTab !== 'sales-stats' &&
@@ -291,6 +301,72 @@ function AppContent() {
                 onNavigate={navigateTo}
                 currentPage={customerPage}
               />
+
+              {/* Sticky QR Dine-In Pill Banner */}
+              {activeTable && (
+                <div 
+                  style={{
+                    position: 'sticky',
+                    top: '80px',
+                    zIndex: 990,
+                    background: '#311E18',
+                    color: '#FFD000',
+                    padding: '8px 20px',
+                    margin: '0 auto',
+                    maxWidth: '420px',
+                    borderRadius: '30px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    boxShadow: '0 6px 20px rgba(49, 30, 24, 0.3)',
+                    fontFamily: "'Luckiest Guy', cursive",
+                    fontSize: '0.9rem',
+                    letterSpacing: '0.5px'
+                  }}
+                >
+                  <span>🍽️ Dining at Table {activeTable.table_no} ({activeTable.seats} Seats)</span>
+                  <button
+                    onClick={clearTable}
+                    style={{
+                      background: 'rgba(255, 208, 0, 0.2)',
+                      color: '#FFD000',
+                      border: '1px solid #FFD000',
+                      borderRadius: '12px',
+                      padding: '2px 8px',
+                      fontSize: '0.75rem',
+                      cursor: 'pointer',
+                      fontFamily: 'inherit'
+                    }}
+                    title="Leave table / Switch to takeaway"
+                  >
+                    Change
+                  </button>
+                </div>
+              )}
+
+              {tableError && (
+                <div 
+                  style={{
+                    position: 'sticky',
+                    top: '80px',
+                    zIndex: 990,
+                    background: '#FEF2F2',
+                    color: '#991B1B',
+                    padding: '10px 20px',
+                    margin: '0 auto',
+                    maxWidth: '480px',
+                    borderRadius: '16px',
+                    border: '1px solid #FECACA',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    fontSize: '0.85rem',
+                    fontWeight: 700
+                  }}
+                >
+                  <span>⚠️ {tableError}</span>
+                </div>
+              )}
 
               {customerPage === 'home' && <HomePage onNavigate={navigateTo} />}
               {customerPage === 'menu' && <MenuPage addToCart={addToCart} />}
@@ -352,9 +428,11 @@ function AppContent() {
 export default function App() {
   return (
     <AuthProvider>
-      <CartProvider>
-        <AppContent />
-      </CartProvider>
+      <TableProvider>
+        <CartProvider>
+          <AppContent />
+        </CartProvider>
+      </TableProvider>
     </AuthProvider>
   );
 }

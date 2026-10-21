@@ -161,6 +161,81 @@
   padding: 16px;
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(255, 205, 0, 0.4);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.contact-submit-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.contact-success-banner {
+  background: #F0FDF4;
+  border: 2px solid #86EFAC;
+  border-radius: 20px;
+  padding: 30px 24px;
+  text-align: center;
+  color: #14532D;
+  animation: fadeIn 0.4s ease;
+}
+
+.contact-success-icon {
+  width: 50px;
+  height: 50px;
+  background: #22C55E;
+  color: white;
+  border-radius: 50%;
+  font-size: 24px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 14px;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.35);
+}
+
+.contact-success-banner h3 {
+  font-family: var(--font-display, 'Luckiest Guy', cursive);
+  font-size: 24px;
+  margin-bottom: 8px;
+  color: #15803D;
+}
+
+.contact-success-banner p {
+  font-size: 15px;
+  line-height: 1.5;
+  color: #166534;
+  max-width: 480px;
+  margin: 0 auto 20px;
+}
+
+.contact-send-another-btn {
+  background: #15803D;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 24px;
+  padding: 10px 24px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.contact-send-another-btn:hover {
+  background: #166534;
+  transform: translateY(-2px);
+}
+
+.contact-error-alert {
+  background: #FEF2F2;
+  border: 1px solid #FCA5A5;
+  color: #991B1B;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 16px;
 }
 
 /* BANNER */
@@ -226,4 +301,103 @@
   .contact-see-you-banner h2 {
     font-size: 20px;
   }
+}
+
+/* SOCIAL MEDIA SECTION */
+.contact-social-subtitle {
+  font-size: 15px;
+  color: #5A4A42;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.contact-social-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-top: 10px;
+}
+
+.contact-social-link-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border-radius: 18px;
+  text-decoration: none;
+  background-color: #FAF7F2;
+  border: 1.5px solid rgba(60, 35, 23, 0.08);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.contact-social-link-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(60, 35, 23, 0.1);
+  background-color: #FFFFFF;
+  border-color: rgba(60, 35, 23, 0.18);
+}
+
+.contact-social-link-card:focus-visible {
+  outline: 2px solid #1294F6;
+  outline-offset: 2px;
+}
+
+.social-icon-wrapper {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
+.social-icon-wrapper.instagram {
+  background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+}
+
+.social-icon-wrapper.phone {
+  background: #1294F6;
+}
+
+.social-icon-wrapper.facebook {
+  background: #1877F2;
+}
+
+.contact-phone-link {
+  color: #1294F6;
+  text-decoration: none;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.contact-phone-link:hover {
+  color: #0070D2;
+  text-decoration: underline;
+}
+
+.social-card-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.social-platform-title {
+  font-family: var(--font-display, 'Luckiest Guy', cursive);
+  font-size: 17px;
+  color: #3C2317;
+  letter-spacing: 0.5px;
+}
+
+.social-platform-action {
+  font-size: 13px;
+  font-weight: 600;
+  color: #8C756B;
+  margin-top: 2px;
+  transition: color 0.2s ease;
+}
+
+.contact-social-link-card:hover .social-platform-action {
+  color: #1294F6;
 }

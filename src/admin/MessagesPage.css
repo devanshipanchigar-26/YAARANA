@@ -1,0 +1,313 @@
+/* ==============================================================================
+   YAARANA Cafe: Admin Customer Messages / Inquiries Styles
+   ============================================================================== */
+
+.messages-admin-page {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 20px;
+}
+
+/* Stats Row */
+.messages-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.messages-stat-card {
+  background: #FFFFFF;
+  border: 1px solid #EFE9E1;
+  border-radius: 16px;
+  padding: 16px 20px;
+  box-shadow: 0 4px 14px rgba(61, 39, 29, 0.04);
+}
+
+.messages-stat-card p {
+  margin: 0 0 6px 0;
+  font-size: 0.8rem;
+  color: #7D6B62;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.messages-stat-card h3 {
+  margin: 0;
+  font-size: 1.8rem;
+  color: #3D271D;
+  font-family: 'Luckiest Guy', cursive, sans-serif;
+}
+
+.messages-stat-card.unread h3 {
+  color: #E15B35;
+}
+
+.messages-stat-card.resolved h3 {
+  color: #27AE60;
+}
+
+/* Controls Bar */
+.messages-controls-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+  background: #FFFFFF;
+  border: 1px solid #EFE9E1;
+  border-radius: 16px;
+  padding: 12px 18px;
+  box-shadow: 0 4px 14px rgba(61, 39, 29, 0.03);
+}
+
+.messages-search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #F8F5F2;
+  border: 1px solid #EFE9E1;
+  border-radius: 24px;
+  padding: 8px 16px;
+  min-width: 260px;
+  flex: 1;
+  max-width: 420px;
+}
+
+.messages-search-box input {
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 100%;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.9rem;
+  color: #3D271D;
+}
+
+.messages-filter-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.messages-pill-btn {
+  background: transparent;
+  border: 1px solid #EFE9E1;
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #6B554B;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.messages-pill-btn:hover {
+  background: #F8F5F2;
+  border-color: #D6CBC2;
+}
+
+.messages-pill-btn.active {
+  background: #3D271D;
+  color: #FFFFFF;
+  border-color: #3D271D;
+}
+
+/* Messages List */
+.messages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.message-card {
+  background: #FFFFFF;
+  border: 1.5px solid #EFE9E1;
+  border-radius: 18px;
+  padding: 20px 24px;
+  box-shadow: 0 4px 16px rgba(61, 39, 29, 0.04);
+  transition: all 0.2s ease;
+}
+
+.message-card.unread {
+  border-left: 5px solid #E15B35;
+  background: #FFFBF9;
+}
+
+.message-card.resolved {
+  opacity: 0.88;
+  border-left: 5px solid #27AE60;
+}
+
+.message-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.message-customer-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.message-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #EFE9E1;
+  color: #3D271D;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.1rem;
+}
+
+.message-card.unread .message-avatar {
+  background: #FEE2E2;
+  color: #DC2626;
+}
+
+.message-meta h4 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #3D271D;
+  font-weight: 700;
+}
+
+.message-meta .message-contact-line {
+  margin: 2px 0 0 0;
+  font-size: 0.85rem;
+  color: #7D6B62;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.message-badge {
+  padding: 4px 12px;
+  border-radius: 14px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.message-badge.unread {
+  background: #FEE2E2;
+  color: #DC2626;
+  border: 1px solid #FCA5A5;
+}
+
+.message-badge.read {
+  background: #FEF3C7;
+  color: #D97706;
+}
+
+.message-badge.resolved {
+  background: #DCFCE7;
+  color: #166534;
+}
+
+.message-body {
+  background: #FAF7F2;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin: 12px 0;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: #3D271D;
+  white-space: pre-wrap;
+}
+
+.message-footer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 8px;
+}
+
+.message-timestamp {
+  font-size: 0.8rem;
+  color: #9A877E;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.message-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-message-action {
+  background: #F8F5F2;
+  border: 1px solid #EFE9E1;
+  border-radius: 18px;
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #5C4337;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.btn-message-action:hover {
+  background: #EFE9E1;
+  color: #3D271D;
+}
+
+.btn-message-action.call {
+  background: #EFF6FF;
+  border-color: #BFDBFE;
+  color: #1D4ED8;
+}
+
+.btn-message-action.call:hover {
+  background: #DBEAFE;
+}
+
+.btn-message-action.resolve {
+  background: #F0FDF4;
+  border-color: #BBF7D0;
+  color: #15803D;
+}
+
+.btn-message-action.resolve:hover {
+  background: #DCFCE7;
+}
+
+.btn-message-action.delete {
+  color: #DC2626;
+}
+
+.btn-message-action.delete:hover {
+  background: #FEE2E2;
+}
+
+/* Empty state */
+.messages-empty-state {
+  background: #FFFFFF;
+  border: 1px dashed #D6CBC2;
+  border-radius: 20px;
+  padding: 48px 24px;
+  text-align: center;
+  color: #7D6B62;
+}
+
+.messages-empty-state h3 {
+  font-family: 'Luckiest Guy', cursive;
+  font-size: 1.5rem;
+  color: #3D271D;
+  margin: 12px 0 6px 0;
+}

@@ -115,7 +115,22 @@
   color: #51332d;
   cursor: pointer;
   border-radius: 50%;
-  transition: color 0.2s ease, background-color 0.2s ease;
+  transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+}
+
+.instagram-nav-btn {
+  text-decoration: none;
+  color: #51332d;
+}
+
+.instagram-nav-btn:hover {
+  color: #E1306C;
+  background-color: rgba(225, 48, 108, 0.1);
+  transform: translateY(-2px);
+}
+
+.mobile-only-link {
+  display: none;
 }
 
 .cart-icon-btn {
@@ -306,6 +321,17 @@
 
   .nav-link {
     font-size: 1.25rem;
+  }
+
+  .mobile-only-link {
+    display: block;
+  }
+
+  .nav-social-link {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 8px;
+    color: #E1306C !important;
   }
 }
 

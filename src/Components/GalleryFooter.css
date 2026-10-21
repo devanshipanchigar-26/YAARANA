@@ -205,6 +205,17 @@
   gap: 8px;
 }
 
+.footer-phone-link {
+  color: inherit;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.footer-phone-link:hover {
+  color: #1294F6;
+  text-decoration: underline;
+}
+
 .location-icon {
   font-size: 1.2rem;
 }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { useCafeSettings } from '../utils/cafeSettings';
+import SocialIcons from './SocialIcons';
 import './GalleryFooter.css';
 
 function formatTime12(timeStr) {
@@ -165,15 +166,17 @@ export default function GalleryFooter() {
             </p>
             {cafeSettings?.contactNumber && (
               <p className="footer-text" style={{ marginTop: '6px' }}>
-                <span className="location-icon">📞</span> {cafeSettings.contactNumber}
+                <span className="location-icon">📞</span>
+                <a
+                  href={`tel:${cafeSettings.contactNumber.replace(/[^0-9+]/g, '')}`}
+                  className="footer-phone-link"
+                  title={`Call ${cafeSettings.contactNumber} in Phone app`}
+                >
+                  {cafeSettings.contactNumber}
+                </a>
               </p>
             )}
-            <div className="social-icons">
-              <span className="icon">📷</span>
-              <span className="icon">💬</span>
-              <span className="icon">✉️</span>
-              <span className="icon">📞</span>
-            </div>
+            <SocialIcons settings={cafeSettings} size={18} />
           </div>
 
           <div className="footer-col">

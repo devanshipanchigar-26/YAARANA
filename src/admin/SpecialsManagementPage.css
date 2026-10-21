@@ -1,0 +1,538 @@
+/* ==============================================================================
+   YAARANA Cafe: Specials Management Page Styling
+   ============================================================================== */
+
+.specials-admin-page {
+  padding: 0 0 60px 0;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Header & Stat Cards */
+.specials-admin-header {
+  margin-bottom: 28px;
+}
+
+.specials-admin-title {
+  font-family: 'Luckiest Guy', cursive;
+  color: #3D271D;
+  font-size: 2.2rem;
+  letter-spacing: 0.5px;
+  margin: 0 0 8px 0;
+}
+
+.specials-admin-subtitle {
+  color: #6B554B;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.specials-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.specials-stat-card {
+  background: #FFFFFF;
+  border: 1px solid #EFE9E1;
+  border-radius: 16px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 2px 8px rgba(61, 39, 29, 0.04);
+}
+
+.specials-stat-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.specials-stat-icon.total { background: #FFF6E5; color: #D97706; }
+.specials-stat-icon.visible { background: #ECFDF5; color: #059669; }
+.specials-stat-icon.stock { background: #EFF6FF; color: #2563EB; }
+.specials-stat-icon.linked { background: #F5F3FF; color: #7C3AED; }
+
+.specials-stat-content h4 {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  color: #8C786E;
+  margin: 0 0 4px 0;
+  letter-spacing: 0.5px;
+}
+
+.specials-stat-content .stat-number {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #3D271D;
+  margin: 0;
+  line-height: 1.1;
+}
+
+/* Form Card */
+.specials-form-card {
+  background: #FFFFFF;
+  border: 1px solid #EFE9E1;
+  border-radius: 20px;
+  padding: 24px;
+  margin-bottom: 32px;
+  box-shadow: 0 4px 16px rgba(61, 39, 29, 0.05);
+}
+
+.specials-form-card h3 {
+  font-family: 'Luckiest Guy', cursive;
+  color: #3D271D;
+  font-size: 1.4rem;
+  margin: 0 0 20px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.specials-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #3D271D;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 12px 14px;
+  border: 1.5px solid #EFE9E1;
+  border-radius: 12px;
+  background: #FDFBFA;
+  font-size: 0.95rem;
+  color: #3D271D;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #FFD000;
+  box-shadow: 0 0 0 3px rgba(255, 208, 0, 0.25);
+}
+
+.price-hint-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #FFF8E6;
+  color: #B45309;
+  font-weight: 700;
+  font-size: 0.8rem;
+  padding: 6px 12px;
+  border-radius: 20px;
+  margin-top: 4px;
+}
+
+/* Image Upload Section */
+.image-upload-box {
+  border: 2px dashed #E0D6CC;
+  background: #FAF8F5;
+  border-radius: 16px;
+  padding: 18px;
+  text-align: center;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.image-upload-box:hover {
+  border-color: #FF7A2F;
+  background: #FFF7ED;
+}
+
+.image-upload-box input[type="file"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: #7A6559;
+}
+
+.upload-preview-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  justify-content: center;
+}
+
+.upload-preview-img {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #FFD000;
+  box-shadow: 0 4px 10px rgba(61, 39, 29, 0.15);
+}
+
+.upload-preview-meta {
+  text-align: left;
+}
+
+.btn-remove-preview {
+  background: #FEE2E2;
+  color: #DC2626;
+  border: none;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 6px;
+}
+
+/* Checkbox switches */
+.specials-toggles-row {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+  padding-top: 8px;
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #3D271D;
+  cursor: pointer;
+}
+
+.toggle-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #FF7A2F;
+  cursor: pointer;
+}
+
+/* Action Buttons */
+.form-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.btn-save-special {
+  background: #FFD000;
+  color: #311E18;
+  font-family: 'Luckiest Guy', cursive;
+  font-size: 1.05rem;
+  padding: 12px 28px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 12px rgba(255, 208, 0, 0.3);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.btn-save-special:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 208, 0, 0.4);
+}
+
+.btn-save-special:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-cancel-edit {
+  background: #EFE9E1;
+  color: #6B554B;
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.btn-cancel-edit:hover {
+  background: #E5DCD2;
+}
+
+/* Alert Banners */
+.specials-banner {
+  padding: 12px 18px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.specials-banner.success {
+  background: #ECFDF5;
+  color: #065F46;
+  border: 1px solid #A7F3D0;
+}
+
+.specials-banner.error {
+  background: #FEF2F2;
+  color: #991B1B;
+  border: 1px solid #FECACA;
+}
+
+/* Specials Table */
+.specials-table-container {
+  background: #FFFFFF;
+  border: 1px solid #EFE9E1;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(61, 39, 29, 0.04);
+}
+
+.specials-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.specials-table th {
+  background: #FDFBFA;
+  padding: 14px 18px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #8C786E;
+  border-bottom: 1px solid #EFE9E1;
+}
+
+.specials-table td {
+  padding: 16px 18px;
+  border-bottom: 1px solid #F5F1EB;
+  color: #3D271D;
+  font-size: 0.9rem;
+  vertical-align: middle;
+}
+
+.specials-table tr:last-child td {
+  border-bottom: none;
+}
+
+.specials-table tr:hover {
+  background: #FDFBF8;
+}
+
+.table-special-image {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #FFD000;
+  background: #EFE9E1;
+}
+
+.table-special-badge {
+  display: inline-block;
+  background: #FF7A2F;
+  color: #FFFFFF;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-top: 4px;
+  text-transform: uppercase;
+}
+
+/* Quick Toggle Buttons */
+.badge-toggle-btn {
+  border: none;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: transform 0.1s, opacity 0.15s;
+}
+
+.badge-toggle-btn:hover {
+  opacity: 0.88;
+  transform: scale(1.03);
+}
+
+.badge-toggle-btn.active-green {
+  background: #DCFCE7;
+  color: #166534;
+}
+
+.badge-toggle-btn.inactive-red {
+  background: #FEE2E2;
+  color: #991B1B;
+}
+
+.badge-toggle-btn.active-blue {
+  background: #DBEAFE;
+  color: #1E40AF;
+}
+
+.badge-toggle-btn.inactive-gray {
+  background: #F3F4F6;
+  color: #6B7280;
+}
+
+/* Row Action Buttons */
+.row-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-table-action {
+  border: none;
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.btn-table-action.edit {
+  background: #FFD000;
+  color: #311E18;
+}
+
+.btn-table-action.edit:hover {
+  background: #E6BC00;
+}
+
+.btn-table-action.delete {
+  background: #FEE2E2;
+  color: #DC2626;
+}
+
+.btn-table-action.delete:hover {
+  background: #FECACA;
+}
+
+/* Confirmation Modal */
+.specials-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(30, 15, 10, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.specials-modal-card {
+  background: #FFFFFF;
+  border-radius: 20px;
+  padding: 28px;
+  max-width: 440px;
+  width: 100%;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.25);
+  text-align: center;
+}
+
+.specials-modal-card h3 {
+  font-family: 'Luckiest Guy', cursive;
+  color: #3D271D;
+  font-size: 1.4rem;
+  margin: 0 0 12px 0;
+}
+
+.specials-modal-card p {
+  color: #6B554B;
+  font-size: 0.95rem;
+  margin: 0 0 24px 0;
+  line-height: 1.5;
+}
+
+.specials-modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.btn-confirm-delete {
+  background: #DC2626;
+  color: #FFFFFF;
+  font-weight: 800;
+  padding: 10px 24px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-cancel-modal {
+  background: #EFE9E1;
+  color: #3D271D;
+  font-weight: 700;
+  padding: 10px 20px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+}
+
+/* Empty & Loading states */
+.specials-empty-state {
+  text-align: center;
+  padding: 50px 20px;
+  color: #7A6559;
+}
+
+.specials-empty-state h4 {
+  font-family: 'Luckiest Guy', cursive;
+  font-size: 1.3rem;
+  color: #3D271D;
+  margin: 12px 0 6px 0;
+}
+
+@media (max-width: 768px) {
+  .specials-form-card {
+    padding: 18px;
+  }
+  
+  .specials-table {
+    display: block;
+    overflow-x: auto;
+  }
+}

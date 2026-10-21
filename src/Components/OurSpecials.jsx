@@ -1,52 +1,162 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import badgeCupImg from '../assets/badge-cup.png';
+import { supabase } from '../supabaseClient';
+import { useCart } from '../context/CartContext';
 import './OurSpecials.css';
 
-const specialsData = [
+// Curated fallbacks in case remote database is loading, offline, or unpopulated
+const defaultFallbackSpecials = [
   { 
-    id: 1, 
-    name: "Coffee", 
+    id: 'f-1', 
+    name: "Classic Brew", 
+    badge: "Chef Special",
+    price: 120,
+    isAvailable: true,
     image: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=600&q=80" 
   },
   { 
-    id: 2, 
-    name: "Fries", 
+    id: 'f-2', 
+    name: "Crispy Peri Fries", 
+    badge: "Trending",
+    price: 110,
+    isAvailable: true,
     image: "https://images.unsplash.com/photo-1576107232684-1279f3908594?auto=format&fit=crop&w=600&q=80" 
   },
   { 
-    id: 3, 
-    name: "Waffles", 
+    id: 'f-3', 
+    name: "Belgian Waffles", 
+    badge: "Must Try",
+    price: 180,
+    isAvailable: true,
     image: "https://images.unsplash.com/photo-1562376552-0d160a2f238d?auto=format&fit=crop&w=600&q=80" 
   },
   { 
-    id: 4, 
-    name: "Burgers", 
+    id: 'f-4', 
+    name: "Gourmet Burgers", 
+    badge: "Bestseller",
+    price: 160,
+    isAvailable: true,
     image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80" 
   },
   { 
-    id: 5, 
-    name: "Shakes", 
+    id: 'f-5', 
+    name: "Thick Shakes", 
+    badge: "Popular",
+    price: 140,
+    isAvailable: true,
     image: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=600&q=80" 
   },
   { 
-    id: 6, 
-    name: "Sandwiches", 
+    id: 'f-6', 
+    name: "Artisan Sandwiches", 
+    badge: "Chef Special",
+    price: 130,
+    isAvailable: true,
     image: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=600&q=80" 
   }
 ];
 
-const extendedItems = [...specialsData, ...specialsData, ...specialsData];
-
 export default function OurSpecials({ onNavigate }) {
-  const [currentIndex, setCurrentIndex] = useState(specialsData.length);
-  const [isTransitioning, setIsTransitioning] = useState(true);
+  const [specialsList, setSpecialsList] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [stepDistance, setStepDistance] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(true);
+  const [addedItemNotice, setAddedItemNotice] = useState(null);
+
+  const { addToCart, openCart } = useCart();
   const isMoving = useRef(false);
   const viewportRef = useRef(null);
-
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
 
+  // 1. Fetch live specials from Supabase (visible items only)
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchSpecials = async () => {
+      try {
+        setLoading(true);
+        const { data, error } = await supabase
+          .from('specials')
+          .select(`
+            id,
+            title,
+            description,
+            image_url,
+            badge_text,
+            display_order,
+            is_visible,
+            is_available,
+            menu_item_id,
+            menu_items (
+              id,
+              name,
+              price,
+              emoji,
+              is_available
+            )
+          `)
+          .eq('is_visible', true)
+          .order('display_order', { ascending: true });
+
+        if (error) {
+          // If table doesn't exist yet, fallback silently
+          console.warn('Could not fetch specials from database, using fallback:', error.message);
+          if (isMounted) setSpecialsList(defaultFallbackSpecials);
+        } else if (data && data.length > 0) {
+          const formatted = data.map((item) => ({
+            id: item.id,
+            name: item.title,
+            badge: item.badge_text,
+            description: item.description,
+            image: item.image_url || 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=600&q=80',
+            menuItem: item.menu_items,
+            price: item.menu_items?.price != null ? item.menu_items.price : null,
+            // Availability strictly enforces both special flag and underlying menu_item in-stock flag
+            isAvailable: Boolean(
+              item.is_available && (!item.menu_items || item.menu_items.is_available !== false)
+            ),
+          }));
+          if (isMounted) setSpecialsList(formatted);
+        } else {
+          // Empty in DB -> fallback
+          if (isMounted) setSpecialsList(defaultFallbackSpecials);
+        }
+      } catch (err) {
+        console.error('Error in OurSpecials fetch:', err);
+        if (isMounted) setSpecialsList(defaultFallbackSpecials);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    fetchSpecials();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // 2. Prepare items extended for continuous carousel looping
+  const activeItems = specialsList.length > 0 ? specialsList : defaultFallbackSpecials;
+  const loopMultiplier = activeItems.length < 3 ? 4 : 3;
+
+  const extendedItems = useMemo(() => {
+    let result = [];
+    for (let i = 0; i < loopMultiplier; i++) {
+      result = result.concat(activeItems);
+    }
+    return result;
+  }, [activeItems, loopMultiplier]);
+
+  const [currentIndex, setCurrentIndex] = useState(activeItems.length);
+
+  // Sync index when active items count changes
+  useEffect(() => {
+    setCurrentIndex(activeItems.length);
+  }, [activeItems.length]);
+
+  // 3. Carousel step distance calculations
   useEffect(() => {
     const updateDistance = () => {
       if (viewportRef.current) {
@@ -65,7 +175,7 @@ export default function OurSpecials({ onNavigate }) {
       clearTimeout(timer);
       window.removeEventListener('resize', updateDistance);
     };
-  }, []);
+  }, [extendedItems]);
 
   const handleNext = () => {
     if (isMoving.current) return;
@@ -83,12 +193,12 @@ export default function OurSpecials({ onNavigate }) {
 
   const handleTransitionEnd = () => {
     isMoving.current = false;
-    if (currentIndex >= specialsData.length * 2) {
+    if (currentIndex >= activeItems.length * 2) {
       setIsTransitioning(false);
-      setCurrentIndex(currentIndex - specialsData.length);
-    } else if (currentIndex < specialsData.length) {
+      setCurrentIndex(currentIndex - activeItems.length);
+    } else if (currentIndex < activeItems.length) {
       setIsTransitioning(false);
-      setCurrentIndex(currentIndex + specialsData.length);
+      setCurrentIndex(currentIndex + activeItems.length);
     }
   };
 
@@ -115,6 +225,27 @@ export default function OurSpecials({ onNavigate }) {
     touchEndX.current = 0;
   };
 
+  // 4. Cart Interaction using authoritative product identity
+  const handleAddToCart = (item) => {
+    if (!item.isAvailable) return;
+
+    if (item.menuItem) {
+      // Authoritative product payload ensures no duplicate items or mismatched prices
+      addToCart({
+        id: item.menuItem.id,
+        name: item.menuItem.name,
+        price: Number(item.menuItem.price) || 0,
+        emoji: item.menuItem.emoji || '',
+      });
+
+      // Quick visual feedback notification
+      setAddedItemNotice(item.name);
+      setTimeout(() => setAddedItemNotice(null), 2500);
+    } else if (onNavigate) {
+      onNavigate('menu');
+    }
+  };
+
   return (
     <section className="scroll-section specials-section" id="specials">
       <div className="specials-container">
@@ -137,6 +268,44 @@ export default function OurSpecials({ onNavigate }) {
             <h2 className="title-specials">SPECIALS</h2>
           </div>
         </div>
+
+        {/* Floating Cart Feedback Banner */}
+        {addedItemNotice && (
+          <div 
+            style={{
+              background: '#311E18',
+              color: '#FFD000',
+              fontFamily: "'Luckiest Guy', cursive",
+              padding: '8px 20px',
+              borderRadius: '25px',
+              fontSize: '0.95rem',
+              letterSpacing: '0.5px',
+              marginBottom: '14px',
+              boxShadow: '0 4px 15px rgba(61, 39, 29, 0.25)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              animation: 'fadeIn 0.2s ease-in-out'
+            }}
+          >
+            <span>🎉 Added "{addedItemNotice}" to Cart!</span>
+            <button
+              onClick={() => openCart && openCart('cart')}
+              style={{
+                background: '#FFD000',
+                color: '#311E18',
+                border: 'none',
+                padding: '4px 12px',
+                borderRadius: '12px',
+                fontFamily: 'inherit',
+                fontSize: '0.75rem',
+                cursor: 'pointer'
+              }}
+            >
+              View Cart →
+            </button>
+          </div>
+        )}
 
         {/* Carousel */}
         <div className="carousel-wrapper">
@@ -164,9 +333,52 @@ export default function OurSpecials({ onNavigate }) {
               {extendedItems.map((item, index) => (
                 <div className="item-card" key={`${item.id}-${index}`}>
                   <div className="image-frame">
-                    <img src={item.image} alt={item.name} />
+                    <img 
+                      src={item.image} 
+                      alt={item.name} 
+                      onError={(e) => {
+                        e.currentTarget.src = 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=600&q=80';
+                      }}
+                    />
                   </div>
+                  
+                  {item.badge && (
+                    <div>
+                      <span className="special-card-badge">{item.badge}</span>
+                    </div>
+                  )}
+
                   <h3>{item.name}</h3>
+
+                  <div className="special-card-meta">
+                    {item.price != null && (
+                      <span className="special-card-price">₹{item.price}</span>
+                    )}
+
+                    {item.menuItem ? (
+                      item.isAvailable ? (
+                        <button
+                          type="button"
+                          className="special-card-add-btn"
+                          onClick={() => handleAddToCart(item)}
+                          aria-label={`Add ${item.name} to cart`}
+                        >
+                          ADD +
+                        </button>
+                      ) : (
+                        <span className="special-card-soldout">Sold Out</span>
+                      )
+                    ) : (
+                      <button
+                        type="button"
+                        className="special-card-add-btn"
+                        onClick={() => onNavigate && onNavigate('menu')}
+                        aria-label="Explore menu"
+                      >
+                        EXPLORE →
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
