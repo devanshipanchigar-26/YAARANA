@@ -282,7 +282,7 @@ export default function SettingsPage() {
                     type="tel"
                     value={formData.contactNumber || ''}
                     onChange={(e) => handleInputChange('contactNumber', e.target.value)}
-                    placeholder="+91 98765 43210"
+                    placeholder="+91 88798 23936"
                   />
                 </div>
               </div>
@@ -321,7 +321,7 @@ export default function SettingsPage() {
                   rows={2}
                   value={formData.address || ''}
                   onChange={(e) => handleInputChange('address', e.target.value)}
-                  placeholder="Street, Landmark, City, Pincode"
+                  placeholder="Shop No.C2, Swami Vivekanand Rd, Shiv Shakti Complex, Dahisar East, Mumbai, Maharashtra 400068"
                 />
               </div>
 
@@ -408,7 +408,7 @@ export default function SettingsPage() {
                     type="url"
                     value={formData.instagramUrl || ''}
                     onChange={(e) => handleInputChange('instagramUrl', e.target.value)}
-                    placeholder="https://instagram.com/yourcafehandle"
+                    placeholder="https://www.instagram.com/yaarana_mumbai"
                   />
                   {formData.instagramUrl?.trim() ? (
                     isValidInstagramUrl(formData.instagramUrl) ? (

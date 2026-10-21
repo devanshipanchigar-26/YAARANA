@@ -5,8 +5,8 @@ export const DEFAULT_SETTINGS = {
   // 1. Cafe Profile
   cafeName: 'YAARANA Cafe',
   logoUrl: '',
-  address: '123 Yaarana Street, Foodie Hub, City',
-  contactNumber: '+91 98765 43210',
+  address: 'Shop No.C2, Swami Vivekanand Rd, Shiv Shakti Complex, Dahisar East, Mumbai, Maharashtra 400068',
+  contactNumber: '+91 88798 23936',
   aboutStory: '',
   openingTime: '10:00',
   closingTime: '23:00',
@@ -32,7 +32,7 @@ export const DEFAULT_SETTINGS = {
   notificationEmail: 'admin@yaarana.com',
 
   // 5. Social Media Links
-  instagramUrl: '',
+  instagramUrl: 'https://www.instagram.com/yaarana_mumbai?igsh=MTF1amV3ZzJuazBtaw%3D%3D',
   facebookUrl: '',
   whatsappNumber: '',
 };

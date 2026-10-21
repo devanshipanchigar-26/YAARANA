@@ -50,10 +50,10 @@ export default function SocialIcons({
   className = '',
   includeContact = true,
 }) {
-  const instagramUrl = settings.instagramUrl?.trim() || '';
+  const instagramUrl = settings.instagramUrl?.trim() || 'https://www.instagram.com/yaarana_mumbai?igsh=MTF1amV3ZzJuazBtaw%3D%3D';
   const facebookUrl = settings.facebookUrl?.trim() || '';
-  const rawPhone = settings.contactNumber?.trim() || '+91 98765 43210';
-  const cleanPhone = rawPhone.replace(/[^0-9+]/g, '') || '+919876543210';
+  const rawPhone = settings.contactNumber?.trim() || '+91 88798 23936';
+  const cleanPhone = rawPhone.replace(/[^0-9+]/g, '') || '+918879823936';
   const contactEmail = settings.notificationEmail?.trim() || 'admin@yaarana.com';
 
   return (

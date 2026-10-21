@@ -45,8 +45,9 @@ function Contact() {
   const openFormatted = formatTime12(cafeSettings?.openingTime) || '10:00 AM';
   const closeFormatted = formatTime12(cafeSettings?.closingTime) || '11:00 PM';
   const closingDays = Array.isArray(cafeSettings?.closingDays) ? cafeSettings.closingDays : [];
-  const displayPhone = cafeSettings?.contactNumber?.trim() || '+91 98765 43210';
-  const cleanPhone = displayPhone.replace(/[^0-9+]/g, '') || '+919876543210';
+  const displayPhone = cafeSettings?.contactNumber?.trim() || '+91 88798 23936';
+  const cleanPhone = displayPhone.replace(/[^0-9+]/g, '') || '+918879823936';
+  const instagramUrl = cafeSettings?.instagramUrl?.trim() || 'https://www.instagram.com/yaarana_mumbai?igsh=MTF1amV3ZzJuazBtaw%3D%3D';
 
   const handleChange = (e) => {
     setFormData({
@@ -179,7 +180,17 @@ function Contact() {
 
             <div className="contact-hours-row">
               <span>Location:</span>
-              <strong>{cafeSettings?.address || '123 Yaarana Street, Foodie Hub, City'}</strong>
+              <strong>
+                <a
+                  href="https://www.google.com/search?q=yaarana+cafe+address&ludocid=1769502948618701248"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: 'inherit', textDecoration: 'none' }}
+                  title="View YAARANA Cafe on Google Maps"
+                >
+                  📍 {cafeSettings?.address || 'Shop No.C2, Swami Vivekanand Rd, Shiv Shakti Complex, Dahisar East, Mumbai, Maharashtra 400068'}
+                </a>
+              </strong>
             </div>
 
             <div className="contact-hours-row">
@@ -238,9 +249,9 @@ function Contact() {
             </a>
 
             {/* Instagram */}
-            {cafeSettings?.instagramUrl && (
+            {instagramUrl && (
               <a
-                href={cafeSettings.instagramUrl}
+                href={instagramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="contact-social-link-card instagram"

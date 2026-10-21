@@ -162,20 +162,27 @@ export default function GalleryFooter() {
           <div className="footer-col">
             <h3 className="footer-heading">ADDRESS</h3>
             <p className="footer-text">
-              <span className="location-icon">📍</span> {cafeSettings?.address || '123 Yaarana Street, Foodie Hub, City'}
+              <span className="location-icon">📍</span>{' '}
+              <a
+                href="https://www.google.com/search?q=yaarana+cafe+address&ludocid=1769502948618701248"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: 'inherit', textDecoration: 'none' }}
+                title="View YAARANA Cafe on Google Maps"
+              >
+                {cafeSettings?.address || 'Shop No.C2, Swami Vivekanand Rd, Shiv Shakti Complex, Dahisar East, Mumbai, Maharashtra 400068'}
+              </a>
             </p>
-            {cafeSettings?.contactNumber && (
-              <p className="footer-text" style={{ marginTop: '6px' }}>
-                <span className="location-icon">📞</span>
-                <a
-                  href={`tel:${cafeSettings.contactNumber.replace(/[^0-9+]/g, '')}`}
-                  className="footer-phone-link"
-                  title={`Call ${cafeSettings.contactNumber} in Phone app`}
-                >
-                  {cafeSettings.contactNumber}
-                </a>
-              </p>
-            )}
+            <p className="footer-text" style={{ marginTop: '6px' }}>
+              <span className="location-icon">📞</span>
+              <a
+                href={`tel:${(cafeSettings?.contactNumber || '+91 88798 23936').replace(/[^0-9+]/g, '')}`}
+                className="footer-phone-link"
+                title={`Call ${cafeSettings?.contactNumber || '+91 88798 23936'} in Phone app`}
+              >
+                {cafeSettings?.contactNumber || '+91 88798 23936'}
+              </a>
+            </p>
             <SocialIcons settings={cafeSettings} size={18} />
           </div>
 

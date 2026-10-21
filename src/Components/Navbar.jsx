@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ShoppingCart, User, Menu, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { useCafeSettings } from '../utils/cafeSettings';
+import { useCafeSettings, DEFAULT_SETTINGS } from '../utils/cafeSettings';
 import { InstagramIcon } from './SocialIcons';
 import './Navbar.css';
 
@@ -17,6 +17,7 @@ export default function Navbar({
   const { user } = useAuth();
   const [cafeSettings] = useCafeSettings();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const instagramUrl = cafeSettings?.instagramUrl || DEFAULT_SETTINGS.instagramUrl;
 
   // Close mobile drawer on escape key or resize to desktop
   useEffect(() => {
@@ -124,10 +125,10 @@ export default function Navbar({
             Book a Table
           </a>
         </li>
-        {cafeSettings?.instagramUrl && (
+        {instagramUrl && (
           <li className="mobile-only-link">
             <a
-              href={cafeSettings.instagramUrl}
+              href={instagramUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="nav-link nav-social-link"
@@ -172,9 +173,9 @@ export default function Navbar({
           <User size={22} />
         </button>
 
-        {cafeSettings?.instagramUrl && (
+        {instagramUrl && (
           <a
-            href={cafeSettings.instagramUrl}
+            href={instagramUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="icon-button instagram-nav-btn"
