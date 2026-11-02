@@ -159,9 +159,9 @@ export default function GalleryFooter() {
 
         <div className="footer-info-grid">
           
-          <div className="footer-col">
+          <div className="footer-col footer-col-address">
             <h3 className="footer-heading">ADDRESS</h3>
-            <p className="footer-text">
+            <p className="footer-text footer-address-text">
               <span className="location-icon">📍</span>{' '}
               <a
                 href="https://www.google.com/search?q=yaarana+cafe+address&ludocid=1769502948618701248"
@@ -173,8 +173,8 @@ export default function GalleryFooter() {
                 {cafeSettings?.address || 'Shop No.C2, Swami Vivekanand Rd, Shiv Shakti Complex, Dahisar East, Mumbai, Maharashtra 400068'}
               </a>
             </p>
-            <p className="footer-text" style={{ marginTop: '6px' }}>
-              <span className="location-icon">📞</span>
+            <p className="footer-text footer-phone-text">
+              <span className="location-icon">📞</span>{' '}
               <a
                 href={`tel:${(cafeSettings?.contactNumber || '+91 88798 23936').replace(/[^0-9+]/g, '')}`}
                 className="footer-phone-link"
@@ -183,31 +183,37 @@ export default function GalleryFooter() {
                 {cafeSettings?.contactNumber || '+91 88798 23936'}
               </a>
             </p>
-            <SocialIcons settings={cafeSettings} size={18} />
           </div>
 
-          <div className="footer-col">
+          <div className="footer-col footer-col-hours">
             <h3 className="footer-heading">OPENING HOURS</h3>
-            <p className="footer-text">
+            <p className="footer-text footer-hours-text">
               Mon – Sun: {openFormatted} – {closeFormatted}
             </p>
             {closingDays.length > 0 && (
-              <p className="footer-text" style={{ color: '#E53935', fontSize: '0.85rem', marginTop: '4px' }}>
+              <p className="footer-text footer-closing-text" style={{ color: '#E53935', fontSize: '0.82rem', marginTop: '4px' }}>
                 Closed on: {closingDays.join(', ')}
               </p>
             )}
+            <div className="footer-social-wrapper">
+              <SocialIcons settings={cafeSettings} size={15} />
+            </div>
           </div>
 
-          <div className="footer-col">
+          <div className="footer-col footer-col-about">
             <h3 className="footer-heading">ABOUT US</h3>
             <p className="footer-text">
               Your ultimate hangout spot for coffee, snacks & memories.
             </p>
-            <p className="copyright-text">
-              © {new Date().getFullYear()} {cafeSettings?.cafeName || 'YAARANA'}. All Rights Reserved.
-            </p>
           </div>
 
+        </div>
+
+        <div className="footer-bottom-bar">
+          <p className="copyright-text">
+            © {new Date().getFullYear()} {cafeSettings?.cafeName || 'YAARANA'}. All Rights Reserved.
+            <span className="footer-mobile-tagline"> · Coffee, Snacks & Memories</span>
+          </p>
         </div>
 
       </div>
