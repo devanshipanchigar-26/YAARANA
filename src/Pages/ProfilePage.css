@@ -671,3 +671,47 @@
     padding: 20px 16px;
   }
 }
+
+@media (max-width: 480px) {
+  .profile-container {
+    padding: 0 12px;
+    margin-top: 16px;
+  }
+
+  .profile-hero-card {
+    padding: 18px 14px;
+    gap: 16px;
+    border-radius: 18px;
+  }
+
+  .profile-avatar-circle {
+    width: 68px;
+    height: 68px;
+    font-size: 1.6rem;
+  }
+
+  .profile-hero-name {
+    font-size: 1.35rem;
+  }
+
+  .profile-card {
+    padding: 16px 14px;
+    border-radius: 18px;
+  }
+
+  .profile-card-header h2 {
+    font-size: 1.15rem;
+  }
+
+  .profile-input-group input {
+    font-size: 0.9rem;
+    padding: 10px 12px;
+  }
+
+  .profile-save-btn,
+  .profile-logout-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+

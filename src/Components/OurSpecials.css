@@ -295,23 +295,24 @@
     grid-template-areas:
       "badge our"
       "badge specials";
-    column-gap: 16px;
+    column-gap: 14px;
     row-gap: 0px;
     margin-top: 8px;
     margin-bottom: 12px;
     align-items: center;
+    max-width: 100%;
   }
 
   .circular-badge {
     grid-area: badge;
-    width: 100px;
-    height: 100px;
+    width: clamp(74px, 18vw, 96px);
+    height: clamp(74px, 18vw, 96px);
   }
 
   .badge-center-icon {
-    width: 48px;
-    height: 48px;
-    padding: 5px;
+    width: clamp(36px, 9vw, 48px);
+    height: clamp(36px, 9vw, 48px);
+    padding: 4px;
   }
 
   .header-text-group {
@@ -320,18 +321,18 @@
 
   .title-our {
     grid-area: our;
-    font-size: 4.8rem;
+    font-size: clamp(2.4rem, 10vw, 4.2rem);
     align-self: end;
     margin: 0;
+    line-height: 0.95;
   }
 
   .title-specials {
     grid-area: specials;
-    font-size: clamp(3rem, 14vw, 5.2rem);
+    font-size: clamp(2.2rem, 9.2vw, 4.4rem);
     line-height: 0.95;
-    letter-spacing: -1px;
+    letter-spacing: -0.5px;
     align-self: start;
-    white-space: nowrap;
     margin: 0;
   }
 
@@ -342,26 +343,27 @@
   .carousel-wrapper {
     justify-content: center;
     margin: auto 0;
+    width: 100%;
   }
 
   .specials-viewport {
-    max-width: 270px;
+    max-width: min(290px, 86vw);
     padding: 6px 0;
   }
 
   .image-frame {
-    width: 210px;
-    height: 210px;
+    width: clamp(170px, 48vw, 210px);
+    height: clamp(170px, 48vw, 210px);
     border-width: 4px;
     margin-bottom: 10px;
   }
 
   .item-card h3 {
-    font-size: 2.1rem;
+    font-size: clamp(1.6rem, 5.5vw, 2.1rem);
   }
 
   .specials-bottom-action {
-    margin-top: 0;
+    margin-top: 6px;
     margin-bottom: 16px;
     width: 100%;
     display: flex;
@@ -369,9 +371,42 @@
   }
 
   .btn-view-menu {
-    font-size: 1.2rem;
-    padding: 13px 30px;
+    font-size: clamp(1.05rem, 3.5vw, 1.25rem);
+    padding: 12px 28px;
     width: 100%;
     max-width: 270px;
+  }
+}
+
+@media (max-width: 480px) {
+  .specials-container {
+    padding: 0 12px;
+  }
+
+  .specials-header {
+    column-gap: 10px;
+    margin-top: 4px;
+    margin-bottom: 8px;
+  }
+
+  .title-our {
+    font-size: clamp(2.1rem, 9.5vw, 3.2rem);
+  }
+
+  .title-specials {
+    font-size: clamp(1.95rem, 8.8vw, 3.4rem);
+  }
+
+  .special-card-meta {
+    gap: 8px;
+  }
+
+  .special-card-price {
+    font-size: 1.05rem;
+  }
+
+  .special-card-add-btn {
+    padding: 6px 14px;
+    font-size: 0.78rem;
   }
 }

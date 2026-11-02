@@ -626,24 +626,91 @@
 
 /* Responsive */
 @media (max-width: 600px) {
-  .my-bookings-page {
-    padding: 85px 12px 40px;
+  .myb-container {
+    padding: 16px 12px 40px;
   }
 
   .myb-title {
-    font-size: 1.8rem;
+    font-size: clamp(1.6rem, 6.5vw, 1.9rem);
+  }
+
+  .myb-toolbar-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .myb-book-new-btn {
+    width: 100%;
+    justify-content: center;
   }
 
   .myb-tabs-bar {
-    flex-wrap: wrap;
+    width: 100%;
+    gap: 4px;
   }
 
   .myb-tab-btn {
-    flex: 1 1 100%;
+    flex: 1 1 auto;
     text-align: center;
+    padding: 8px 12px;
+    font-size: 0.85rem;
   }
 
   .myb-details-row {
     grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 450px) {
+  .my-bookings-page .brand-title {
+    font-size: 1.15rem;
+  }
+
+  .my-bookings-page .btn-header-back,
+  .my-bookings-page .btn-header-refresh {
+    padding: 6px 10px;
+    font-size: 0.78rem;
+  }
+
+  .myb-card {
+    padding: 14px 12px;
+    border-radius: 16px;
+  }
+
+  .myb-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .myb-card-id-group {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .myb-details-row {
+    grid-template-columns: 1fr;
+  }
+
+  .myb-actions-row {
+    flex-direction: column;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .myb-btn-cancel,
+  .myb-btn-menu {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .myb-modal-card {
+    max-height: 90dvh;
+    width: 100%;
+    max-width: calc(100vw - 24px);
+    border-radius: 18px;
+    padding: 20px 16px;
   }
 }

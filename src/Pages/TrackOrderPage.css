@@ -765,3 +765,111 @@
   font-weight: 700;
 }
 
+@media (max-width: 680px) {
+  .track-main-container {
+    padding: 16px 14px 48px;
+  }
+
+  .track-card {
+    padding: 18px 14px;
+    border-radius: 16px;
+  }
+
+  .track-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding-bottom: 12px;
+    margin-bottom: 14px;
+  }
+
+  .track-order-id {
+    font-size: clamp(1.4rem, 6.5vw, 1.8rem);
+  }
+
+  .track-badges-group {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .track-stepper-container {
+    margin: 20px 0 20px;
+  }
+
+  .track-stepper-progress-bar {
+    top: 16px;
+    left: 20px;
+    right: 20px;
+    height: 3px;
+  }
+
+  .track-step-circle {
+    width: 32px;
+    height: 32px;
+    border-width: 2px;
+    margin-bottom: 6px;
+  }
+
+  .track-step-circle svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .track-step-title {
+    font-size: 0.68rem;
+    line-height: 1.15;
+  }
+
+  .track-step-desc {
+    display: none;
+  }
+
+  .track-action-btn {
+    width: 100%;
+    min-width: 100%;
+    padding: 11px 16px;
+    font-size: 0.85rem;
+  }
+
+  .track-prep-info {
+    padding: 10px 12px;
+    font-size: 0.8rem;
+    margin-bottom: 16px;
+  }
+
+  .unsettled-amount-box {
+    padding: 12px 14px;
+  }
+
+  .unsettled-value {
+    font-size: 1.25rem;
+  }
+
+  .track-pay-online-btn {
+    padding: 11px 16px;
+    font-size: 0.88rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .track-header-bar {
+    padding: 10px 12px;
+  }
+
+  .track-cafe-title {
+    font-size: 1.15rem;
+  }
+
+  .track-back-btn,
+  .track-refresh-btn {
+    padding: 6px 10px;
+    font-size: 0.78rem;
+  }
+
+  .track-step-title {
+    font-size: 0.62rem;
+  }
+}
+

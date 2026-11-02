@@ -388,3 +388,70 @@
   background: #4A3026;
   transform: translateY(-1px);
 }
+
+@media (max-width: 480px) {
+  .order-bill-overlay {
+    padding: 8px;
+  }
+
+  .order-bill-container {
+    border-radius: 16px;
+    max-width: 100%;
+  }
+
+  .bill-actions-header {
+    padding: 10px 14px;
+  }
+
+  .bill-actions-title {
+    font-size: 0.85rem;
+  }
+
+  .bill-btn-print {
+    padding: 5px 10px;
+    font-size: 0.78rem;
+  }
+
+  .bill-btn-close {
+    padding: 5px 7px;
+  }
+
+  .bill-receipt-paper {
+    padding: 16px 14px;
+    max-height: calc(88dvh - 48px);
+  }
+
+  .bill-cafe-name {
+    font-size: 1.35rem;
+  }
+
+  .bill-meta-grid {
+    font-size: 0.74rem;
+    column-gap: 8px;
+    row-gap: 6px;
+  }
+
+  .bill-items-table {
+    font-size: 0.75rem;
+  }
+
+  .th-qty, .td-qty {
+    width: 28px;
+  }
+
+  .th-price, .td-price {
+    width: 52px;
+  }
+
+  .th-total, .td-total {
+    width: 62px;
+  }
+
+  .bill-grand-total {
+    font-size: 0.95rem;
+  }
+
+  .bill-grand-total strong {
+    font-size: 1.05rem;
+  }
+}

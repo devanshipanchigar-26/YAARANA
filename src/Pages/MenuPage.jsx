@@ -240,6 +240,27 @@ export default function MenuPage({ addToCart }) {
           .mp-art { position: relative; top: 0; margin: 0 auto; order: -1; }
           .mp-title { font-size: 2.1rem; }
         }
+
+        @media (max-width: 480px) {
+          .mp-page { padding: 75px 12px 30px; }
+          .mp-search { margin-bottom: 20px; }
+          .mp-search input { padding: 12px 48px 12px 18px; font-size: 0.9rem; }
+          .mp-search svg { right: 16px; width: 18px; height: 18px; }
+          .mp-cats { gap: 12px; margin-bottom: 24px; }
+          .mp-circle { width: 60px; height: 60px; border-width: 3px; }
+          .mp-circle svg { width: 24px; height: 24px; }
+          .mp-cat-label { font-size: 0.72rem; }
+          .mp-section { margin-bottom: 40px; }
+          .mp-title { font-size: clamp(1.6rem, 6.5vw, 1.9rem); margin-bottom: 16px; }
+          .mp-art { width: 220px; height: 240px; margin-bottom: 12px; }
+          .mp-arch { left: 30px; width: 160px; height: 190px; }
+          .mp-art img { width: 220px; height: 220px; }
+          .mp-item { gap: 8px; margin-bottom: 14px; align-items: center; }
+          .mp-name { font-size: 0.88rem; flex: 1; word-break: break-word; }
+          .mp-dots { display: none; }
+          .mp-price { font-size: 0.88rem; margin-left: auto; }
+          .mp-add { padding: 5px 10px; font-size: 0.65rem; border-radius: 12px; flex-shrink: 0; }
+        }
       `}</style>
 
       <div className="mp-wrap">

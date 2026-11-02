@@ -412,3 +412,49 @@
   font-size: 0.85rem;
   font-weight: 600;
 }
+
+@media (max-width: 480px) {
+  .review-modal-backdrop {
+    padding: 8px;
+  }
+
+  .review-modal-card {
+    border-radius: 18px;
+    max-height: 92dvh;
+    width: 100%;
+  }
+
+  .review-modal-header {
+    padding: 16px 16px 12px;
+  }
+
+  .review-modal-title {
+    font-size: 1.35rem;
+  }
+
+  .review-modal-body {
+    padding: 14px 16px;
+  }
+
+  .review-star-btn {
+    padding: 3px;
+  }
+
+  .review-submit-btn {
+    padding: 12px 18px;
+    font-size: 1rem;
+    border-radius: 12px;
+  }
+
+  .review-modal-footer {
+    padding: 12px 16px;
+  }
+
+  .review-success-view {
+    padding: 24px 16px;
+  }
+
+  .review-success-title {
+    font-size: 1.6rem;
+  }
+}

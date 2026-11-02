@@ -957,28 +957,130 @@
 
 /* Responsive */
 @media (max-width: 680px) {
+  .my-orders-container {
+    padding: 16px 14px 48px;
+  }
+
   .header-inner {
-    flex-wrap: wrap;
-    gap: 10px;
+    flex-wrap: nowrap;
+    gap: 8px;
   }
 
   .guest-login-banner {
     flex-direction: column;
     align-items: flex-start;
-  }
-
-  .stepper-nodes-row {
-    flex-wrap: wrap;
+    padding: 14px 16px;
     gap: 12px;
   }
 
+  .guest-login-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .tracker-spotlight-card {
+    padding: 18px 14px;
+    border-radius: 16px;
+    margin-bottom: 22px;
+  }
+
+  .tracker-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding-bottom: 14px;
+  }
+
+  .tracker-order-id {
+    font-size: clamp(1.4rem, 6.5vw, 1.8rem);
+  }
+
+  .tracker-stepper-wrap {
+    margin: 20px 0 16px;
+  }
+
   .stepper-track-bar {
+    top: 15px;
+    left: 20px;
+    right: 20px;
+    height: 3px;
+  }
+
+  .stepper-nodes-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 4px;
+  }
+
+  .stepper-node {
+    width: auto;
+    flex: 1;
+  }
+
+  .node-circle {
+    width: 30px;
+    height: 30px;
+    margin-bottom: 4px;
+  }
+
+  .node-circle svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  .node-title {
+    font-size: 0.65rem;
+    line-height: 1.15;
+  }
+
+  .node-desc {
     display: none;
+  }
+
+  .tracker-actions-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .tracker-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 11px 16px;
+    font-size: 0.85rem;
+  }
+
+  .prep-time-box {
+    padding: 6px 12px;
+    font-size: 0.78rem;
+    margin-bottom: 14px;
+  }
+
+  .payment-box-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .btn-pay-now-action {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .tabs-bar {
+    gap: 4px;
+    margin-bottom: 14px;
+  }
+
+  .tab-btn {
+    padding: 8px 12px;
+    font-size: 0.85rem;
   }
 
   .order-card-row {
     flex-direction: column;
     align-items: flex-start;
+    padding: 14px 16px;
+    gap: 12px;
   }
 
   .card-right {
@@ -988,6 +1090,29 @@
     align-items: center;
     border-top: 1px dashed #E5DDD3;
     padding-top: 10px;
-    margin-top: 6px;
+    margin-top: 4px;
+  }
+}
+
+@media (max-width: 420px) {
+  .brand-title {
+    font-size: 1.15rem;
+  }
+
+  .btn-header-back,
+  .btn-header-refresh {
+    padding: 6px 10px;
+    font-size: 0.78rem;
+  }
+
+  .card-right {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .card-btn-stack {
+    width: 100%;
+    justify-content: flex-start;
   }
 }

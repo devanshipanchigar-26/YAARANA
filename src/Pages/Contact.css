@@ -14,7 +14,7 @@
 
 .contact-hero-content h1 {
   font-family: var(--font-display, 'Luckiest Guy', cursive);
-  font-size: 64px;
+  font-size: clamp(2.4rem, 6.5vw, 64px);
   color: #3C2317;
   letter-spacing: 1.5px;
   margin-bottom: 8px;
@@ -23,7 +23,7 @@
 .contact-hero-content p {
   color: #1294F6;
   font-family: var(--font-display, 'Luckiest Guy', cursive);
-  font-size: 20px;
+  font-size: clamp(1.1rem, 2.5vw, 20px);
   letter-spacing: 2px;
 }
 
@@ -401,3 +401,86 @@
 .contact-social-link-card:hover .social-platform-action {
   color: #1294F6;
 }
+
+@media (max-width: 480px) {
+  .contact-page {
+    padding: calc(var(--navbar-height, 64px) + 12px) 12px 30px;
+  }
+
+  .contact-hero {
+    padding: 10px 0 20px;
+  }
+
+  .contact-hero-content h1 {
+    font-size: clamp(26px, 8vw, 34px);
+  }
+
+  .contact-hero-content p {
+    font-size: 14px;
+    letter-spacing: 1px;
+  }
+
+  .contact-info-card,
+  .contact-form-card {
+    padding: 18px 14px;
+    border-radius: 20px;
+    margin-bottom: 18px;
+  }
+
+  .contact-info-card h2,
+  .contact-form-card h2 {
+    font-size: clamp(20px, 6vw, 24px);
+  }
+
+  .contact-form-group input,
+  .contact-form-group textarea {
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-size: 13.5px;
+  }
+
+  .contact-submit-button {
+    padding: 13px;
+    font-size: 16px;
+    border-radius: 22px;
+  }
+
+  .contact-social-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .contact-social-link-card {
+    padding: 12px 14px;
+    gap: 12px;
+    border-radius: 14px;
+  }
+
+  .social-icon-wrapper {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+  }
+
+  .social-platform-title {
+    font-size: 15px;
+  }
+
+  .social-platform-action {
+    font-size: 12px;
+  }
+
+  .contact-see-you-banner {
+    padding: 18px 14px;
+    border-radius: 20px;
+  }
+
+  .contact-see-you-banner h2 {
+    font-size: 18px;
+  }
+
+  .contact-see-you-banner p {
+    font-size: 13px;
+  }
+}
+

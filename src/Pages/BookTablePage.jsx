@@ -355,11 +355,20 @@ export default function BookTablePage() {
         .bt-user-email { color: #6B554B; font-size: 0.8rem; font-weight: normal; }
 
         @media (max-width: 520px) {
-          .bt-page { padding: 85px 12px 40px; }
-          .bt-card { padding: 16px; }
-          .bt-title { font-size: 1.9rem; }
-          .bt-floor { grid-template-columns: repeat(auto-fill, minmax(95px, 1fr)); gap: 10px; padding: 14px 10px; }
-          .bt-table { width: 95px; }
+          .bt-page { padding: 80px 12px 40px; }
+          .bt-card { padding: 16px 12px; border-radius: 16px; }
+          .bt-title { font-size: clamp(1.7rem, 6.5vw, 2.1rem); }
+          .bt-sub { margin-bottom: 18px; font-size: 0.9rem; }
+          .bt-row { flex-direction: column; gap: 12px; }
+          .bt-field { min-width: 100%; }
+          .bt-slots { gap: 8px; }
+          .bt-slot { padding: 7px 12px; font-size: 0.82rem; }
+          .bt-floor { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; padding: 12px 8px; }
+          .bt-table { width: 100%; max-width: 110px; }
+          .bt-surface { height: 40px; }
+          .bt-no { font-size: 1.3rem; }
+          .bt-login-prompt-box { padding: 20px 12px; }
+          .bt-login-action-btn { width: 100%; padding: 12px 16px; font-size: 0.92rem; }
         }
       `}</style>
 

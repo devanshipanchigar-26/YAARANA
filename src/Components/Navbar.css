@@ -335,16 +335,23 @@
   }
 }
 
+@media (max-width: 540px) {
+  .instagram-nav-btn {
+    display: none;
+  }
+}
+
 @media (max-width: 480px) {
   .navbar {
-    padding: 0 12px;
+    padding: 0 10px;
     height: 64px;
   }
 
   .navbar-logo {
-    font-size: 17px;
-    padding: 5px 12px;
+    font-size: clamp(14px, 4.2vw, 17px);
+    padding: 5px clamp(8px, 2.5vw, 12px);
     border-radius: 14px;
+    letter-spacing: 0.5px;
   }
 
   .dot {
@@ -352,36 +359,46 @@
     height: 4px;
     min-width: 4px;
     min-height: 4px;
-    margin: 0 2px;
+    margin: 0 1.5px;
   }
 
   .cart-badge {
-    top: 0px;
+    top: -1px;
     right: -2px;
-    width: 15px;
-    height: 15px;
+    width: 16px;
+    height: 16px;
     font-size: 9px;
     border-width: 1.5px;
   }
 
   .navbar-buttons {
-    gap: 4px;
+    gap: 3px;
   }
 
   .icon-button {
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    min-height: 34px;
   }
 
   .nav-login-btn {
-    padding: 6px 12px;
-    font-size: 13px;
-    border-radius: 16px;
+    padding: 5px 10px;
+    font-size: 12px;
+    border-radius: 14px;
   }
 
   .navbar-links {
     top: 64px;
-    padding: 18px 0;
+    padding: 20px 0 28px;
     gap: 16px;
+    max-height: calc(100dvh - 64px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .nav-link {
+    font-size: 1.15rem;
+    padding: 6px 0;
   }
 }
