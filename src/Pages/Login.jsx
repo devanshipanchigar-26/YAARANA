@@ -23,11 +23,10 @@ function Login({ onLoginSuccess }) {
   // Auto-redirect if user is or becomes logged in (e.g. from another tab or verification link)
   useEffect(() => {
     if (user) {
-      if (loginType === 'admin') {
-        const role = profile?.role || user.user_metadata?.role;
-        if (role === 'admin') {
-          navigate('/', { state: { openAdmin: true }, replace: true });
-        }
+      const role = profile?.role || user.user_metadata?.role;
+      if (role === 'admin') {
+        sessionStorage.setItem('activeAdminTab', 'live-orders');
+        navigate('/admin', { replace: true });
       } else {
         if (returnToCheckout) {
           navigate('/', { state: { resumeCheckout: true }, replace: true });
@@ -40,7 +39,7 @@ function Login({ onLoginSuccess }) {
         }
       }
     }
-  }, [user, profile, loginType, navigate, returnToCheckout, returnToBookTable, returnUrl]);
+  }, [user, profile, navigate, returnToCheckout, returnToBookTable, returnUrl]);
 
   // Detect email confirmation status or errors in URL hash/query params
   useEffect(() => {
@@ -99,37 +98,34 @@ function Login({ onLoginSuccess }) {
         return;
       }
 
-      if (loginType === 'admin') {
-        // Authoritative server-backed check: verify role directly from public.users table
-        const { data: profileData } = await supabase
-          .from('users')
-          .select('role')
-          .eq('id', data.user.id)
-          .maybeSingle();
+      // Authoritative server-backed check: verify role directly from public.users table
+      const { data: profileData } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', data.user.id)
+        .maybeSingle();
 
-        const role = profileData?.role || data.user.user_metadata?.role;
+      const role = profileData?.role || data.user.user_metadata?.role;
 
-        if (role !== 'admin') {
-          // Immediately sign out to prevent unauthorized admin access
-          await supabase.auth.signOut();
-          setError('Access Denied: This account does not have administrator privileges. Please use User Login.');
-          setLoading(false);
-          return;
-        }
-
-        if (onLoginSuccess) {
-          onLoginSuccess(data);
-        }
-
-        navigate('/', { state: { openAdmin: true }, replace: true });
+      if (loginType === 'admin' && role !== 'admin') {
+        // Immediately sign out to prevent unauthorized admin access
+        await supabase.auth.signOut();
+        setError('Access Denied: This account does not have administrator privileges. Please use User Login.');
+        setLoading(false);
         return;
       }
 
-      // Regular User Login flow
       if (onLoginSuccess) {
         onLoginSuccess(data);
       }
 
+      if (role === 'admin') {
+        sessionStorage.setItem('activeAdminTab', 'live-orders');
+        navigate('/admin', { replace: true });
+        return;
+      }
+
+      // Regular User Login flow
       if (returnToCheckout) {
         navigate('/', { state: { resumeCheckout: true }, replace: true });
       } else if (returnToBookTable) {

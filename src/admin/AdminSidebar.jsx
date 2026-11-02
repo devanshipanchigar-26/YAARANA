@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { checkRazorpayConfig } from '../utils/razorpayClient';
 
 export default function AdminSidebar({
   activeTab,
@@ -10,6 +11,14 @@ export default function AdminSidebar({
   onBackToWebsite,
 }) {
   const { user, profile, signOut } = useAuth();
+  const [razorpayMode, setRazorpayMode] = useState(null);
+
+  useEffect(() => {
+    checkRazorpayConfig()
+      .then((cfg) => setRazorpayMode(cfg.is_live_mode ? 'LIVE' : 'TEST'))
+      .catch(() => {});
+  }, []);
+
   const navItems = [
     { id: 'live-orders', label: 'Live Orders', icon: '🔥' },
     { id: 'order-history', label: 'Order History', icon: '📦' },
@@ -31,7 +40,27 @@ export default function AdminSidebar({
   return (
     <aside className={`admin-sidebar ${isOpen ? 'open' : ''}`}>
       <div className="sidebar-logo-area">
-        <div className="sidebar-logo-badge">YAARANA</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div className="sidebar-logo-badge">YAARANA</div>
+          {razorpayMode && (
+            <span
+              onClick={() => handleNavClick('settings')}
+              style={{
+                fontSize: '0.65rem',
+                fontWeight: 700,
+                padding: '2px 7px',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                backgroundColor: razorpayMode === 'LIVE' ? '#22C55E' : '#EAB308',
+                color: '#FFFFFF',
+                letterSpacing: '0.5px',
+              }}
+              title={`Razorpay Payment Gateway is currently in ${razorpayMode} Mode. Click to manage.`}
+            >
+              {razorpayMode}
+            </span>
+          )}
+        </div>
         {onClose && (
           <button
             type="button"

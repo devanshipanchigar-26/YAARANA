@@ -46,7 +46,7 @@ export function AuthProvider({ children }) {
   const [session, setSession] = useState(initial.session);
   const [user, setUser] = useState(initial.user);
   const [profile, setProfile] = useState(initial.profile);
-  const [loading, setLoading] = useState(!initial.user);
+  const [loading, setLoading] = useState(true);
 
   const fetchProfile = async (userId, userMetadata = {}, userEmail = '') => {
     try {
@@ -65,7 +65,7 @@ export function AuthProvider({ children }) {
           name: userMetadata?.name || userMetadata?.full_name || 'Customer',
           phone: userMetadata?.phone || '',
           email: userEmail,
-          role: 'customer',
+          role: userMetadata?.role || 'customer',
         });
       }
     } catch (err) {
@@ -75,11 +75,11 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     // 1. Initial session check
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchProfile(session.user.id, session.user.user_metadata, session.user.email);
+        await fetchProfile(session.user.id, session.user.user_metadata, session.user.email);
       }
       setLoading(false);
     });
@@ -101,11 +101,11 @@ export function AuthProvider({ children }) {
     // 3. Cross-tab storage synchronization listener
     const handleStorageChange = (e) => {
       if (e.key && e.key.startsWith('sb-') && e.key.endsWith('-auth-token')) {
-        supabase.auth.getSession().then(({ data: { session } }) => {
+        supabase.auth.getSession().then(async ({ data: { session } }) => {
           setSession(session);
           setUser(session?.user ?? null);
           if (session?.user) {
-            fetchProfile(session.user.id, session.user.user_metadata, session.user.email);
+            await fetchProfile(session.user.id, session.user.user_metadata, session.user.email);
           } else {
             setProfile(null);
           }

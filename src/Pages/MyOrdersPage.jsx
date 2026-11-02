@@ -333,7 +333,13 @@ export default function MyOrdersPage({ onNavigateToMenu, onBackHome }) {
       },
       onError: (err) => {
         setPayingOrderId(null);
-        setPayError(err.message || 'Payment could not be completed. Please try again.');
+        const msg = err.message || (typeof err === 'string' ? err : 'Payment could not be completed. Please try again.');
+        setPayError(msg);
+        if (err?.isPendingReconciliation) {
+          // Poll to check if webhook has completed reconciliation
+          setTimeout(() => fetchOrders(true), 4000);
+          setTimeout(() => fetchOrders(true), 8000);
+        }
       },
     });
   };

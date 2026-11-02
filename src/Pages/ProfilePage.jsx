@@ -337,7 +337,7 @@ export default function ProfilePage({ onBackHome, onNavigateToOrders, onNavigate
           {(profile?.role === 'admin' || user?.user_metadata?.role === 'admin') && (
             <button
               className="profile-shortcut-card admin-shortcut-card"
-              onClick={() => navigate('/', { state: { openAdmin: true } })}
+              onClick={() => navigate('/admin')}
             >
               <div className="shortcut-icon-box admin-bg">
                 <Shield size={22} />

@@ -7,7 +7,16 @@
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0';
 
-// Native Web Crypto API for zero-dependency, safe HMAC-SHA256 signature verification
+// Native Web Crypto API for constant-time HMAC-SHA256 signature verification
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) {
+    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return diff === 0;
+}
+
 async function computeHmacSha256(secret: string, message: string): Promise<string> {
   const enc = new TextEncoder();
   const key = await crypto.subtle.importKey(
@@ -46,9 +55,10 @@ serve(async (req) => {
       return new Response('Missing x-razorpay-signature header', { status: 400 });
     }
 
-    // Cryptographic validation over raw body
+    // Cryptographic constant-time validation over raw body
     const expectedSignature = await computeHmacSha256(webhookSecret, rawBody);
-    if (expectedSignature !== signature) {
+    const isSignatureValid = timingSafeEqual(expectedSignature, signature.toLowerCase());
+    if (!isSignatureValid) {
       console.warn('Webhook signature verification failed!');
       return new Response('Invalid webhook signature', { status: 400 });
     }
@@ -80,6 +90,15 @@ serve(async (req) => {
       const payment = event.payload.payment?.entity;
       if (!payment) {
         return new Response('Missing payment entity', { status: 400 });
+      }
+
+      // An authorized but uncaptured payment must NEVER be marked Paid
+      if (payment.status !== 'captured') {
+        console.warn(`Webhook received ${eventType} but payment status is '${payment.status}'. Skipping settlement.`);
+        return new Response(JSON.stringify({ status: 'ignored_uncaptured_payment' }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        });
       }
 
       const rzpPaymentId = payment.id;

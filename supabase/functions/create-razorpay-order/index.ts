@@ -30,16 +30,75 @@ serve(async (req) => {
       );
     }
 
-    const { orderId } = await req.json();
+    const isLiveMode = razorpayKeyId.startsWith('rzp_live_');
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    const reqBody = await req.json().catch(() => ({}));
+
+    // Secure mode and configuration inspection restricted to authenticated administrators
+    if (reqBody.action === 'get-config') {
+      const authHeader = req.headers.get('Authorization') || '';
+      if (!authHeader) {
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized: Authentication required' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const token = authHeader.replace('Bearer ', '');
+      const { data: { user }, error: userErr } = await supabase.auth.getUser(token);
+
+      if (userErr || !user) {
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized: Invalid authentication session' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Verify admin role via users or profiles table
+      let isAdmin = user.user_metadata?.role === 'admin';
+      if (!isAdmin) {
+        const { data: userProfile } = await supabase
+          .from('users')
+          .select('role')
+          .eq('id', user.id)
+          .maybeSingle();
+        if (userProfile?.role === 'admin') isAdmin = true;
+      }
+      if (!isAdmin) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .maybeSingle();
+        if (profile?.role === 'admin') isAdmin = true;
+      }
+
+      if (!isAdmin) {
+        return new Response(
+          JSON.stringify({ error: 'Forbidden: Administrator privileges required' }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      return new Response(
+        JSON.stringify({
+          configured: Boolean(razorpayKeyId && razorpayKeySecret),
+          is_live_mode: isLiveMode,
+          mode: isLiveMode ? 'live' : 'test',
+          key_id_prefix: isLiveMode ? 'rzp_live' : 'rzp_test',
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { orderId } = reqBody;
     if (!orderId) {
       return new Response(
         JSON.stringify({ error: 'Missing required field: orderId' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
-
-    // Create elevated server client
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // 1. Fetch authoritative order state
     const { data: order, error: orderErr } = await supabase
@@ -162,6 +221,8 @@ serve(async (req) => {
         amount: rzpOrder.amount,
         currency: rzpOrder.currency,
         key_id: razorpayKeyId,
+        is_live_mode: isLiveMode,
+        mode: isLiveMode ? 'live' : 'test',
         bill_version: order.bill_version || 1,
         remaining_balance: remainingBalance,
       }),

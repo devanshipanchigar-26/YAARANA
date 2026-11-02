@@ -25,6 +25,7 @@ import {
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
 import { useCafeSettings, DEFAULT_SETTINGS, checkStoreOpenStatus, playOrderChimeSound, isValidInstagramUrl } from '../utils/cafeSettings';
+import { checkRazorpayConfig } from '../utils/razorpayClient';
 import './SettingsPage.css';
 
 const DAYS_OF_WEEK = [
@@ -44,6 +45,15 @@ export default function SettingsPage() {
   // Local form state
   const [formData, setFormData] = useState({ ...DEFAULT_SETTINGS });
   const [activeSubTab, setActiveSubTab] = useState('all');
+
+  // Razorpay Gateway Live vs Test Mode detection
+  const [razorpayConfig, setRazorpayConfig] = useState({ configured: false, is_live_mode: false, mode: 'checking' });
+
+  useEffect(() => {
+    checkRazorpayConfig()
+      .then((cfg) => setRazorpayConfig(cfg))
+      .catch(() => {});
+  }, []);
 
   // Compute live store status based on schedule and manual toggle
   const currentStoreStatus = checkStoreOpenStatus(formData);
@@ -620,9 +630,56 @@ export default function SettingsPage() {
                 </button>
               </div>
 
+              {/* Admin-visible Razorpay Gateway Mode Indicator */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '12px 16px',
+                  borderRadius: '12px',
+                  marginBottom: '14px',
+                  border: razorpayConfig.is_live_mode
+                    ? '1px solid #BBF7D0'
+                    : '1px solid #FEF08A',
+                  background: razorpayConfig.is_live_mode
+                    ? '#F0FDF4'
+                    : '#FEFCE8',
+                  color: razorpayConfig.is_live_mode ? '#166534' : '#854D0E',
+                }}
+              >
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold', fontSize: '0.92rem' }}>
+                    <span>{razorpayConfig.is_live_mode ? '🟢' : '🟡'}</span>
+                    <span>
+                      Razorpay Gateway Status:{' '}
+                      <strong>{razorpayConfig.is_live_mode ? 'LIVE MODE (Production)' : 'TEST MODE (Sandbox)'}</strong>
+                    </span>
+                  </div>
+                  <p style={{ margin: '3px 0 0 24px', fontSize: '0.82rem', opacity: 0.9 }}>
+                    {razorpayConfig.is_live_mode
+                      ? 'Live gateway active. Real customer payments are processed and deposited into the cafe account.'
+                      : 'Test sandbox active. Transactions are simulated for development. Real cards & UPI are not debited.'}
+                  </p>
+                </div>
+                <span
+                  style={{
+                    fontSize: '0.72rem',
+                    fontWeight: 'bold',
+                    padding: '3px 9px',
+                    borderRadius: '20px',
+                    backgroundColor: razorpayConfig.is_live_mode ? '#22C55E' : '#EAB308',
+                    color: '#FFFFFF',
+                    letterSpacing: '0.5px',
+                  }}
+                >
+                  {razorpayConfig.is_live_mode ? 'LIVE' : 'TEST'}
+                </span>
+              </div>
+
               <div className="settings-toggle-row">
                 <div className="toggle-info">
-                  <strong>Pay Online (Razorpay Test Mode)</strong>
+                  <strong>Pay Online (Razorpay {razorpayConfig.is_live_mode ? 'Live' : 'Test Mode'})</strong>
                   <p>Accept instant payments via Razorpay (UPI, Credit/Debit Cards, Netbanking)</p>
                 </div>
                 <button

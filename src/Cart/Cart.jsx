@@ -975,10 +975,13 @@ export default function Cart({
               onSuccess: (verifyData) => {
                 setResult((prev) => ({
                   ...prev,
-                  payment_status: 'Paid',
+                  payment_status: verifyData.payment_status || 'Paid',
                   paid_amount: verifyData.paid_amount || ord.total || ord.total_amount,
                   payment_reference: verifyData.payment_reference,
                 }));
+              },
+              onError: (err) => {
+                alert(err.message || 'Payment could not be completed. Please check your bank account or pay at the counter.');
               },
             });
           }}

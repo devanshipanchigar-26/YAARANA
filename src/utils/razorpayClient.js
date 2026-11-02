@@ -110,13 +110,17 @@ async function extractErrorMessage(err, fallback = 'Operation failed') {
     }
 
     // 3. Configure Razorpay Standard Checkout Modal
+    const logoUrl = (typeof window !== 'undefined' && window.location?.origin)
+      ? `${window.location.origin}/favicon.svg`
+      : undefined;
+
     const rzpOptions = {
       key: orderData.key_id,
       amount: orderData.amount,
       currency: orderData.currency || 'INR',
       name: 'YAARANA Café',
       description: `Payment for Order #${orderId}`,
-      image: '/images/logo.png', // Fallback brand icon
+      image: logoUrl,
       order_id: orderData.razorpay_order_id,
       prefill: {
         name: customerName,
@@ -132,26 +136,9 @@ async function extractErrorMessage(err, fallback = 'Operation failed') {
         },
       },
       handler: async (response) => {
-        const amountInRupees = Number((orderData.amount / 100).toFixed(2));
         try {
-          // 1. Authoritative direct DB update safeguard for instant realtime sync in Admin Live Orders
-          try {
-            await supabase
-              .from('orders')
-              .update({
-                payment_status: 'Paid',
-                paid_amount: amountInRupees,
-                payment_mode: 'razorpay',
-                payment_reference: response.razorpay_payment_id,
-                paid_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-              })
-              .eq('id', orderId);
-          } catch (dbErr) {
-            console.warn('Direct order status update notice:', dbErr);
-          }
-
-          // 2. Server-Side Cryptographic & Gateway Verification
+          // Strictly server-side cryptographic and gateway verification
+          // The client never directly mutates order payment status in the database
           const { data: verifyData, error: verifyErr } = await supabase.functions.invoke(
             'verify-razorpay-payment',
             {
@@ -166,29 +153,40 @@ async function extractErrorMessage(err, fallback = 'Operation failed') {
           );
 
           if (verifyErr || !verifyData?.verified) {
-            console.warn('Verify function warning, using verified client payment state:', verifyErr);
-            onSuccess({
-              verified: true,
-              orderId,
-              payment_status: 'Paid',
-              paid_amount: amountInRupees,
-              payment_reference: response.razorpay_payment_id,
-              is_fully_paid: true,
-            });
+            const detailedMsg = await extractErrorMessage(verifyErr, verifyData?.error || 'Payment verification failed');
+            const isNetworkErr = !verifyData && (
+              verifyErr?.message?.toLowerCase().includes('fetch') ||
+              verifyErr?.message?.toLowerCase().includes('network') ||
+              verifyErr?.context?.status >= 500
+            );
+
+            if (isNetworkErr) {
+              // Network timeout after gateway authorization: Do NOT treat as failure or success without reconciliation
+              onError({
+                isNetworkError: true,
+                isPendingReconciliation: true,
+                message: 'Your payment was authorized by your bank, but our server timed out while receiving final confirmation. Please DO NOT pay again. Your order will be automatically verified shortly via webhook.',
+                paymentId: response.razorpay_payment_id,
+                orderId,
+              });
+              return;
+            }
+
+            // Definite rejection (signature mismatch, uncaptured state, entity mismatch)
+            onError(new Error(detailedMsg || 'Payment verification was rejected by server.'));
             return;
           }
 
+          // Verified and captured on server
           onSuccess(verifyData);
         } catch (vErr) {
-          console.error('Error during payment completion:', vErr);
-          // If Razorpay gateway already authorized payment, do not block the user with failure
-          onSuccess({
-            verified: true,
+          console.error('Error during payment verification request:', vErr);
+          onError({
+            isNetworkError: true,
+            isPendingReconciliation: true,
+            message: 'Your payment was authorized by your bank, but a network error occurred during confirmation. Please do not retry immediately; the payment will reconcile automatically.',
+            paymentId: response.razorpay_payment_id,
             orderId,
-            payment_status: 'Paid',
-            paid_amount: amountInRupees,
-            payment_reference: response.razorpay_payment_id,
-            is_fully_paid: true,
           });
         }
       },
@@ -196,13 +194,28 @@ async function extractErrorMessage(err, fallback = 'Operation failed') {
 
     const rzp = new window.Razorpay(rzpOptions);
     rzp.on('payment.failed', (failResponse) => {
-      console.warn('Razorpay payment failed:', failResponse.error);
-      onError(new Error(failResponse.error?.description || 'Payment failed at bank'));
+      console.warn('Razorpay payment failed at gateway:', failResponse.error);
+      onError(new Error(failResponse.error?.description || 'Payment was declined at the bank'));
     });
 
     rzp.open();
   } catch (err) {
     console.error('Razorpay checkout initialization error:', err);
     onError(err);
+  }
+}
+
+/**
+ * Safe inspection of Razorpay integration mode (test vs live) without exposing secrets
+ */
+export async function checkRazorpayConfig() {
+  try {
+    const { data, error } = await supabase.functions.invoke('create-razorpay-order', {
+      body: { action: 'get-config' },
+    });
+    if (error || !data) return { configured: false, mode: 'unknown', is_live_mode: false };
+    return data;
+  } catch {
+    return { configured: false, mode: 'unknown', is_live_mode: false };
   }
 }

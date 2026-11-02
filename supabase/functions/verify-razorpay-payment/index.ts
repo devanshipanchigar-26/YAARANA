@@ -6,20 +6,34 @@
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0';
 
-// Native Web Crypto API for zero-dependency, safe HMAC-SHA256 signature verification
-async function computeHmacSha256(secret: string, message: string): Promise<string> {
-  const enc = new TextEncoder();
-  const key = await crypto.subtle.importKey(
-    'raw',
-    enc.encode(secret),
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign']
-  );
-  const signature = await crypto.subtle.sign('HMAC', key, enc.encode(message));
-  return Array.from(new Uint8Array(signature))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
+// Native Web Crypto API for constant-time HMAC-SHA256 signature verification
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) {
+    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return diff === 0;
+}
+
+async function verifyHmacSha256ConstantTime(secret: string, message: string, expectedSignature: string): Promise<boolean> {
+  try {
+    const enc = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      'raw',
+      enc.encode(secret),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    );
+    const signature = await crypto.subtle.sign('HMAC', key, enc.encode(message));
+    const generated = Array.from(new Uint8Array(signature))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
+    return timingSafeEqual(generated, expectedSignature.toLowerCase());
+  } catch {
+    return false;
+  }
 }
 
 const corsHeaders = {
@@ -46,6 +60,8 @@ serve(async (req) => {
       );
     }
 
+    const isLiveMode = razorpayKeyId.startsWith('rzp_live_');
+
     const {
       orderId,
       razorpay_order_id,
@@ -65,7 +81,7 @@ serve(async (req) => {
     // 1. Fetch current order state
     const { data: order, error: orderErr } = await supabase
       .from('orders')
-      .select('id, user_id, total_amount, paid_amount, payment_status, bill_version, payment_token, razorpay_order_id, created_at')
+      .select('id, user_id, total_amount, paid_amount, payment_status, payment_reference, bill_version, payment_token, razorpay_order_id, created_at')
       .eq('id', orderId)
       .maybeSingle();
 
@@ -107,7 +123,7 @@ serve(async (req) => {
       isAuthorized = true;
     }
 
-    // Fresh unpaid order fallback
+    // Fresh unpaid order fallback (< 60 minutes)
     if (!isAuthorized && (order.payment_status?.toLowerCase() === 'pending' || order.payment_status?.toLowerCase() === 'partially_paid')) {
       const createdAtMs = order.created_at ? new Date(order.created_at).getTime() : Date.now();
       if (Date.now() - createdAtMs < 60 * 60 * 1000) {
@@ -122,11 +138,11 @@ serve(async (req) => {
       );
     }
 
-    // LAYER 1: Cryptographic HMAC-SHA256 Signature Verification
+    // LAYER 1: Constant-Time Cryptographic HMAC-SHA256 Signature Verification
     const payload = `${razorpay_order_id}|${razorpay_payment_id}`;
-    const generatedSignature = await computeHmacSha256(razorpayKeySecret, payload);
+    const isSignatureValid = await verifyHmacSha256ConstantTime(razorpayKeySecret, payload, razorpay_signature);
 
-    if (generatedSignature !== razorpay_signature) {
+    if (!isSignatureValid) {
       console.warn('Tampered payment signature detected for order:', orderId);
       return new Response(
         JSON.stringify({ error: 'Cryptographic signature mismatch: payment verification failed' }),
@@ -152,18 +168,21 @@ serve(async (req) => {
 
     const gatewayPayment = await rzpPayResponse.json();
 
-    // LAYER 3: Verification of Gateway Captured State
-    if (gatewayPayment.status !== 'captured' && gatewayPayment.status !== 'authorized') {
+    // LAYER 3: Strict Verification of Gateway Captured State
+    // An authorized but uncaptured payment must NEVER be marked Paid
+    if (gatewayPayment.status !== 'captured') {
       return new Response(
         JSON.stringify({
-          error: `Payment is not in captured state. Status: ${gatewayPayment.status}`,
+          error: `Payment is not in captured state. Current gateway status is '${gatewayPayment.status}'. Authorized but uncaptured payments cannot be marked Paid.`,
           status: gatewayPayment.status,
+          isCaptured: false,
         }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // LAYER 4: Entity & Order Linkage
+    // LAYER 4: Entity, Amount, Currency, and Order Linkage Verification
+    // 4a. Razorpay Order ID check
     if (gatewayPayment.order_id !== razorpay_order_id) {
       return new Response(
         JSON.stringify({ error: 'Gateway order ID does not match session order ID' }),
@@ -171,15 +190,48 @@ serve(async (req) => {
       );
     }
 
+    if (order.razorpay_order_id && order.razorpay_order_id !== razorpay_order_id) {
+      return new Response(
+        JSON.stringify({ error: 'Order registered Razorpay ID does not match session' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // 4b. YAARANA Order ID check
+    if (gatewayPayment.notes?.order_id && String(gatewayPayment.notes.order_id) !== String(order.id)) {
+      return new Response(
+        JSON.stringify({ error: 'Gateway payment note order ID does not match YAARANA order ID' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // 4c. Currency check
     if (gatewayPayment.currency !== 'INR') {
       return new Response(
-        JSON.stringify({ error: 'Unsupported currency' }),
+        JSON.stringify({ error: 'Unsupported currency: expected INR' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // 4d. Amount check: Must be greater than 0 and within reasonable order balance
+    if (!gatewayPayment.amount || gatewayPayment.amount <= 0) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid gateway payment amount' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const remainingBalance = Math.max(0, Number(order.total_amount || 0) - Number(order.paid_amount || 0));
+    const maxExpectedPaise = Math.round(remainingBalance * 100);
+    // Tolerance of 100 paise (₹1) for fractional rounding
+    if (gatewayPayment.amount > maxExpectedPaise + 100) {
+      return new Response(
+        JSON.stringify({ error: 'Payment amount exceeds remaining order balance' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     // LAYER 5: Atomic Database Settlement RPC
-    let settlementResult: any = null;
     const { data: rpcData, error: rpcErr } = await supabase.rpc('record_captured_payment', {
       p_order_id: String(order.id),
       p_razorpay_order_id: razorpay_order_id,
@@ -189,46 +241,24 @@ serve(async (req) => {
     });
 
     if (rpcErr || !rpcData) {
-      console.warn('Settlement RPC warning, executing authoritative direct update:', rpcErr);
-      const paidAmt = Number((gatewayPayment.amount / 100).toFixed(2));
-      const orderTotal = Number(order.total_amount || 0);
-      const newStatus = paidAmt >= orderTotal ? 'Paid' : 'Partially_Paid';
-
-      const { error: directErr } = await supabase
-        .from('orders')
-        .update({
-          payment_status: newStatus,
-          paid_amount: paidAmt,
-          payment_reference: razorpay_payment_id,
-          paid_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', order.id);
-
-      if (directErr) {
-        console.error('Direct fallback update error:', directErr);
-        return new Response(
-          JSON.stringify({ error: 'Database error recording payment: ' + (rpcErr?.message || directErr.message) }),
-          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-
-      settlementResult = {
-        payment_status: newStatus,
-        total_amount: orderTotal,
-        paid_amount: paidAmt,
-        remaining_balance: Math.max(0, orderTotal - paidAmt),
-        is_fully_paid: newStatus === 'Paid',
-        idempotent_duplicate: false,
-      };
-    } else {
-      settlementResult = rpcData;
+      console.error('Fatal Settlement RPC failure:', rpcErr);
+      return new Response(
+        JSON.stringify({
+          error: 'Atomic database settlement failure: record_captured_payment procedure failed or database migration is missing',
+          details: rpcErr?.message || 'Empty RPC response',
+        }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
+
+    const settlementResult = rpcData;
 
     return new Response(
       JSON.stringify({
         verified: true,
         orderId: order.id,
+        is_live_mode: isLiveMode,
+        mode: isLiveMode ? 'live' : 'test',
         payment_status: settlementResult.payment_status,
         total_amount: settlementResult.total_amount,
         paid_amount: settlementResult.paid_amount,

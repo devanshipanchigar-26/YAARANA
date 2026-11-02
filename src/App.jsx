@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import Navbar from './Components/Navbar';
 import HomePage from './Pages/HomePage';
 import MenuPage from './Pages/MenuPage';
@@ -32,6 +32,44 @@ import { CartProvider, useCart } from './context/CartContext';
 import { TableProvider, useTable } from './context/TableContext';
 import './App.css';
 
+// Guard component to protect admin routes from unauthenticated users and customers
+function ProtectedAdminRoute({ children }) {
+  const { user, profile, loading } = useAuth();
+  const location = useLocation();
+
+  if (loading) {
+    return (
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: '#FAF6F0',
+          fontFamily: "'Luckiest Guy', cursive",
+          color: '#311E18',
+          fontSize: '1.25rem',
+          letterSpacing: '0.5px'
+        }}
+      >
+        Loading YAARANA Admin...
+      </div>
+    );
+  }
+
+  const isAdmin = profile?.role === 'admin' || user?.user_metadata?.role === 'admin';
+
+  if (!user) {
+    return <Navigate to="/login" state={{ returnUrl: location.pathname, adminMode: true }} replace />;
+  }
+
+  if (!isAdmin) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+}
+
 function AppContent() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -53,9 +91,15 @@ function AppContent() {
     closeCart,
   } = useCart();
 
-  // Toggle between 'website' and 'admin' views
-  const [currentView, setCurrentView] = useState('website');
-  const [activeAdminTab, setActiveAdminTab] = useState('menu-management');
+  // Active admin tab defaults to 'live-orders' and preserves on refresh
+  const [activeAdminTab, setActiveAdminTab] = useState(() => {
+    return sessionStorage.getItem('activeAdminTab') || 'live-orders';
+  });
+
+  const handleAdminTabChange = (tab) => {
+    setActiveAdminTab(tab);
+    sessionStorage.setItem('activeAdminTab', tab);
+  };
 
   // Active table identity from TableContext
   const { activeTable, tableNo: qrTable, tableError, clearTable } = useTable();
@@ -101,18 +145,17 @@ function AppContent() {
     }
   }, [location.state, navigate, location.pathname, openCart]);
 
-  // Handle direct openAdmin navigation flag from Admin Login
+  // Handle direct openAdmin navigation flag from legacy links
   useEffect(() => {
     if (location.state?.openAdmin) {
-      setCurrentView('admin');
-      navigate(location.pathname, { replace: true, state: {} });
+      navigate('/admin', { replace: true, state: {} });
     }
-  }, [location.state, navigate, location.pathname]);
+  }, [location.state, navigate]);
 
   // Switch customer page and start at the top of the new page
   const navigateTo = (page) => {
     if (page === 'admin') {
-      setCurrentView('admin');
+      navigate('/admin');
       window.scrollTo(0, 0);
       return;
     }
@@ -231,28 +274,31 @@ function AppContent() {
         }
       />
       <Route
-        path="*"
+        path="/admin"
         element={
-          currentView === 'admin' ? (
+          <ProtectedAdminRoute>
             <div className="app-root">
               <AdminLayout
                 activeTab={activeAdminTab}
-                setActiveTab={setActiveAdminTab}
-                onBackToWebsite={() => setCurrentView('website')}
+                setActiveTab={handleAdminTabChange}
+                onBackToWebsite={() => {
+                  setCustomerPage('home');
+                  navigate('/');
+                }}
               >
-                  {activeAdminTab === 'live-orders' && <LiveOrdersPage />}
-                  {activeAdminTab === 'order-history' && <OrderHistoryPage />}
-                  {activeAdminTab === 'table-bookings' && <TableBookingsPage />}
-                  {activeAdminTab === 'tables-qr' && <TablesQRManagementPage />}
-                  {activeAdminTab === 'menu-management' && <MenuManagementPage />}
-                  {activeAdminTab === 'specials' && <SpecialsManagementPage />}
-                  {activeAdminTab === 'customers' && <CustomersPage initialSubTab="directory" />}
-                  {activeAdminTab === 'messages' && <CustomersPage initialSubTab="messages" />}
-                  {activeAdminTab === 'reviews' && <ReviewsPage />}
-                  {(activeAdminTab === 'sales-statistics' || activeAdminTab === 'sales' || activeAdminTab === 'sales-stats') && <SalesStatisticsPage />}
-                  {activeAdminTab === 'settings' && <SettingsPage />}
+                {activeAdminTab === 'live-orders' && <LiveOrdersPage />}
+                {activeAdminTab === 'order-history' && <OrderHistoryPage />}
+                {activeAdminTab === 'table-bookings' && <TableBookingsPage />}
+                {activeAdminTab === 'tables-qr' && <TablesQRManagementPage />}
+                {activeAdminTab === 'menu-management' && <MenuManagementPage />}
+                {activeAdminTab === 'specials' && <SpecialsManagementPage />}
+                {activeAdminTab === 'customers' && <CustomersPage initialSubTab="directory" />}
+                {activeAdminTab === 'messages' && <CustomersPage initialSubTab="messages" />}
+                {activeAdminTab === 'reviews' && <ReviewsPage />}
+                {(activeAdminTab === 'sales-statistics' || activeAdminTab === 'sales' || activeAdminTab === 'sales-stats') && <SalesStatisticsPage />}
+                {activeAdminTab === 'settings' && <SettingsPage />}
 
-                  {activeAdminTab !== 'live-orders' &&
+                {activeAdminTab !== 'live-orders' &&
                   activeAdminTab !== 'order-history' &&
                   activeAdminTab !== 'table-bookings' &&
                   activeAdminTab !== 'tables-qr' &&
@@ -273,152 +319,139 @@ function AppContent() {
                     </div>
                   )}
 
-                  {/* Button to go back to customer website */}
-                  <div style={{ marginTop: '40px', borderTop: '1px solid #EFE9E1', paddingTop: '20px' }}>
-                    <button
-                      onClick={() => setCurrentView('website')}
-                      style={{
-                        backgroundColor: '#311E18',
-                        color: '#FFD000',
-                        fontFamily: "'Luckiest Guy', cursive",
-                        padding: '10px 20px',
-                        border: 'none',
-                        borderRadius: '12px',
-                        cursor: 'pointer',
-                        fontSize: '0.9rem'
-                      }}
-                    >
-                      ← Back to Customer Website
-                    </button>
-                  </div>
-                </AdminLayout>
-              </div>
-          ) : (
-            <div className="app">
-              <Navbar
-                onCartClick={() => openCart('cart')}
-                cartItemCount={cartItemCount}
-                onNavigate={navigateTo}
-                currentPage={customerPage}
-              />
-
-              {/* Sticky QR Dine-In Pill Banner */}
-              {activeTable && (
-                <div 
-                  style={{
-                    position: 'sticky',
-                    top: '80px',
-                    zIndex: 990,
-                    background: '#311E18',
-                    color: '#FFD000',
-                    padding: '8px 20px',
-                    margin: '0 auto',
-                    maxWidth: '420px',
-                    borderRadius: '30px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    boxShadow: '0 6px 20px rgba(49, 30, 24, 0.3)',
-                    fontFamily: "'Luckiest Guy', cursive",
-                    fontSize: '0.9rem',
-                    letterSpacing: '0.5px'
-                  }}
-                >
-                  <span>🍽️ Dining at Table {activeTable.table_no} ({activeTable.seats} Seats)</span>
+                {/* Button to go back to customer website */}
+                <div style={{ marginTop: '40px', borderTop: '1px solid #EFE9E1', paddingTop: '20px' }}>
                   <button
-                    onClick={clearTable}
-                    style={{
-                      background: 'rgba(255, 208, 0, 0.2)',
-                      color: '#FFD000',
-                      border: '1px solid #FFD000',
-                      borderRadius: '12px',
-                      padding: '2px 8px',
-                      fontSize: '0.75rem',
-                      cursor: 'pointer',
-                      fontFamily: 'inherit'
+                    onClick={() => {
+                      setCustomerPage('home');
+                      navigate('/');
                     }}
-                    title="Leave table / Switch to takeaway"
+                    style={{
+                      backgroundColor: '#311E18',
+                      color: '#FFD000',
+                      fontFamily: "'Luckiest Guy', cursive",
+                      padding: '10px 20px',
+                      border: 'none',
+                      borderRadius: '12px',
+                      cursor: 'pointer',
+                      fontSize: '0.9rem'
+                    }}
                   >
-                    Change
+                    ← Back to Customer Website
                   </button>
                 </div>
-              )}
+              </AdminLayout>
+            </div>
+          </ProtectedAdminRoute>
+        }
+      />
+      <Route
+        path="*"
+        element={
+          <div className="app">
+            <Navbar
+              onCartClick={() => openCart('cart')}
+              cartItemCount={cartItemCount}
+              onNavigate={navigateTo}
+              currentPage={customerPage}
+            />
 
-              {tableError && (
-                <div 
-                  style={{
-                    position: 'sticky',
-                    top: '80px',
-                    zIndex: 990,
-                    background: '#FEF2F2',
-                    color: '#991B1B',
-                    padding: '10px 20px',
-                    margin: '0 auto',
-                    maxWidth: '480px',
-                    borderRadius: '16px',
-                    border: '1px solid #FECACA',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    fontSize: '0.85rem',
-                    fontWeight: 700
-                  }}
-                >
-                  <span>⚠️ {tableError}</span>
-                </div>
-              )}
-
-              {customerPage === 'home' && <HomePage onNavigate={navigateTo} />}
-              {customerPage === 'menu' && <MenuPage addToCart={addToCart} />}
-              {customerPage === 'book-table' && <BookTablePage />}
-              {customerPage === 'about' && <About onNavigate={navigateTo} />}
-              {customerPage === 'contact' && <Contact />}
-
-              {/* Floating Button to open Admin Panel (always available access point) */}
-              <div style={{ position: 'fixed', bottom: '20px', right: '20px', zIndex: 997 }}>
+            {/* Sticky QR Dine-In Pill Banner */}
+            {activeTable && (
+              <div 
+                style={{
+                  position: 'sticky',
+                  top: '80px',
+                  zIndex: 990,
+                  background: '#311E18',
+                  color: '#FFD000',
+                  padding: '8px 20px',
+                  margin: '0 auto',
+                  maxWidth: '420px',
+                  borderRadius: '30px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  boxShadow: '0 6px 20px rgba(49, 30, 24, 0.3)',
+                  fontFamily: "'Luckiest Guy', cursive",
+                  fontSize: '0.9rem',
+                  letterSpacing: '0.5px'
+                }}
+              >
+                <span>🍽️ Dining at Table {activeTable.table_no} ({activeTable.seats} Seats)</span>
                 <button
-                  onClick={() => setCurrentView('admin')}
+                  onClick={clearTable}
                   style={{
-                    backgroundColor: '#FFD000',
-                    color: '#311E18',
-                    fontFamily: "'Luckiest Guy', cursive",
-                    padding: '12px 24px',
-                    border: 'none',
-                    borderRadius: '30px',
+                    background: 'rgba(255, 208, 0, 0.2)',
+                    color: '#FFD000',
+                    border: '1px solid #FFD000',
+                    borderRadius: '12px',
+                    padding: '2px 8px',
+                    fontSize: '0.75rem',
                     cursor: 'pointer',
-                    boxShadow: '0 8px 25px rgba(61, 39, 29, 0.2)',
-                    fontSize: '1rem'
+                    fontFamily: 'inherit'
                   }}
+                  title="Leave table / Switch to takeaway"
                 >
-                  🚀 Open Admin Panel
+                  Change
                 </button>
               </div>
+            )}
 
-              <Cart
-                isOpen={isCartOpen}
-                onClose={closeCart}
-                items={cartItems}
-                increaseQuantity={increaseQuantity}
-                decreaseQuantity={decreaseQuantity}
-                removeItem={removeItem}
-                clearCart={clearCart}
-                defaultTable={qrTable}
-                initialStep={cartInitialStep}
-                onRequireLogin={() => {
-                  closeCart();
-                  navigate('/login', { state: { returnToCheckout: true } });
+            {tableError && (
+              <div 
+                style={{
+                  position: 'sticky',
+                  top: '80px',
+                  zIndex: 990,
+                  background: '#FEF2F2',
+                  color: '#991B1B',
+                  padding: '10px 20px',
+                  margin: '0 auto',
+                  maxWidth: '480px',
+                  borderRadius: '16px',
+                  border: '1px solid #FECACA',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  fontSize: '0.85rem',
+                  fontWeight: 700
                 }}
-                onExplore={() => {
-                  closeCart();
-                  navigateTo('menu');
-                }}
-                onTrackOrder={(orderId, orderObj) => {
-                  closeCart();
-                  navigate(`/my-orders/${orderId}`, { state: { initialOrder: orderObj } });
-                }}
-              />
-            </div>
-          )
+              >
+                <span>⚠️ {tableError}</span>
+              </div>
+            )}
+
+            {customerPage === 'home' && <HomePage onNavigate={navigateTo} />}
+            {customerPage === 'menu' && <MenuPage addToCart={addToCart} />}
+            {customerPage === 'book-table' && <BookTablePage />}
+            {customerPage === 'about' && <About onNavigate={navigateTo} />}
+            {customerPage === 'contact' && <Contact />}
+
+            <Cart
+              isOpen={isCartOpen}
+              onClose={closeCart}
+              items={cartItems}
+              increaseQuantity={increaseQuantity}
+              decreaseQuantity={decreaseQuantity}
+              removeItem={removeItem}
+              clearCart={clearCart}
+              defaultTable={qrTable}
+              initialStep={cartInitialStep}
+              onRequireLogin={() => {
+                closeCart();
+                navigate('/login', { state: { returnToCheckout: true } });
+              }}
+              onExplore={() => {
+                closeCart();
+                navigateTo('menu');
+              }}
+              onTrackOrder={(orderId, orderObj) => {
+                closeCart();
+                navigate(`/my-orders/${orderId}`, { state: { initialOrder: orderObj } });
+              }}
+            />
+          </div>
         }
       />
     </Routes>

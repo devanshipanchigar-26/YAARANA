@@ -127,7 +127,13 @@ export default function TrackOrderPage({ onNavigateToMenu, onBackHome }) {
       },
       onError: (err) => {
         setPayingOnline(false);
-        setPayError(err.message || 'Payment could not be completed. Please retry or pay at counter.');
+        const msg = err.message || (typeof err === 'string' ? err : 'Payment could not be completed. Please retry or pay at counter.');
+        setPayError(msg);
+        if (err?.isPendingReconciliation) {
+          // Poll to check if webhook has completed reconciliation
+          setTimeout(() => fetchOrderDetails(true), 4000);
+          setTimeout(() => fetchOrderDetails(true), 8000);
+        }
       },
     });
   };
