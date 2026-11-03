@@ -120,7 +120,7 @@ export async function saveCafeSettings(newSettings) {
  * Subscribes to settings updates (both intra-tab via CustomEvent and cross-tab via StorageEvent)
  */
 export function subscribeCafeSettings(callback) {
-  if (typeof window === 'undefined') return () => {};
+  if (typeof window === 'undefined') return () => { };
 
   const handleCustomEvent = (e) => {
     callback(e.detail || getCafeSettings());
@@ -410,7 +410,7 @@ if (typeof window !== 'undefined') {
           dummy.resume();
         }
       }
-    } catch {}
+    } catch { }
     window.removeEventListener('click', unlockAudioContext);
     window.removeEventListener('keydown', unlockAudioContext);
     window.removeEventListener('touchstart', unlockAudioContext);

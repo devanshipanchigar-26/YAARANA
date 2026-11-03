@@ -6,53 +6,53 @@ import './OurSpecials.css';
 
 // Curated fallbacks in case remote database is loading, offline, or unpopulated
 const defaultFallbackSpecials = [
-  { 
-    id: 'f-1', 
-    name: "Classic Brew", 
+  {
+    id: 'f-1',
+    name: "Classic Brew",
     badge: "Chef Special",
     price: 120,
     isAvailable: true,
-    image: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=600&q=80" 
+    image: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=600&q=80"
   },
-  { 
-    id: 'f-2', 
-    name: "Crispy Peri Fries", 
+  {
+    id: 'f-2',
+    name: "Crispy Peri Fries",
     badge: "Trending",
     price: 110,
     isAvailable: true,
-    image: "https://images.unsplash.com/photo-1576107232684-1279f3908594?auto=format&fit=crop&w=600&q=80" 
+    image: "https://images.unsplash.com/photo-1576107232684-1279f3908594?auto=format&fit=crop&w=600&q=80"
   },
-  { 
-    id: 'f-3', 
-    name: "Belgian Waffles", 
+  {
+    id: 'f-3',
+    name: "Belgian Waffles",
     badge: "Must Try",
     price: 180,
     isAvailable: true,
-    image: "https://images.unsplash.com/photo-1562376552-0d160a2f238d?auto=format&fit=crop&w=600&q=80" 
+    image: "https://images.unsplash.com/photo-1562376552-0d160a2f238d?auto=format&fit=crop&w=600&q=80"
   },
-  { 
-    id: 'f-4', 
-    name: "Gourmet Burgers", 
+  {
+    id: 'f-4',
+    name: "Gourmet Burgers",
     badge: "Bestseller",
     price: 160,
     isAvailable: true,
-    image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80" 
+    image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80"
   },
-  { 
-    id: 'f-5', 
-    name: "Thick Shakes", 
+  {
+    id: 'f-5',
+    name: "Thick Shakes",
     badge: "Popular",
     price: 140,
     isAvailable: true,
-    image: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=600&q=80" 
+    image: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=600&q=80"
   },
-  { 
-    id: 'f-6', 
-    name: "Artisan Sandwiches", 
+  {
+    id: 'f-6',
+    name: "Artisan Sandwiches",
     badge: "Chef Special",
     price: 130,
     isAvailable: true,
-    image: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=600&q=80" 
+    image: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=600&q=80"
   }
 ];
 
@@ -249,7 +249,7 @@ export default function OurSpecials({ onNavigate }) {
   return (
     <section className="scroll-section specials-section" id="specials">
       <div className="specials-container">
-        
+
         {/* Section Header */}
         <div className="specials-header">
           <div className="circular-badge">
@@ -271,7 +271,7 @@ export default function OurSpecials({ onNavigate }) {
 
         {/* Floating Cart Feedback Banner */}
         {addedItemNotice && (
-          <div 
+          <div
             style={{
               background: '#311E18',
               color: '#FFD000',
@@ -315,14 +315,14 @@ export default function OurSpecials({ onNavigate }) {
             </svg>
           </button>
 
-          <div 
+          <div
             ref={viewportRef}
             className="specials-viewport"
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
           >
-            <div 
+            <div
               className="specials-track"
               onTransitionEnd={handleTransitionEnd}
               style={{
@@ -333,15 +333,15 @@ export default function OurSpecials({ onNavigate }) {
               {extendedItems.map((item, index) => (
                 <div className="item-card" key={`${item.id}-${index}`}>
                   <div className="image-frame">
-                    <img 
-                      src={item.image} 
-                      alt={item.name} 
+                    <img
+                      src={item.image}
+                      alt={item.name}
                       onError={(e) => {
                         e.currentTarget.src = 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=600&q=80';
                       }}
                     />
                   </div>
-                  
+
                   {item.badge && (
                     <div>
                       <span className="special-card-badge">{item.badge}</span>

@@ -254,7 +254,7 @@ export default function Cart({
             localStorage.setItem('yaarana_last_order_id', String(activeOrder.id));
             localStorage.setItem('yaarana_last_table', tableNo.trim());
             window.dispatchEvent(new Event('storage'));
-          } catch {}
+          } catch { }
 
           const existingItemsNormalized = (activeOrder.order_items || []).map((it) => ({
             name: it.menu_items?.name || it.item_name || it.name || 'Item',
@@ -291,7 +291,7 @@ export default function Cart({
 
           try {
             localStorage.setItem('yaarana_last_order', JSON.stringify(orderData));
-          } catch {}
+          } catch { }
 
           // For ongoing table dine-in meals, additional rounds simply increment the running table tab.
           // Customers pay the full consolidated bill when finished dining from Track Order / My Orders!
@@ -572,8 +572,8 @@ export default function Cart({
                       ? 'Store Closed'
                       : 'Ordering Paused'
                     : !isMinOrderMet
-                    ? `Min Order: ₹${minOrderAmount}`
-                    : 'Proceed to Checkout'}
+                      ? `Min Order: ₹${minOrderAmount}`
+                      : 'Proceed to Checkout'}
                   <span>→</span>
                 </button>
               </div>
@@ -842,12 +842,12 @@ export default function Cart({
                     ? 'Store Closed'
                     : 'Ordering Paused'
                   : placing
-                  ? 'Sending to Kitchen...'
-                  : orderType === 'dine-in'
-                  ? activeTableOrder
-                    ? `Add to Table Bill · ₹${total}`
-                    : `Place Order (${paymentMode === 'razorpay' ? 'Pay Online' : 'Cash'}) · ₹${total}`
-                  : `Place Order (${paymentMode === 'razorpay' ? 'Pay Online' : 'Cash'}) · ₹${total}`}
+                    ? 'Sending to Kitchen...'
+                    : orderType === 'dine-in'
+                      ? activeTableOrder
+                        ? `Add to Table Bill · ₹${total}`
+                        : `Place Order (${paymentMode === 'razorpay' ? 'Pay Online' : 'Cash'}) · ₹${total}`
+                      : `Place Order (${paymentMode === 'razorpay' ? 'Pay Online' : 'Cash'}) · ₹${total}`}
                 <span>→</span>
               </button>
               <p className="secure-text">
@@ -915,10 +915,10 @@ export default function Cart({
                   {result.payment_status?.toLowerCase() === 'paid'
                     ? '✓ Paid in Full'
                     : result.isAddedToExistingBill
-                    ? '📋 Added to running table tab • Settle after meal in Track Order'
-                    : result.paymentMode === 'razorpay'
-                    ? '💳 Pay Online via Track Order'
-                    : '💵 Cash payment at counter'}
+                      ? '📋 Added to running table tab • Settle after meal in Track Order'
+                      : result.paymentMode === 'razorpay'
+                        ? '💳 Pay Online via Track Order'
+                        : '💵 Cash payment at counter'}
                 </span>
               </div>
             </div>

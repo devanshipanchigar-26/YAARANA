@@ -9,7 +9,7 @@ import './Navbar.css';
 export default function Navbar({
   cartItemCount = 0,
   onCartClick,
-  onNavigate = () => {},
+  onNavigate = () => { },
   currentPage = 'home',
 }) {
   const navigate = useNavigate();

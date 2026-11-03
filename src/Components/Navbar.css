@@ -43,9 +43,17 @@
   align-self: center;
 }
 
-.dot-pink { background-color: #FF51A8; }
-.dot-cyan { background-color: #00E5FF; }
-.dot-yellow { background-color: #FFEA00; }
+.dot-pink {
+  background-color: #FF51A8;
+}
+
+.dot-cyan {
+  background-color: #00E5FF;
+}
+
+.dot-yellow {
+  background-color: #FFEA00;
+}
 
 .navbar-links {
   display: flex;
@@ -203,8 +211,15 @@
 }
 
 @keyframes fadeInDropdown {
-  from { opacity: 0; transform: translateY(-6px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .profile-info {

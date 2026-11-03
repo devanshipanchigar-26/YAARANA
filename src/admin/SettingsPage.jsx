@@ -52,7 +52,7 @@ export default function SettingsPage() {
   useEffect(() => {
     checkRazorpayConfig()
       .then((cfg) => setRazorpayConfig(cfg))
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   // Compute live store status based on schedule and manual toggle
@@ -468,9 +468,8 @@ export default function SettingsPage() {
             <div className="settings-card-body">
               {/* Accepting orders banner toggle with schedule awareness */}
               <div
-                className={`order-status-banner ${
-                  currentStoreStatus.isOpen ? 'status-open' : 'status-closed'
-                }`}
+                className={`order-status-banner ${currentStoreStatus.isOpen ? 'status-open' : 'status-closed'
+                  }`}
               >
                 <div className="status-info">
                   <span className="status-indicator-dot" />
@@ -513,9 +512,8 @@ export default function SettingsPage() {
                 </div>
                 <button
                   type="button"
-                  className={`toggle-switch-btn ${
-                    formData.autoCloseOutsideHours !== false ? 'on' : 'off'
-                  }`}
+                  className={`toggle-switch-btn ${formData.autoCloseOutsideHours !== false ? 'on' : 'off'
+                    }`}
                   onClick={() =>
                     handleInputChange(
                       'autoCloseOutsideHours',
@@ -612,9 +610,8 @@ export default function SettingsPage() {
                 </div>
                 <button
                   type="button"
-                  className={`toggle-switch-btn ${
-                    formData.cashPaymentEnabled ? 'on' : 'off'
-                  }`}
+                  className={`toggle-switch-btn ${formData.cashPaymentEnabled ? 'on' : 'off'
+                    }`}
                   onClick={() =>
                     handleInputChange(
                       'cashPaymentEnabled',
@@ -684,9 +681,8 @@ export default function SettingsPage() {
                 </div>
                 <button
                   type="button"
-                  className={`toggle-switch-btn ${
-                    formData.razorpayPaymentEnabled !== false ? 'on' : 'off'
-                  }`}
+                  className={`toggle-switch-btn ${formData.razorpayPaymentEnabled !== false ? 'on' : 'off'
+                    }`}
                   onClick={() =>
                     handleInputChange(
                       'razorpayPaymentEnabled',
@@ -745,9 +741,8 @@ export default function SettingsPage() {
                   </button>
                   <button
                     type="button"
-                    className={`toggle-switch-btn ${
-                      formData.newOrderAlerts ? 'on' : 'off'
-                    }`}
+                    className={`toggle-switch-btn ${formData.newOrderAlerts ? 'on' : 'off'
+                      }`}
                     onClick={() =>
                       handleInputChange('newOrderAlerts', !formData.newOrderAlerts)
                     }
@@ -768,9 +763,8 @@ export default function SettingsPage() {
                 </div>
                 <button
                   type="button"
-                  className={`toggle-switch-btn ${
-                    formData.orderStatusNotifications ? 'on' : 'off'
-                  }`}
+                  className={`toggle-switch-btn ${formData.orderStatusNotifications ? 'on' : 'off'
+                    }`}
                   onClick={() =>
                     handleInputChange(
                       'orderStatusNotifications',
@@ -793,9 +787,8 @@ export default function SettingsPage() {
                 </div>
                 <button
                   type="button"
-                  className={`toggle-switch-btn ${
-                    formData.lowStockAlerts ? 'on' : 'off'
-                  }`}
+                  className={`toggle-switch-btn ${formData.lowStockAlerts ? 'on' : 'off'
+                    }`}
                   onClick={() =>
                     handleInputChange('lowStockAlerts', !formData.lowStockAlerts)
                   }
@@ -815,9 +808,8 @@ export default function SettingsPage() {
                 </div>
                 <button
                   type="button"
-                  className={`toggle-switch-btn ${
-                    formData.emailNotificationsEnabled ? 'on' : 'off'
-                  }`}
+                  className={`toggle-switch-btn ${formData.emailNotificationsEnabled ? 'on' : 'off'
+                    }`}
                   onClick={() =>
                     handleInputChange(
                       'emailNotificationsEnabled',

@@ -16,7 +16,7 @@ export default function AdminSidebar({
   useEffect(() => {
     checkRazorpayConfig()
       .then((cfg) => setRazorpayMode(cfg.is_live_mode ? 'LIVE' : 'TEST'))
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   const navItems = [
